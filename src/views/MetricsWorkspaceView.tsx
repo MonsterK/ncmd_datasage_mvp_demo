@@ -18,8 +18,17 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ResponsiveContainer, LineChart, Line } from "recharts"
 import { Flame } from "lucide-react"
 
-import type { Metric, Domain, Album, Dimension, DimensionTreeNode, CategoryNode, NewMetricPayload, Tag } from "@/App"
-import { getMetricTimestamp } from "@/App"
+import type {
+  Metric,
+  Album,
+  Domain,
+  DimensionTreeNode,
+  Dimension,
+  CategoryNode,
+  Tag,
+  NewMetricPayload,
+} from "@/types"
+import { getMetricTimestamp } from "@/lib/utils"
 import {
   MetricSearchView,
   type MetricSortField,

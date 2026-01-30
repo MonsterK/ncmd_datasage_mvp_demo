@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 
-import type { CategoryNode, Metric, NewMetricPayload } from "@/App"
-import { normalizeFilters, normalizeDimensions } from "@/App"
+import { NewMetricPayload, CategoryNode, Metric } from "@/types"
+import { normalizeFilters, normalizeDimensions } from "@/lib/utils"
 
 export interface MetricRegistrationViewProps {
   categories: CategoryNode[]

@@ -1,4 +1,4 @@
-import type { Metric, Dimension } from "@/App"
+import { Metric, Dimension } from "@/types"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { MetricProfileView } from "@/views/MetricProfileView"
 

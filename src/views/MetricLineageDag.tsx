@@ -1,4 +1,4 @@
-import type { Metric } from "@/App"
+import { Metric } from "@/types"
 
 export interface MetricLineageDagProps {
   metric: Metric

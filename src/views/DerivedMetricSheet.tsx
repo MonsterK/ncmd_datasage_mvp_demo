@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
 
-import type { Metric, Dimension, DerivedMetricSpec, FilterBasedDerivedDimensionFilter } from "@/App"
+import {
+  Metric,
+  Dimension,
+  DerivedMetricSpec,
+  FilterBasedDerivedDimensionFilter,
+} from "@/types"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"

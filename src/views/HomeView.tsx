@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Search as SearchIcon, PlusCircle, Layers, FolderKanban } from "lucide-react"
 
-import type { Metric, Dimension, Album } from "@/App"
+import { Metric, Dimension, Album } from "@/types"
 
 export type TopNav = "home" | "metrics" | "management"
 

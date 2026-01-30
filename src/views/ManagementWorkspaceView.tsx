@@ -23,7 +23,15 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle } from "lucide-react"
 
-import type { Metric, Dimension, CategoryNode, Domain, NewMetricPayload, Album, Tag } from "@/App"
+import {
+  Metric,
+  Dimension,
+  CategoryNode,
+  Domain,
+  NewMetricPayload,
+  Album,
+  Tag,
+} from "@/types"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
 
 export type ManagementSection = "metric" | "metricSet" | "dimension" | "category" | "domain"

@@ -14,7 +14,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-import type { Metric, Dimension } from "@/App"
+import { Metric } from "@/types"
+import { DimensionTreeNode, Dimension } from "@/types"
 
 export interface DimensionManagementViewProps {
   metrics: Metric[]

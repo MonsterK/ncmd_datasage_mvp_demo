@@ -16,7 +16,8 @@ import {
   Bar,
 } from "recharts"
 
-import type { Metric, Dimension } from "@/App"
+import { Metric, Dimension } from "@/types"
+import { getMetricTimestamp } from "@/lib/utils"
 import { MetricLineageDag } from "./MetricLineageDag"
 
 export interface MetricProfileViewProps {
