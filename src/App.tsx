@@ -501,25 +501,25 @@ function App() {
     activeGlobalDomainId ?? permittedDomains[0]?.id ?? uniqueDomains[0]?.id ?? ""
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 font-sans">
-      <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+      <header className="sticky top-0 z-50 border-b border-blue-100 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 shadow-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200">
                 <LineChart className="h-5 w-5" />
               </div>
               <div className="flex flex-col">
-                 <span className="text-lg font-bold tracking-tight text-zinc-900 leading-none">DataSage</span>
-                 <span className="text-[10px] text-zinc-500 font-medium">Unified metric semantics</span>
+                 <span className="text-xl font-bold tracking-tight text-slate-900 leading-none">DataSage</span>
+                 <span className="text-[10px] text-slate-500 font-medium tracking-wide">Unified Metric Semantics</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 ml-4 border-l border-zinc-200 pl-4">
-               <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Domain</span>
+            <div className="flex items-center gap-3 ml-4 border-l-2 border-slate-100 pl-6">
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Domain</span>
                {data.domains.length > 0 && (
                   <Select value={domainSelectValue} onValueChange={(value) => setActiveGlobalDomainId(value)}>
-                    <SelectTrigger className="h-8 w-[140px] border-zinc-200 bg-zinc-50/50 text-sm rounded-full">
+                    <SelectTrigger className="h-8 w-[150px] border-slate-200 bg-white text-sm rounded-lg hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:ring-2 focus:ring-blue-100">
                       <SelectValue placeholder="Select domain" />
                     </SelectTrigger>
                     <SelectContent>
@@ -534,14 +534,14 @@ function App() {
             </div>
           </div>
 
-          <nav className="flex items-center bg-zinc-100 p-1 rounded-full">
+          <nav className="flex items-center bg-slate-100/80 p-1.5 rounded-full border border-slate-200/50">
               <TopNavButton
                 label="Home"
                 active={activeTopNav === "home"}
                 onClick={() => handleChangeTopNav("home")}
               />
               <TopNavButton
-                label="Metrics/Dimensions"
+                label="Metrics & Dimensions"
                 active={activeTopNav === "metrics" || activeTopNav === "dimensions"}
                 onClick={() => handleChangeTopNav("metrics")}
               />
@@ -679,10 +679,10 @@ function TopNavButton({ label, active, onClick, icon }: TopNavButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className={`relative px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
+      className={`relative px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
         active
-          ? "bg-zinc-900 text-white shadow-sm"
-          : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/50"
+          ? "bg-white text-blue-600 shadow-sm shadow-blue-100 ring-1 ring-blue-100"
+          : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
       }`}
     >
       {label}
