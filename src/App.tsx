@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react"
 import "./App.css"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart3, Database, LayoutGrid, Plus } from "lucide-react"
+import { BarChart3, Database, LayoutGrid, Plus, LineChart } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -506,58 +506,51 @@ function App() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                <Database className="h-5 w-5" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
+                <LineChart className="h-5 w-5" />
               </div>
-              <span className="text-lg font-bold tracking-tight text-zinc-900">Field Manager</span>
+              <div className="flex flex-col">
+                 <span className="text-lg font-bold tracking-tight text-zinc-900 leading-none">DataSage</span>
+                 <span className="text-[10px] text-zinc-500 font-medium">Unified metric semantics</span>
+              </div>
             </div>
 
-            <nav className="flex items-center gap-6">
-              <TopNavButton
-                label="Dashboard"
-                active={activeTopNav === "home"}
-                onClick={() => handleChangeTopNav("home")}
-                icon={<LayoutGrid className="h-4 w-4" />}
-              />
-              <TopNavButton
-                label="Fields"
-                active={activeTopNav === "metrics"}
-                onClick={() => handleChangeTopNav("metrics")}
-                icon={<BarChart3 className="h-4 w-4" />}
-              />
-              <TopNavButton
-                label="Dimensions"
-                active={activeTopNav === "dimensions"}
-                onClick={() => handleChangeTopNav("dimensions")}
-                icon={<Database className="h-4 w-4" />}
-              />
-            </nav>
+            <div className="flex items-center gap-3 ml-4 border-l border-zinc-200 pl-4">
+               <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Domain</span>
+               {data.domains.length > 0 && (
+                  <Select value={domainSelectValue} onValueChange={(value) => setActiveGlobalDomainId(value)}>
+                    <SelectTrigger className="h-8 w-[140px] border-zinc-200 bg-zinc-50/50 text-sm rounded-full">
+                      <SelectValue placeholder="Select domain" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(permittedDomains.length ? permittedDomains : uniqueDomains).map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {data.domains.length > 0 && (
-              <Select value={domainSelectValue} onValueChange={(value) => setActiveGlobalDomainId(value)}>
-                <SelectTrigger className="h-9 w-[180px] border-zinc-200 bg-zinc-50/50 text-sm">
-                  <SelectValue placeholder="Select domain" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(permittedDomains.length ? permittedDomains : uniqueDomains).map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            
-             <button
-              onClick={() => handleChangeTopNav("management")}
-              className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-medium text-white shadow transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Create New</span>
-            </button>
-          </div>
+          <nav className="flex items-center bg-zinc-100 p-1 rounded-full">
+              <TopNavButton
+                label="Home"
+                active={activeTopNav === "home"}
+                onClick={() => handleChangeTopNav("home")}
+              />
+              <TopNavButton
+                label="Metrics/Dimensions"
+                active={activeTopNav === "metrics" || activeTopNav === "dimensions"}
+                onClick={() => handleChangeTopNav("metrics")}
+              />
+              <TopNavButton
+                label="Management"
+                active={activeTopNav === "management"}
+                onClick={() => handleChangeTopNav("management")}
+              />
+          </nav>
         </div>
       </header>
 
@@ -686,13 +679,12 @@ function TopNavButton({ label, active, onClick, icon }: TopNavButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className={`group flex items-center gap-2 px-1 py-4 text-sm font-medium border-b-2 transition-all ${
+      className={`relative px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 ${
         active
-          ? "border-blue-600 text-blue-600"
-          : "border-transparent text-zinc-500 hover:text-zinc-900 hover:border-zinc-300"
+          ? "bg-zinc-900 text-white shadow-sm"
+          : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/50"
       }`}
     >
-      {icon && <span className={active ? "text-blue-600" : "text-zinc-400 group-hover:text-zinc-600"}>{icon}</span>}
       {label}
     </button>
   )
