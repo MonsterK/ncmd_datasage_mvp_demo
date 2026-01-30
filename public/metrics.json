@@ -1,0 +1,239 @@
+{
+  "metrics": [
+    {
+      "id": "m1",
+      "businessName": "SGI Payout",
+      "slug": "sgi_payout",
+      "categoryPath": ["Monetization", "Revenue", "SGI"],
+      "businessDefinition": "Total SGI payout amount for qualifying agencies within the selected period.",
+      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) AS sgi_payout FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
+      "status": "Active",
+      "domain": "SGI",
+      "owners": {
+        "businessOwner": "Monetization Strategy",
+        "techOwner": "Ads Data Engineering"
+      },
+      "createdAt": "2025-12-15T00:00:00Z",
+      "updatedAt": "2026-01-10T00:00:00Z",
+      "heat": 88,
+      "queryDefinitions": [
+        {
+          "id": "q1",
+          "type": "Aeolus Visual Query",
+          "source": "fabric_sgi_payout_daily",
+          "originField": "payout_amount",
+          "aggregate": "SUM",
+          "businessDate": "biz_date",
+          "filters": ["market = 'US'", "product_line = 'Ads'"],
+          "analysisDimensions": ["agency", "region", "platform"]
+        }
+      ],
+      "trend30d": [
+        { "date": "2026-01-01", "value": 120 },
+        { "date": "2026-01-02", "value": 132 },
+        { "date": "2026-01-03", "value": 118 },
+        { "date": "2026-01-04", "value": 140 },
+        { "date": "2026-01-05", "value": 150 },
+        { "date": "2026-01-06", "value": 160 },
+        { "date": "2026-01-07", "value": 158 },
+        { "date": "2026-01-08", "value": 170 },
+        { "date": "2026-01-09", "value": 165 },
+        { "date": "2026-01-10", "value": 180 }
+      ],
+      "topDimensions": [
+        { "label": "Agency A", "value": 42 },
+        { "label": "Agency B", "value": 33 },
+        { "label": "Agency C", "value": 25 }
+      ],
+      "boundDimensionSlugs": ["agency", "region", "platform"]
+    },
+    {
+      "id": "m2",
+      "businessName": "QBR Revenue",
+      "slug": "qbr_revenue",
+      "categoryPath": ["Monetization", "Revenue", "QBR"],
+      "businessDefinition": "Net revenue recognized for quarterly business review scope.",
+      "technicalDefinition": "SELECT biz_date, SUM(net_revenue) AS qbr_revenue FROM fact_qbr_revenue WHERE is_qbr = 1 GROUP BY biz_date",
+      "status": "Active",
+      "domain": "QBR",
+      "owners": {
+        "businessOwner": "Global Monetization PMO",
+        "techOwner": "Ads Data Engineering"
+      },
+      "createdAt": "2025-11-01T00:00:00Z",
+      "updatedAt": "2026-01-09T00:00:00Z",
+      "heat": 76,
+      "queryDefinitions": [
+        {
+          "id": "q2",
+          "type": "Aeolus Visual Query",
+          "source": "fabric_qbr_revenue_daily",
+          "originField": "net_revenue",
+          "aggregate": "SUM",
+          "businessDate": "biz_date",
+          "filters": ["currency = 'USD'"],
+          "analysisDimensions": ["region", "vertical"]
+        }
+      ],
+      "trend30d": [
+        { "date": "2026-01-01", "value": 80 },
+        { "date": "2026-01-02", "value": 82 },
+        { "date": "2026-01-03", "value": 79 },
+        { "date": "2026-01-04", "value": 90 },
+        { "date": "2026-01-05", "value": 95 },
+        { "date": "2026-01-06", "value": 100 },
+        { "date": "2026-01-07", "value": 102 },
+        { "date": "2026-01-08", "value": 105 },
+        { "date": "2026-01-09", "value": 110 },
+        { "date": "2026-01-10", "value": 115 }
+      ],
+      "topDimensions": [
+        { "label": "North America", "value": 55 },
+        { "label": "Europe", "value": 30 },
+        { "label": "APAC", "value": 15 }
+      ],
+      "boundDimensionSlugs": ["region", "vertical"]
+    },
+    {
+      "id": "m3",
+      "businessName": "Active Monetized Creators",
+      "slug": "active_monetized_creators",
+      "categoryPath": ["Monetization", "Supply", "Creators"],
+      "businessDefinition": "Number of creators with at least one monetization event in the selected period.",
+      "technicalDefinition": "SELECT biz_date, COUNT(DISTINCT creator_id) AS active_monetized_creators FROM fact_creator_monetization WHERE biz_date BETWEEN :start_date AND :end_date",
+      "status": "Draft",
+      "domain": "Creator",
+      "owners": {
+        "businessOwner": "Creator Monetization PM",
+        "techOwner": "Creator Data Engineering"
+      },
+      "createdAt": "2025-12-01T00:00:00Z",
+      "updatedAt": "2026-01-08T00:00:00Z",
+      "heat": 64,
+      "queryDefinitions": [
+        {
+          "id": "q3",
+          "type": "Aeolus Visual Query",
+          "source": "fabric_creator_monetization_daily",
+          "originField": "creator_id",
+          "aggregate": "DISTINCT_COUNT",
+          "businessDate": "biz_date",
+          "filters": ["program = 'RevenueShare'"],
+          "analysisDimensions": ["platform", "region"]
+        }
+      ],
+      "trend30d": [
+        { "date": "2026-01-01", "value": 40 },
+        { "date": "2026-01-02", "value": 42 },
+        { "date": "2026-01-03", "value": 41 },
+        { "date": "2026-01-04", "value": 44 },
+        { "date": "2026-01-05", "value": 46 },
+        { "date": "2026-01-06", "value": 48 },
+        { "date": "2026-01-07", "value": 50 },
+        { "date": "2026-01-08", "value": 49 },
+        { "date": "2026-01-09", "value": 51 },
+        { "date": "2026-01-10", "value": 53 }
+      ],
+      "topDimensions": [
+        { "label": "Short Video", "value": 60 },
+        { "label": "Live Streaming", "value": 25 },
+        { "label": "Other", "value": 15 }
+      ],
+      "boundDimensionSlugs": ["platform", "region"]
+    },
+    {
+      "id": "m4",
+      "businessName": "SGI Payout per Agency",
+      "slug": "sgi_payout_per_agency",
+      "categoryPath": ["Monetization", "Revenue", "SGI"],
+      "businessDefinition": "Average SGI payout per active agency in the selected period.",
+      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / COUNT(DISTINCT agency_id) AS sgi_payout_per_agency FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
+      "status": "Draft",
+      "domain": "SGI",
+      "owners": {
+        "businessOwner": "Monetization Strategy",
+        "techOwner": "Ads Data Engineering"
+      },
+      "createdAt": "2025-12-20T00:00:00Z",
+      "updatedAt": "2026-01-10T00:00:00Z",
+      "heat": 72,
+      "queryDefinitions": [
+        {
+          "id": "q4",
+          "type": "Aeolus Visual Query",
+          "source": "fabric_sgi_payout_daily",
+          "originField": "payout_amount",
+          "aggregate": "AVG_BY_AGENCY",
+          "businessDate": "biz_date",
+          "filters": ["product_line = 'Ads'"],
+          "analysisDimensions": ["agency", "region"]
+        }
+      ],
+      "trend30d": [
+        { "date": "2026-01-01", "value": 10 },
+        { "date": "2026-01-02", "value": 11 },
+        { "date": "2026-01-03", "value": 10 },
+        { "date": "2026-01-04", "value": 12 },
+        { "date": "2026-01-05", "value": 12 },
+        { "date": "2026-01-06", "value": 13 },
+        { "date": "2026-01-07", "value": 13 },
+        { "date": "2026-01-08", "value": 14 },
+        { "date": "2026-01-09", "value": 15 },
+        { "date": "2026-01-10", "value": 15 }
+      ],
+      "topDimensions": [
+        { "label": "Agency A", "value": 15 },
+        { "label": "Agency B", "value": 12 },
+        { "label": "Agency C", "value": 8 }
+      ],
+      "boundDimensionSlugs": ["agency", "region"]
+    },
+    {
+      "id": "m5",
+      "businessName": "Creator Revenue per Active Creator",
+      "slug": "creator_rev_per_creator",
+      "categoryPath": ["Monetization", "Supply", "Creators"],
+      "businessDefinition": "Average monetization revenue per active monetized creator.",
+      "technicalDefinition": "SELECT biz_date, SUM(revenue) / COUNT(DISTINCT creator_id) AS creator_rev_per_creator FROM fact_creator_monetization WHERE biz_date BETWEEN :start_date AND :end_date",
+      "status": "Active",
+      "domain": "Creator",
+      "owners": {
+        "businessOwner": "Creator Monetization PM",
+        "techOwner": "Creator Data Engineering"
+      },
+      "createdAt": "2025-12-10T00:00:00Z",
+      "updatedAt": "2026-01-07T00:00:00Z",
+      "heat": 90,
+      "queryDefinitions": [
+        {
+          "id": "q5",
+          "type": "Aeolus Visual Query",
+          "source": "fabric_creator_monetization_daily",
+          "originField": "revenue",
+          "aggregate": "AVG_BY_CREATOR",
+          "businessDate": "biz_date",
+          "filters": ["program = 'RevenueShare'"],
+          "analysisDimensions": ["platform", "region", "vertical"]
+        }
+      ],
+      "trend30d": [
+        { "date": "2026-01-01", "value": 5 },
+        { "date": "2026-01-02", "value": 5.2 },
+        { "date": "2026-01-03", "value": 5.1 },
+        { "date": "2026-01-04", "value": 5.4 },
+        { "date": "2026-01-05", "value": 5.6 },
+        { "date": "2026-01-06", "value": 5.8 },
+        { "date": "2026-01-07", "value": 6 },
+        { "date": "2026-01-08", "value": 6.1 },
+        { "date": "2026-01-09", "value": 6.3 },
+        { "date": "2026-01-10", "value": 6.5 }
+      ],
+      "topDimensions": [
+        { "label": "Short Video", "value": 65 },
+        { "label": "Live Streaming", "value": 25 },
+        { "label": "Other", "value": 10 }
+      ],
+      "boundDimensionSlugs": ["platform", "region", "vertical"]
+    }
+  ]
+}

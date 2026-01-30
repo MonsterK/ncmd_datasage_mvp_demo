@@ -1,0 +1,72 @@
+{
+  "dimensions": [
+    {
+      "id": "d1",
+      "name": "Agency",
+      "slug": "agency",
+      "aliases": ["Partner", "Client"],
+      "description": "Advertising agency or commercial partner.",
+      "domain": "SGI",
+      "version": "v1",
+      "scope": ["SGI", "QBR"],
+      "type": "enum",
+      "values": [
+        { "code": "AGENCY_A", "label": "Agency A" },
+        { "code": "AGENCY_B", "label": "Agency B" },
+        { "code": "AGENCY_C", "label": "Agency C" }
+      ],
+      "boundMetricSlugs": ["sgi_payout", "sgi_payout_per_agency"]
+    },
+    {
+      "id": "d2",
+      "name": "Region",
+      "slug": "region",
+      "aliases": ["Geo", "Market"],
+      "description": "Geographical region where the revenue is recognized.",
+      "domain": "Global",
+      "version": "v2",
+      "scope": ["SGI", "QBR", "Creator"],
+      "type": "hierarchy",
+      "values": [
+        { "code": "NA", "label": "North America" },
+        { "code": "EU", "label": "Europe" },
+        { "code": "APAC", "label": "Asia Pacific" }
+      ],
+      "boundMetricSlugs": ["sgi_payout", "qbr_revenue", "active_monetized_creators", "sgi_payout_per_agency", "creator_rev_per_creator"]
+    },
+    {
+      "id": "d3",
+      "name": "Platform",
+      "slug": "platform",
+      "aliases": ["Surface"],
+      "description": "Product surface where monetization happens (e.g. Short Video, Live).",
+      "domain": "Creator",
+      "version": "v1",
+      "scope": ["Creator"],
+      "type": "enum",
+      "values": [
+        { "code": "SHORT_VIDEO", "label": "Short Video" },
+        { "code": "LIVE", "label": "Live Streaming" },
+        { "code": "OTHER", "label": "Other" }
+      ],
+      "boundMetricSlugs": ["active_monetized_creators", "creator_rev_per_creator"]
+    },
+    {
+      "id": "d4",
+      "name": "Vertical",
+      "slug": "vertical",
+      "aliases": ["Industry"],
+      "description": "Advertiser vertical for QBR revenue analysis.",
+      "domain": "QBR",
+      "version": "v1",
+      "scope": ["QBR"],
+      "type": "enum",
+      "values": [
+        { "code": "E_COM", "label": "E-commerce" },
+        { "code": "GAMING", "label": "Gaming" },
+        { "code": "BRAND", "label": "Brand" }
+      ],
+      "boundMetricSlugs": ["qbr_revenue", "creator_rev_per_creator"]
+    }
+  ]
+}

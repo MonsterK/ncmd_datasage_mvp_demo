@@ -1,0 +1,28 @@
+{
+  "domains": [
+    {
+      "id": "SGI",
+      "name": "SGI",
+      "description": "Strategic Goal Incentive metrics and payout performance.",
+      "permitted": true,
+      "sourceType": "Fabric table",
+      "sourceLink": "https://aeolus.example.com/query/sgi_payout"
+    },
+    {
+      "id": "QBR",
+      "name": "QBR",
+      "description": "Quarterly Business Review revenue and outcome metrics.",
+      "permitted": true,
+      "sourceType": "Fabric view",
+      "sourceLink": "https://aeolus.example.com/query/qbr_revenue"
+    },
+    {
+      "id": "Creator",
+      "name": "Creator",
+      "description": "Creator monetization and active supply metrics.",
+      "permitted": true,
+      "sourceType": "Aeolus dashboard",
+      "sourceLink": "https://aeolus.example.com/query/creator_monetization"
+    }
+  ]
+}

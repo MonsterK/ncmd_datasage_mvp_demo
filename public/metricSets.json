@@ -1,0 +1,49 @@
+{
+  "metricSets": [
+    {
+      "id": "ms1",
+      "name": "SGI Core Metrics",
+      "description": "Core SGI payout metrics used for incentive performance tracking.",
+      "scope": "SGI",
+      "visibility": "team",
+      "domain": "SGI",
+      "metricSlugs": ["sgi_payout", "sgi_payout_per_agency"]
+    },
+    {
+      "id": "ms2",
+      "name": "QBR Revenue Pack",
+      "description": "Key revenue metrics included in quarterly business reviews.",
+      "scope": "QBR",
+      "visibility": "team",
+      "domain": "QBR",
+      "metricSlugs": ["qbr_revenue"]
+    },
+    {
+      "id": "ms3",
+      "name": "Creator Monetization Health",
+      "description": "Creator-side supply and monetization activity metrics.",
+      "scope": "Creator",
+      "visibility": "team",
+      "domain": "Creator",
+      "metricSlugs": ["active_monetized_creators", "creator_rev_per_creator"]
+    },
+    {
+      "id": "ms4",
+      "name": "SGI vs QBR Revenue Overview",
+      "description": "Cross-domain comparison between SGI payout and QBR revenue.",
+      "scope": "SGI/QBR",
+      "visibility": "team",
+      "domain": "QBR",
+      "metricSlugs": ["sgi_payout", "qbr_revenue"]
+    },
+    {
+      "id": "ms5",
+      "name": "Creator Monetization Deep Dive",
+      "description": "Creator volume and monetization efficiency metrics.",
+      "scope": "Creator",
+      "visibility": "team",
+      "domain": "Creator",
+      "metricSlugs": ["active_monetized_creators", "creator_rev_per_creator"]
+    }
+  ]
+}

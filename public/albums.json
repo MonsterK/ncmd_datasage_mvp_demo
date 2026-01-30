@@ -1,0 +1,20 @@
+{
+  "albums": [
+    {
+      "id": "a1",
+      "name": "2025 Q1 SGI QBR",
+      "description": "Core SGI and QBR metrics used in quarterly business review.",
+      "scope": "SGI/QBR",
+      "visibility": "team",
+      "metricSlugs": ["sgi_payout", "qbr_revenue"]
+    },
+    {
+      "id": "a2",
+      "name": "Creator Monetization Health",
+      "description": "Metrics tracking creator monetization supply.",
+      "scope": "Creator",
+      "visibility": "team",
+      "metricSlugs": ["active_monetized_creators"]
+    }
+  ]
+}

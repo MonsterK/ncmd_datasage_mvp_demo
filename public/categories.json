@@ -1,0 +1,37 @@
+{
+  "categories": [
+    {
+      "id": "c1",
+      "name": "Monetization",
+      "children": [
+        {
+          "id": "c1-1",
+          "name": "Revenue",
+          "children": [
+            {
+              "id": "c1-1-1",
+              "name": "SGI",
+              "metricSlugs": ["sgi_payout"]
+            },
+            {
+              "id": "c1-1-2",
+              "name": "QBR",
+              "metricSlugs": ["qbr_revenue"]
+            }
+          ]
+        },
+        {
+          "id": "c1-2",
+          "name": "Supply",
+          "children": [
+            {
+              "id": "c1-2-1",
+              "name": "Creators",
+              "metricSlugs": ["active_monetized_creators"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

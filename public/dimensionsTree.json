@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": "dim-root-entities",
+      "name": "Monetization entities",
+      "count": 2,
+      "children": [
+        {
+          "id": "dim-entities-agency",
+          "name": "Agency & Partners",
+          "count": 1,
+          "dimensionSlugs": ["agency"]
+        },
+        {
+          "id": "dim-entities-vertical",
+          "name": "Business vertical",
+          "count": 1,
+          "dimensionSlugs": ["vertical"]
+        }
+      ]
+    },
+    {
+      "id": "dim-root-context",
+      "name": "Context & distribution",
+      "count": 2,
+      "children": [
+        {
+          "id": "dim-context-region",
+          "name": "Region",
+          "count": 1,
+          "dimensionSlugs": ["region"]
+        },
+        {
+          "id": "dim-context-platform",
+          "name": "Platform",
+          "count": 1,
+          "dimensionSlugs": ["platform"]
+        }
+      ]
+    }
+  ]
+}
