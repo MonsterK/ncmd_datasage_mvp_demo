@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 import { Metric } from "@/types"
-import { DimensionTreeNode, Dimension } from "@/types"
+import { Dimension } from "@/types"
+import { Search as SearchIcon, Layers, Trash2, Edit } from "lucide-react"
 
 export interface DimensionManagementViewProps {
   metrics: Metric[]

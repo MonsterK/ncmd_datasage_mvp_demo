@@ -262,7 +262,6 @@ function App() {
         trend30d: createFlatTrend(),
         topDimensions: base.topDimensions,
         boundDimensionSlugs,
-        boundDimensionSlugs,
         createdAt: nowIso,
         updatedAt: nowIso,
         heat: 0,
@@ -636,7 +635,6 @@ function App() {
                 onUpdateMetric={handleUpdateMetric}
                 onDeleteMetric={handleDeleteMetric}
                 onUpdateDimension={handleUpdateDimension}
-                onDeleteDimension={handleDeleteDimension}
                 onDeleteDimension={handleDeleteDimension}
                 setTags={setTags}
               />

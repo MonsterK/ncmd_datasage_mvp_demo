@@ -24,7 +24,7 @@ import {
 import { Search as SearchIcon, Flame } from "lucide-react"
 import { ResponsiveContainer, LineChart, Line } from "recharts"
 
-import { Metric, Dimension } from "@/types"
+import { Metric } from "@/types"
 import { getMetricTimestamp } from "@/lib/utils"
 
 export interface MetricSearchViewProps {
