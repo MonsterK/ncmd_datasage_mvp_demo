@@ -256,7 +256,9 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
                 </div>
                 <CardContent className="p-4">
                     <TabsContent value="lineage" className="mt-0">
-                        <MetricLineageDag metric={metric} />
+                        <div className="h-[200px]">
+                            <MetricLineageDag metric={metric} />
+                        </div>
                     </TabsContent>
                     <TabsContent value="knowledge" className="mt-0 text-xs text-slate-600">
                         <ul className="space-y-2 list-disc pl-4 marker:text-slate-400">

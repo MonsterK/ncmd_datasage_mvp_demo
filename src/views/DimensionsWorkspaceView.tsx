@@ -1,8 +1,9 @@
-
 import { useMemo, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { DimensionTreeNode, Dimension } from "@/types"
-import { Folder, ArrowRight, Tag, Pencil, Trash2, Plus, ArrowLeft, Search, Layers } from "lucide-react"
+import { Folder, Tag, Plus, ArrowLeft, Search, Layers, Flame, FileText, Share2 } from "lucide-react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
 export interface DimensionsWorkspaceViewProps {
   dimensionTree: DimensionTreeNode[]
@@ -11,6 +12,8 @@ export interface DimensionsWorkspaceViewProps {
 
 export function DimensionsWorkspaceView({ dimensionTree, dimensions }: DimensionsWorkspaceViewProps) {
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null)
+  const [selectedDimension, setSelectedDimension] = useState<Dimension | null>(null)
+  const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false)
 
   // -- Data Processing for Grid View --
   const categories = useMemo(() => {
@@ -55,14 +58,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
     })
   }, [dimensionTree])
 
-  const stats = useMemo(() => {
-    const totalDimensions = categories.length
-    const totalFields = dimensions.length
-    const avgFields = totalDimensions > 0 ? (totalFields / totalDimensions).toFixed(1) : "0"
-    return { totalDimensions, totalFields, avgFields }
-  }, [categories, dimensions])
-
-
   // -- Data Processing for Detail View --
   const activeNode = useMemo(() => {
     if (!activeNodeId) return null
@@ -94,6 +89,11 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
     return dimensions.filter(d => slugs.has(d.slug))
   }, [activeNode, dimensions])
 
+
+  const handleDimensionClick = (dim: Dimension) => {
+    setSelectedDimension(dim)
+    setIsDetailSheetOpen(true)
+  }
 
   // -- Render --
 
@@ -135,10 +135,14 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
               </div>
             ) : (
               activeDimensions.map((dim) => (
-                <div key={dim.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group">
+                <div 
+                  key={dim.id} 
+                  className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group cursor-pointer"
+                  onClick={() => handleDimensionClick(dim)}
+                >
                   <div>
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-slate-900 text-sm">{dim.name}</span>
+                      <span className="font-semibold text-slate-900 text-sm group-hover:text-blue-700 transition-colors">{dim.name}</span>
                       <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600 uppercase tracking-wide">
                         {dim.type}
                       </span>
@@ -149,9 +153,8 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                   </div>
                   <div className="flex items-center gap-6 text-sm text-slate-400">
                      <span className="text-xs font-medium">{dim.values?.length ?? 0} values</span>
-                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <button className="p-1.5 rounded-md hover:bg-blue-50 hover:text-blue-600 transition-colors"><Pencil className="h-4 w-4" /></button>
-                       <button className="p-1.5 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors"><Trash2 className="h-4 w-4" /></button>
+                     <div className="flex gap-1 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+                       View details →
                      </div>
                   </div>
                 </div>
@@ -159,6 +162,12 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
             )}
           </div>
         </Card>
+
+        <DimensionDetailSheet 
+          open={isDetailSheetOpen} 
+          onOpenChange={setIsDetailSheetOpen} 
+          dimension={selectedDimension} 
+        />
       </div>
     )
   }
@@ -217,32 +226,11 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
         ))}
       </div>
 
-      {/* Statistics Section */}
-      <Card className="border-slate-200 bg-white shadow-sm rounded-2xl">
-        <CardContent className="p-8">
-          <h3 className="text-lg font-bold text-slate-900 mb-6">Dimension Statistics</h3>
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="flex items-center gap-4 border-l-4 border-blue-500 pl-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Dimensions</div>
-                <div className="text-3xl font-bold text-slate-900 mt-1">{stats.totalDimensions}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 border-l-4 border-emerald-500 pl-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Fields</div>
-                <div className="text-3xl font-bold text-slate-900 mt-1">{stats.totalFields}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 border-l-4 border-purple-500 pl-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Avg Fields per Dimension</div>
-                <div className="text-3xl font-bold text-slate-900 mt-1">{stats.avgFields}</div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <DimensionDetailSheet 
+        open={isDetailSheetOpen} 
+        onOpenChange={setIsDetailSheetOpen} 
+        dimension={selectedDimension} 
+      />
     </div>
   )
 }
@@ -256,4 +244,105 @@ function getDescriptionForCategory(name: string): string {
   if (lower.includes("analytic")) return "Key performance indicators, usage metrics, and analytics tracking."
   if (lower.includes("meta")) return "System-level metadata, timestamps, and version control info."
   return "General data fields and dimensions for this category."
+}
+
+interface DimensionDetailSheetProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  dimension: Dimension | null
+}
+
+function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetailSheetProps) {
+  if (!dimension) return null
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
+        <SheetHeader>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Tag className="h-5 w-5" />
+            </div>
+            <div>
+               <SheetTitle className="text-lg font-bold text-slate-900">{dimension.name}</SheetTitle>
+               <p className="font-mono text-xs text-slate-500">{dimension.slug}</p>
+            </div>
+          </div>
+        </SheetHeader>
+        
+        <div className="mt-6 space-y-8">
+           {/* Basic Info */}
+           <div className="space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-slate-500" />
+                Basic Information
+              </h3>
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                 <div className="space-y-1">
+                   <span className="text-slate-500">Domain</span>
+                   <p className="font-medium text-slate-900">{dimension.domain}</p>
+                 </div>
+                 <div className="space-y-1">
+                   <span className="text-slate-500">Type</span>
+                   <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-700">
+                      {dimension.type}
+                   </Badge>
+                 </div>
+                 <div className="col-span-2 space-y-1">
+                   <span className="text-slate-500">Description</span>
+                   <p className="text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                     {dimension.description || "No description provided."}
+                   </p>
+                 </div>
+              </div>
+           </div>
+
+           {/* Stats / Heat */}
+           <div className="space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Flame className="h-4 w-4 text-orange-500" />
+                Usage & Heat
+              </h3>
+              <div className="flex items-center gap-4">
+                 <div className="flex-1 bg-orange-50 rounded-xl p-4 border border-orange-100 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl font-bold text-orange-600">High</span>
+                    <span className="text-[10px] font-medium text-orange-700/70 uppercase tracking-wide mt-1">Usage Heat</span>
+                 </div>
+                 <div className="flex-1 bg-blue-50 rounded-xl p-4 border border-blue-100 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl font-bold text-blue-600">{dimension.boundMetricSlugs.length}</span>
+                    <span className="text-[10px] font-medium text-blue-700/70 uppercase tracking-wide mt-1">Bound Metrics</span>
+                 </div>
+              </div>
+           </div>
+
+           {/* Lineage / Bound Metrics */}
+           <div className="space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Share2 className="h-4 w-4 text-blue-500" />
+                Metric Lineage (Bound Metrics)
+              </h3>
+              {dimension.boundMetricSlugs.length > 0 ? (
+                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                   <div className="bg-slate-50/50 px-4 py-2 border-b border-slate-100 text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+                     Metrics using this dimension
+                   </div>
+                   <ul className="divide-y divide-slate-100">
+                     {dimension.boundMetricSlugs.map(slug => (
+                       <li key={slug} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                          <span className="text-xs font-medium text-slate-700">{slug}</span>
+                          <ArrowRight className="h-3 w-3 text-slate-300" />
+                       </li>
+                     ))}
+                   </ul>
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs text-slate-400">
+                  No metrics are currently bound to this dimension.
+                </div>
+              )}
+           </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
 }
