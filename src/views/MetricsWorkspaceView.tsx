@@ -16,7 +16,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { ResponsiveContainer, LineChart, Line } from "recharts"
-import { Flame } from "lucide-react"
+import { Flame, Search, Filter, ArrowUpDown } from "lucide-react"
 
 import type {
   Metric,
@@ -302,10 +302,10 @@ export function MetricsWorkspaceView({
 
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
               <ToggleGroup
                 type="single"
                 size="sm"
@@ -318,35 +318,35 @@ export function MetricsWorkspaceView({
                     setSelectedMetricSetId(null)
                   }
                 }}
-                className="rounded-full bg-white p-1 text-xs shadow-sm"
+                className="bg-slate-100/50 p-1 rounded-full border border-slate-200"
                 aria-label="Toggle metrics workspace mode"
               >
               <ToggleGroupItem
                 value="metricSets"
-                className="rounded-full px-3 py-1 text-xs font-medium"
+                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
                 aria-label="View metric sets"
               >
                 Metric sets
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="metrics"
-                className="rounded-full px-3 py-1 text-xs font-medium"
+                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
                 aria-label="View metrics"
               >
                 Metrics
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="dimensions"
-                className="rounded-full px-3 py-1 text-xs font-medium"
+                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
                 aria-label="View dimensions"
               >
                 Dimensions
               </ToggleGroupItem>
             </ToggleGroup>
             {selectedDomainId && (
-              <div className="text-[11px] text-zinc-500">
-                Domain:{" "}
-                <span className="font-mono text-zinc-700">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-[11px] text-slate-500 font-medium">
+                <span>Domain:</span>
+                <span className="text-slate-900">
                   {domains.find((d) => d.id === selectedDomainId)?.name ?? selectedDomainId}
                 </span>
               </div>
@@ -357,7 +357,7 @@ export function MetricsWorkspaceView({
               type="button"
               size="sm"
               variant="outline"
-              className="rounded-full px-3 py-1 text-xs shadow-sm hover:shadow-md"
+              className="rounded-full px-4 py-1 text-xs border-slate-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/50 transition-colors shadow-sm"
               onClick={() => setIsNewMetricSheetOpen(true)}
             >
               New metric
@@ -366,7 +366,7 @@ export function MetricsWorkspaceView({
               type="button"
               size="sm"
               variant="outline"
-              className="rounded-full px-3 py-1 text-xs shadow-sm hover:shadow-md"
+              className="rounded-full px-4 py-1 text-xs border-slate-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/50 transition-colors shadow-sm"
               onClick={() => setIsNewMetricSetSheetOpen(true)}
             >
               New metric set
@@ -375,7 +375,7 @@ export function MetricsWorkspaceView({
               type="button"
               size="sm"
               variant="outline"
-              className="rounded-full px-3 py-1 text-xs shadow-sm hover:shadow-md"
+              className="rounded-full px-4 py-1 text-xs border-slate-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/50 transition-colors shadow-sm"
               onClick={() => setIsNewDimensionSheetOpen(true)}
             >
               New dimension
@@ -384,9 +384,9 @@ export function MetricsWorkspaceView({
         </div>
 
         {(workspaceMode === "metricSets" || workspaceMode === "metrics") && (
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-[11px] font-medium text-zinc-600">Tags</span>
-            <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap items-center gap-3 text-xs bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Filter Tags</span>
+            <div className="flex flex-wrap gap-2">
               {tags.length > 0 ? (
                 tags.map((tag) => {
                   const isActive = selectedTagIds.includes(tag.id)
@@ -399,10 +399,10 @@ export function MetricsWorkspaceView({
                           prev.includes(tag.id) ? prev.filter((id) => id !== tag.id) : [...prev, tag.id],
                         )
                       }
-                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all ${
                         isActive
-                          ? "border-zinc-900 bg-zinc-900 text-white"
-                          : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300"
+                          ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-200"
+                          : "border-slate-200 bg-slate-50 text-slate-600 hover:border-blue-300 hover:bg-white"
                       }`}
                     >
                       {tag.name}
@@ -410,241 +410,176 @@ export function MetricsWorkspaceView({
                   )
                 })
               ) : (
-                <span className="text-[11px] text-zinc-400">
-                  No tags configured yet. Use Metric set management → Manage tags.
+                <span className="text-[11px] text-slate-400 italic">
+                  No tags configured.
                 </span>
               )}
             </div>
             {selectedTagIds.length > 0 && (
               <button
                 type="button"
-                className="text-[11px] text-indigo-600 underline"
+                className="ml-auto text-[11px] text-blue-600 hover:text-blue-800 font-medium"
                 onClick={() => setSelectedTagIds([])}
               >
-                Clear
+                Clear filters
               </button>
             )}
           </div>
         )}
 
          {workspaceMode === "metricSets" && !selectedMetricSet && (
-          <Card>
-            <CardContent>
-              <div className="space-y-3 p-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <span className="text-[11px] font-medium text-zinc-600">Search metric sets</span>
-                    <Input
-                      className="h-8 text-xs"
-                      placeholder="Search by metric set name or description…"
-                      value={metricSetSearch}
-                      onChange={(e) => setMetricSetSearch(e.target.value)}
-                    />
-                  </div>
-                  <div className="mt-1 flex min-w-0 flex-col gap-1 sm:mt-0 sm:w-64">
-                    <span className="text-[11px] font-medium text-zinc-600">Sort</span>
-                    <div className="flex gap-2">
-                      <Select
-                        value={metricSetSortField}
-                        onValueChange={(value: MetricSortField) => setMetricSetSortField(value)}
-                      >
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Field" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="createdAt">Created time</SelectItem>
-                          <SelectItem value="updatedAt">Updated time</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select
-                        value={metricSetSortDirection}
-                        onValueChange={(value: MetricSortDirection) => setMetricSetSortDirection(value)}
-                      >
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Order" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="asc">Asc</SelectItem>
-                          <SelectItem value="desc">Desc</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {filteredSets.map((set) => (
-                    <button
-                      key={set.id}
-                      type="button"
-                      onClick={() => handleSelectMetricSet(set.id)}
-                      className="flex h-full flex-col rounded-xl border border-zinc-200 bg-white p-3 text-left shadow-sm transition hover:border-zinc-300 hover:shadow-md"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="text-sm font-semibold">{set.name}</div>
-                          <div className="text-[11px] text-zinc-500">Domain: {set.domain}</div>
-                        </div>
-                        <Badge variant="outline" className="text-[10px]">
-                          {set.visibility}
-                        </Badge>
-                      </div>
-                      <p className="mt-2 line-clamp-2 text-[11px] text-zinc-600">{set.description}</p>
-                      <p className="mt-2 text-[11px] text-zinc-500">
-                        {set.metricSlugs.length} metric{set.metricSlugs.length === 1 ? "" : "s"} in this set.
-                      </p>
-                    </button>
-                  ))}
-                  {filteredSets.length === 0 && (
-                    <p className="text-xs text-zinc-500">
-                      No metric sets for the selected domain in the mock data.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {workspaceMode === "metricSets" && selectedMetricSet && (
-          <Card>
-            <CardHeader className="flex flex-col gap-2 pb-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <CardTitle className="text-sm">Metric set: {selectedMetricSet.name}</CardTitle>
-                <CardDescription className="text-xs">
-                  Metrics inside this set. Click a metric card to open the profile drawer on the right.
-                </CardDescription>
-              </div>
-              <ButtonBackToMetricSets onClick={() => setSelectedMetricSetId(null)} />
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4 flex flex-wrap gap-3 text-xs">
-                <div className="flex min-w-0 flex-1 flex-col gap-1 md:basis-1/3">
-                  <span className="text-[11px] font-medium text-zinc-600">Search in this metric set</span>
+          <div className="grid gap-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <span className="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                  <Search className="h-3 w-3" /> Search metric sets
+                </span>
+                <div className="relative">
                   <Input
-                    className="h-8 text-xs"
-                    placeholder="Search by business name, slug or definition…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-9 text-sm pl-3 border-slate-200 focus:border-blue-300 focus:ring-blue-100 bg-slate-50 focus:bg-white transition-all rounded-lg"
+                    placeholder="Search by name or description..."
+                    value={metricSetSearch}
+                    onChange={(e) => setMetricSetSearch(e.target.value)}
                   />
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1 md:basis-1/3">
-                  <span className="text-[11px] font-medium text-zinc-600">Category path</span>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="All categories" />
+              </div>
+              <div className="mt-2 flex min-w-0 flex-col gap-2 sm:mt-0 sm:w-72">
+                <span className="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                  <ArrowUpDown className="h-3 w-3" /> Sort
+                </span>
+                <div className="flex gap-2">
+                  <Select
+                    value={metricSetSortField}
+                    onValueChange={(value: MetricSortField) => setMetricSetSortField(value)}
+                  >
+                    <SelectTrigger className="h-9 text-xs border-slate-200 rounded-lg bg-slate-50">
+                      <SelectValue placeholder="Field" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      {metricCategoryOptions.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {opt}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="createdAt">Created time</SelectItem>
+                      <SelectItem value="updatedAt">Updated time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={metricSetSortDirection}
+                    onValueChange={(value: MetricSortDirection) => setMetricSetSortDirection(value)}
+                  >
+                    <SelectTrigger className="h-9 text-xs border-slate-200 rounded-lg bg-slate-50">
+                      <SelectValue placeholder="Order" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="asc">Ascending</SelectItem>
+                      <SelectItem value="desc">Descending</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1 md:basis-1/3">
-                  <span className="text-[11px] font-medium text-zinc-600">Owners &amp; query</span>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Business owner" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All owners</SelectItem>
-                        {metricBusinessOwnerOptions.map((owner) => (
-                          <SelectItem key={owner} value={owner}>
-                            {owner}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Select value={techOwnerFilter} onValueChange={setTechOwnerFilter}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Tech owner" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All tech</SelectItem>
-                        {metricTechOwnerOptions.map((owner) => (
-                          <SelectItem key={owner} value={owner}>
-                            {owner}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredSets.map((set) => (
+                <button
+                  key={set.id}
+                  type="button"
+                  onClick={() => handleSelectMetricSet(set.id)}
+                  className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-900/5 hover:-translate-y-1"
+                >
+                  <div className="flex items-start justify-between gap-3 w-full">
+                    <div>
+                      <div className="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors">{set.name}</div>
+                      <div className="text-[11px] font-medium text-slate-500 mt-0.5">Domain: {set.domain}</div>
+                    </div>
+                    <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 border-slate-200">
+                      {set.visibility}
+                    </Badge>
                   </div>
+                  <p className="mt-3 line-clamp-2 text-xs text-slate-500 leading-relaxed">{set.description}</p>
+                  <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between w-full">
+                    <span className="text-[10px] font-medium text-slate-400">
+                      {set.metricSlugs.length} metric{set.metricSlugs.length === 1 ? "" : "s"}
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                      View details →
+                    </span>
+                  </div>
+                </button>
+              ))}
+              {filteredSets.length === 0 && (
+                <div className="col-span-full py-12 text-center text-sm text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                  No metric sets found matching your criteria.
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1 md:basis-1/3">
-                  <span className="text-[11px] font-medium text-zinc-600">Query &amp; sort</span>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <Select
-                      value={hasQueryFilter}
-                      onValueChange={(value: HasQueryFilter) => setHasQueryFilter(value)}
-                    >
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Has bound query" />
+              )}
+            </div>
+          </div>
+        )}
+
+        {workspaceMode === "metricSets" && selectedMetricSet && (
+          <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+            <div className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">{selectedMetricSet.name}</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Managing {metricsForSelectedSet.length} metrics in this set.
+                </p>
+              </div>
+              <ButtonBackToMetricSets onClick={() => setSelectedMetricSetId(null)} />
+            </div>
+            
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                <div className="flex flex-wrap gap-4 text-xs">
+                  <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/3">
+                    <span className="text-[11px] font-semibold text-slate-700">Search</span>
+                    <Input
+                      className="h-9 text-xs border-slate-200 rounded-lg"
+                      placeholder="Search metrics..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/4">
+                    <span className="text-[11px] font-semibold text-slate-700">Category</span>
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="h-9 text-xs border-slate-200 rounded-lg bg-white">
+                        <SelectValue placeholder="All categories" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="yes">Has query</SelectItem>
-                        <SelectItem value="no">No query</SelectItem>
+                        {metricCategoryOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-                    <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Sort by" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="createdAt">Created time</SelectItem>
-                        <SelectItem value="updatedAt">Updated time</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={sortDirection}
-                      onValueChange={(value: MetricSortDirection) => setSortDirection(value)}
-                    >
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Order" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="asc">Asc</SelectItem>
-                        <SelectItem value="desc">Desc</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  </div>
+                  {/* Additional filters can go here */}
+                  <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/4">
+                     <span className="text-[11px] font-semibold text-slate-700">Actions</span>
+                     <Button
+                        type="button"
+                        size="sm"
+                        className="h-9 text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all"
+                        disabled={selectedSlugsForQuery.length === 0}
+                        onClick={() => setIsCombinedQuerySheetOpen(true)}
+                      >
+                        Query Selected ({selectedSlugsForQuery.length})
+                      </Button>
                   </div>
                 </div>
               </div>
 
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="text-[11px] text-zinc-500">
-                  {selectedSlugsForQuery.length
-                    ? `${selectedSlugsForQuery.length} metrics selected for combined query.`
-                    : "Select metrics to run a combined query (mock)."}
-                </span>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="text-xs"
-                  variant="outline"
-                  disabled={selectedSlugsForQuery.length === 0}
-                  onClick={() => setIsCombinedQuerySheetOpen(true)}
-                >
-                  Query selected metrics
-                </Button>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 bg-slate-50/30">
                 {filteredMetricsForSelectedSet.map((m) => (
                   <Card
                     key={m.id}
-                    className="cursor-pointer transition hover:border-zinc-300 hover:shadow-md"
+                    className="group cursor-pointer border-slate-200 shadow-sm transition-all duration-200 hover:border-blue-300 hover:shadow-md hover:bg-white"
                     onClick={() => onOpenMetric(m.slug)}
                   >
-                    <CardHeader className="flex flex-row items-start justify-between gap-2">
-                      <div className="flex flex-1 items-start gap-2">
+                    <CardHeader className="flex flex-row items-start justify-between gap-3 p-4 pb-2 space-y-0">
+                      <div className="flex flex-1 items-start gap-3">
                         <Checkbox
-                          className="mt-1"
+                          className="mt-1 border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                           checked={selectedSlugsForQuery.includes(m.slug)}
                           onCheckedChange={(value) => {
                             const isChecked = value === true
@@ -662,38 +597,39 @@ export function MetricsWorkspaceView({
                           aria-label="Select metric for combined query"
                         />
                         <div>
-                          <CardTitle className="text-sm">{m.businessName}</CardTitle>
-                          <CardDescription className="text-[11px] font-mono text-zinc-500">
+                          <CardTitle className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+                            {m.businessName}
+                          </CardTitle>
+                          <CardDescription className="text-[10px] font-mono text-slate-400 mt-0.5">
                             {m.slug}
                           </CardDescription>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1 text-right">
-                        <Badge variant="outline" className="text-[10px]">
-                          {m.status}
-                        </Badge>
-                        <div className="text-[11px] text-zinc-500">{m.domain}</div>
-                      </div>
+                      <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
+                        {m.status}
+                      </Badge>
                     </CardHeader>
-                    <CardContent>
-                      <p className="line-clamp-2 text-xs text-zinc-700">{m.businessDefinition}</p>
-                      <div className="mt-3 flex items-end justify-between gap-2">
-                        <div className="flex items-center gap-1 text-[11px] text-zinc-500">
-                          <Flame className="h-3 w-3 text-orange-500" />
-                          <span className="font-medium text-zinc-700">{m.heat ?? 0}</span>
+                    <CardContent className="p-4 pt-2">
+                      <p className="line-clamp-2 text-xs text-slate-500 mb-4 h-8 leading-relaxed">
+                        {m.businessDefinition}
+                      </p>
+                      <div className="flex items-end justify-between gap-2 pt-2 border-t border-slate-50">
+                        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+                          <Flame className="h-3 w-3 text-orange-500 fill-orange-500" />
+                          <span className="font-semibold text-slate-700">{m.heat ?? 0}</span>
                         </div>
                         {m.trend30d && m.trend30d.length > 0 && (
-                          <div className="h-10 w-24">
+                          <div className="h-8 w-20 opacity-70 group-hover:opacity-100 transition-opacity">
                             <ResponsiveContainer width="100%" height="100%">
                               <LineChart
                                 data={m.trend30d}
-                                margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                                margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
                               >
                                 <Line
                                   type="monotone"
                                   dataKey="value"
-                                  stroke="#111827"
-                                  strokeWidth={1.5}
+                                  stroke="#3b82f6"
+                                  strokeWidth={2}
                                   dot={false}
                                   isAnimationActive={false}
                                 />
@@ -706,13 +642,13 @@ export function MetricsWorkspaceView({
                   </Card>
                 ))}
                 {filteredMetricsForSelectedSet.length === 0 && (
-                  <p className="text-xs text-zinc-500">
-                    No metrics mapped to this metric set in the mock data.
-                  </p>
+                   <div className="col-span-full py-8 text-center text-xs text-slate-400">
+                    No metrics found.
+                  </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {workspaceMode === "metrics" && (
@@ -791,9 +727,9 @@ function ButtonBackToMetricSets({ onClick }: ButtonBackToMetricSetsProps) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-md"
+      className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/30"
     >
-      Back to metric sets
+      ← Back to metric sets
     </button>
   )
 }

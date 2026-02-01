@@ -127,41 +127,41 @@ export function ManagementWorkspaceView({
           <div className="space-y-3">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs">Name</TableHead>
-                  <TableHead className="text-xs">Slug</TableHead>
-                  <TableHead className="text-xs">Domain</TableHead>
-                  <TableHead className="text-xs">Status</TableHead>
-                  <TableHead className="text-xs">Owners</TableHead>
-                  <TableHead className="text-xs">Updated at</TableHead>
-                  <TableHead className="w-[1%] text-xs text-right">Actions</TableHead>
+                <TableRow className="hover:bg-slate-50 border-slate-100">
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Slug</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Domain</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
+                  <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {metrics.map((m) => (
-                  <TableRow key={m.id} className="hover:bg-zinc-50">
-                    <TableCell className="text-sm font-medium text-zinc-900">{m.businessName}</TableCell>
-                    <TableCell className="font-mono text-[11px] text-zinc-500">{m.slug}</TableCell>
-                    <TableCell className="text-xs text-zinc-700">{m.domain}</TableCell>
+                  <TableRow key={m.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
+                    <TableCell className="text-sm font-medium text-slate-900">{m.businessName}</TableCell>
+                    <TableCell className="font-mono text-[11px] text-slate-500">{m.slug}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{m.domain}</TableCell>
                     <TableCell className="text-xs">
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                         {m.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs">
                       <div className="flex flex-col gap-0.5">
-                        <span>{m.owners.businessOwner}</span>
-                        <span className="text-[11px] text-zinc-500">{m.owners.techOwner}</span>
+                        <span className="text-slate-900">{m.owners.businessOwner}</span>
+                        <span className="text-[11px] text-slate-500">{m.owners.techOwner}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-[11px] text-zinc-500">{formatDate(m.updatedAt)}</TableCell>
+                    <TableCell className="text-[11px] text-slate-500">{formatDate(m.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2 text-[11px] shadow-sm hover:shadow-md"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
                           onClick={() => {
                             setMetricSheetMode("edit")
                             setMetricToEdit(m)
@@ -174,7 +174,7 @@ export function ManagementWorkspaceView({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2 text-[11px] text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
                           onClick={() => onDeleteMetric(m.slug)}
                         >
                           Delete
@@ -183,7 +183,7 @@ export function ManagementWorkspaceView({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2 text-[11px] shadow-sm hover:shadow-md"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
                           onClick={() => onOpenMetricProfile(m.slug)}
                         >
                           View
@@ -194,7 +194,7 @@ export function ManagementWorkspaceView({
                 ))}
                 {metrics.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-6 text-center text-xs text-zinc-500">
+                    <TableCell colSpan={7} className="py-8 text-center text-xs text-slate-400 italic">
                       No metrics in the registry yet.
                     </TableCell>
                   </TableRow>
@@ -208,23 +208,23 @@ export function ManagementWorkspaceView({
           <div className="space-y-3">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs">Name</TableHead>
-                  <TableHead className="text-xs">Domain</TableHead>
-                  <TableHead className="text-xs">Visibility</TableHead>
-+                  <TableHead className="text-xs">Tags</TableHead>
-                  <TableHead className="text-xs">Metric count</TableHead>
-                  <TableHead className="text-xs">Updated at</TableHead>
-                  <TableHead className="w-[1%] text-xs text-right">Actions</TableHead>
+                <TableRow className="hover:bg-slate-50 border-slate-100">
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Domain</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Visibility</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tags</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Metric count</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
+                  <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {metricSets.map((set) => (
-                  <TableRow key={set.id} className="hover:bg-zinc-50">
-                    <TableCell className="text-sm font-medium text-zinc-900">{set.name}</TableCell>
-                    <TableCell className="text-xs text-zinc-700">{set.domain}</TableCell>
+                  <TableRow key={set.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
+                    <TableCell className="text-sm font-medium text-slate-900">{set.name}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{set.domain}</TableCell>
                     <TableCell className="text-xs">
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
                         {set.visibility}
                       </Badge>
                     </TableCell>
@@ -232,24 +232,24 @@ export function ManagementWorkspaceView({
                       {set.tags && set.tags.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {set.tags.map((tagId) => (
-                            <Badge key={tagId} variant="outline" className="text-[10px]">
+                            <Badge key={tagId} variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-100">
                               {tagNameById.get(tagId) ?? tagId}
                             </Badge>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-[11px] text-zinc-400">-</span>
+                        <span className="text-[11px] text-slate-400">-</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-zinc-700">{set.metricSlugs.length}</TableCell>
-                    <TableCell className="text-[11px] text-zinc-500">{formatDate(set.updatedAt)}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{set.metricSlugs.length}</TableCell>
+                    <TableCell className="text-[11px] text-slate-500">{formatDate(set.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2 text-[11px] shadow-sm hover:shadow-md"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
                           onClick={() => {
                             setMetricSetSheetMode("edit")
                             setMetricSetToEdit(set)
@@ -262,7 +262,7 @@ export function ManagementWorkspaceView({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2 text-[11px] text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
                           onClick={() => setMetricSets(metricSets.filter((s) => s.id !== set.id))}
                         >
                           Delete
@@ -271,7 +271,7 @@ export function ManagementWorkspaceView({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2 text-[11px] shadow-sm hover:shadow-md"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
                           onClick={() => {
                             setMetricSetToView(set)
                             setIsMetricSetDetailSheetOpen(true)
@@ -285,7 +285,7 @@ export function ManagementWorkspaceView({
                 ))}
                 {metricSets.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-6 text-center text-xs text-zinc-500">
+                    <TableCell colSpan={6} className="py-8 text-center text-xs text-slate-400 italic">
                       No metric sets in the registry yet.
                     </TableCell>
                   </TableRow>
@@ -299,36 +299,36 @@ export function ManagementWorkspaceView({
           <div className="space-y-3">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs">Name</TableHead>
-                  <TableHead className="text-xs">Slug</TableHead>
-                  <TableHead className="text-xs">Domain</TableHead>
-                  <TableHead className="text-xs">Type</TableHead>
-                  <TableHead className="text-xs">Bound metric count</TableHead>
-                  <TableHead className="text-xs">Updated at</TableHead>
-                  <TableHead className="w-[1%] text-xs text-right">Actions</TableHead>
+                <TableRow className="hover:bg-slate-50 border-slate-100">
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Slug</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Domain</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Bound metric count</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
+                  <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {dimensions.map((d) => (
-                  <TableRow key={d.id} className="hover:bg-zinc-50">
-                    <TableCell className="text-sm font-medium text-zinc-900">{d.name}</TableCell>
-                    <TableCell className="font-mono text-[11px] text-zinc-500">{d.slug}</TableCell>
-                    <TableCell className="text-xs text-zinc-700">{d.domain}</TableCell>
+                  <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
+                    <TableCell className="text-sm font-medium text-slate-900">{d.name}</TableCell>
+                    <TableCell className="font-mono text-[11px] text-slate-500">{d.slug}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{d.domain}</TableCell>
                     <TableCell className="text-xs">
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
                         {d.type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-zinc-700">{d.boundMetricSlugs.length}</TableCell>
-                    <TableCell className="text-[11px] text-zinc-500">{formatDate(d.updatedAt)}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{d.boundMetricSlugs.length}</TableCell>
+                    <TableCell className="text-[11px] text-slate-500">{formatDate(d.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2 text-[11px] shadow-sm hover:shadow-md"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
                           onClick={() => {
                             setDimensionSheetMode("edit")
                             setDimensionToEdit(d)
@@ -341,7 +341,7 @@ export function ManagementWorkspaceView({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 px-2 text-[11px] text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
                           onClick={() => onDeleteDimension(d.id)}
                         >
                           Delete
@@ -352,7 +352,7 @@ export function ManagementWorkspaceView({
                 ))}
                 {dimensions.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-6 text-center text-xs text-zinc-500">
+                    <TableCell colSpan={7} className="py-8 text-center text-xs text-slate-400 italic">
                       No dimensions in the registry yet.
                     </TableCell>
                   </TableRow>
@@ -365,10 +365,10 @@ export function ManagementWorkspaceView({
         return <CategoryManagementView categories={categories} metrics={metrics} />
       case "domain":
         return (
-          <Card>
+          <Card className="border-slate-200 shadow-sm rounded-2xl">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Domain management (mock)</CardTitle>
-              <CardDescription className="text-xs">
+              <CardTitle className="text-sm text-slate-900">Domain management (mock)</CardTitle>
+              <CardDescription className="text-xs text-slate-500">
                 Simple overview of domains available in the demo. In a full product this would manage ownership and
                 permissions.
               </CardDescription>
@@ -377,29 +377,29 @@ export function ManagementWorkspaceView({
               {domains.length > 0 ? (
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs">ID</TableHead>
-                      <TableHead className="text-xs">Name</TableHead>
-                      <TableHead className="text-xs">Description</TableHead>
-                      <TableHead className="text-xs">Data source type</TableHead>
-                      <TableHead className="text-xs">Data source link</TableHead>
-                      <TableHead className="text-xs">Permitted</TableHead>
+                    <TableRow className="border-slate-100 hover:bg-slate-50">
+                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">ID</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data source type</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data source link</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Permitted</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {domains.map((d) => (
-                      <TableRow key={d.id} className="hover:bg-zinc-50">
-                         <TableCell className="text-[11px] font-mono text-zinc-600">{d.id}</TableCell>
-                        <TableCell className="text-xs">{d.name}</TableCell>
-                        <TableCell className="text-xs text-zinc-600">{d.description}</TableCell>
-                        <TableCell className="text-xs text-zinc-600">{d.sourceType ?? "-"}</TableCell>
-                        <TableCell className="text-xs text-zinc-600">
+                      <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
+                         <TableCell className="text-[11px] font-mono text-slate-600">{d.id}</TableCell>
+                        <TableCell className="text-xs font-medium text-slate-900">{d.name}</TableCell>
+                        <TableCell className="text-xs text-slate-600">{d.description}</TableCell>
+                        <TableCell className="text-xs text-slate-600">{d.sourceType ?? "-"}</TableCell>
+                        <TableCell className="text-xs text-slate-600">
                           {d.sourceLink ? (
                             <a
                               href={d.sourceLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-[11px] text-indigo-600 underline"
+                              className="text-[11px] text-blue-600 underline hover:text-blue-800"
                             >
                               {d.sourceLink}
                             </a>
@@ -407,13 +407,13 @@ export function ManagementWorkspaceView({
                             "-"
                           )}
                         </TableCell>
-                        <TableCell className="text-xs text-zinc-600">{d.permitted === false ? "No" : "Yes"}</TableCell>
+                        <TableCell className="text-xs text-slate-600">{d.permitted === false ? "No" : "Yes"}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               ) : (
-                <p className="text-xs text-zinc-500">No domains configured in the mock data.</p>
+                <p className="text-xs text-slate-500">No domains configured in the mock data.</p>
               )}
             </CardContent>
           </Card>
@@ -487,68 +487,69 @@ export function ManagementWorkspaceView({
   const header = getSectionHeader()
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Management</CardTitle>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <Card className="border-none shadow-none bg-transparent">
+        <CardHeader className="px-0 pt-0">
+          <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">Management</CardTitle>
+          <CardDescription className="text-lg text-slate-500 mt-1">
+            Centralized administration for all your data assets.
+          </CardDescription>
         </CardHeader>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Areas</CardTitle>
-            <CardDescription className="text-xs">Navigation across the main management modules.</CardDescription>
+      <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
+        <Card className="border-slate-200 shadow-sm rounded-2xl h-fit">
+          <CardHeader className="pb-3 border-b border-slate-50">
+            <CardTitle className="text-sm font-semibold text-slate-900">Areas</CardTitle>
+            <CardDescription className="text-xs text-slate-500">Navigation modules</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-1 text-xs">
+          <CardContent className="space-y-1 p-3">
             <SidebarItem
               icon={LineChartIcon}
-              label="Metric management"
+              label="Metrics"
               active={activeSection === "metric"}
               onClick={() => onChangeSection("metric")}
             />
             <SidebarItem
               icon={FolderKanban}
-              label="Metric set management"
+              label="Metric Sets"
               active={activeSection === "metricSet"}
               onClick={() => onChangeSection("metricSet")}
             />
             <SidebarItem
               icon={Layers}
-              label="Dimension management"
+              label="Dimensions"
               active={activeSection === "dimension"}
               onClick={() => onChangeSection("dimension")}
             />
             <SidebarItem
               icon={ListTree}
-              label="Category management"
+              label="Categories"
               active={activeSection === "category"}
               onClick={() => onChangeSection("category")}
             />
             <SidebarItem
               icon={Home}
-              label="Domain management"
+              label="Domains"
               active={activeSection === "domain"}
               onClick={() => onChangeSection("domain")}
             />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-col gap-2 pb-2 sm:flex-row sm:items-center sm:justify-between">
+        <Card className="border-slate-200 shadow-sm rounded-2xl">
+          <CardHeader className="flex flex-col gap-4 pb-4 border-b border-slate-50 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-sm">{header.title}</CardTitle>
-              <CardDescription className="text-xs">{header.description}</CardDescription>
+              <CardTitle className="text-lg font-bold text-slate-900">{header.title}</CardTitle>
+              <CardDescription className="text-sm text-slate-500 mt-1">{header.description}</CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
-                className="inline-flex items-center gap-1 rounded-full text-xs shadow-sm transition hover:shadow-md"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700 hover:shadow-lg transition-all"
                 onClick={handleAddClick}
               >
-                <PlusCircle className="h-3 w-3" />
+                <PlusCircle className="h-3.5 w-3.5" />
                 <span>{header.addLabel}</span>
               </Button>
               {activeSection === "metricSet" && (
@@ -556,7 +557,7 @@ export function ManagementWorkspaceView({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="inline-flex items-center gap-1 rounded-full text-xs shadow-sm transition hover:shadow-md"
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium border-slate-200 shadow-sm hover:border-blue-200 hover:text-blue-600 transition-all"
                   onClick={() => setIsTagManagementSheetOpen(true)}
                 >
                   Manage tags
@@ -564,7 +565,7 @@ export function ManagementWorkspaceView({
               )}
             </div>
           </CardHeader>
-          <CardContent>{renderSectionContent()}</CardContent>
+          <CardContent className="p-0 sm:p-4">{renderSectionContent()}</CardContent>
         </Card>
       </div>
 
@@ -675,15 +676,15 @@ function SidebarItem({ icon: Icon, label, active, disabled, onClick }: SidebarIt
     <button
       type="button"
       onClick={disabled ? undefined : onClick}
-      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs font-medium transition-colors ${
+      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-200 ${
         active
-          ? "bg-zinc-900 text-white"
+          ? "bg-slate-900 text-white shadow-md shadow-slate-900/20"
           : disabled
-            ? "cursor-not-allowed text-zinc-300"
-            : "text-zinc-700 hover:bg-zinc-100"
+            ? "cursor-not-allowed text-slate-300"
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       }`}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className={`h-4 w-4 ${active ? "text-blue-400" : "text-slate-400"}`} />
       <span>{label}</span>
     </button>
   )
@@ -1687,20 +1688,20 @@ function CategoryManagementView({ categories, metrics }: CategoryManagementViewP
 
   return (
     <div className="space-y-4">
-      <Card>
+      <Card className="border-slate-200 shadow-sm rounded-2xl">
         <CardHeader>
-          <CardTitle>Category management</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-slate-900">Category management</CardTitle>
+          <CardDescription className="text-slate-500">
             Tree-based management of metric categories with a mock bulk move operation.
           </CardDescription>
         </CardHeader>
       </Card>
 
       <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <Card>
+        <Card className="border-slate-200 shadow-sm rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Category tree</CardTitle>
-            <CardDescription className="text-xs">
+            <CardTitle className="text-sm text-slate-900">Category tree</CardTitle>
+            <CardDescription className="text-xs text-slate-500">
               Static category tree from mock JSON (Monetization &gt; Revenue &gt; SGI / QBR, Supply &gt; Creators).
             </CardDescription>
           </CardHeader>
@@ -1709,16 +1710,16 @@ function CategoryManagementView({ categories, metrics }: CategoryManagementViewP
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-slate-200 shadow-sm rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Bulk move (mock)</CardTitle>
-            <CardDescription className="text-xs">
+            <CardTitle className="text-sm text-slate-900">Bulk move (mock)</CardTitle>
+            <CardDescription className="text-xs text-slate-500">
               Simulate a bulk move of metrics from one category node to another without changing underlying data.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-700">Source category id</label>
+              <label className="text-xs font-medium text-slate-700">Source category id</label>
               <Input
                 className="h-8 text-xs"
                 placeholder="e.g. c1-1-1 for SGI"
@@ -1727,7 +1728,7 @@ function CategoryManagementView({ categories, metrics }: CategoryManagementViewP
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-700">Target category id</label>
+              <label className="text-xs font-medium text-slate-700">Target category id</label>
               <Input
                 className="h-8 text-xs"
                 placeholder="e.g. c1-1-2 for QBR"
@@ -1738,7 +1739,7 @@ function CategoryManagementView({ categories, metrics }: CategoryManagementViewP
             <Button type="button" size="sm" className="text-xs" onClick={handleBulkMove}>
               Simulate bulk move
             </Button>
-            {message && <p className="text-[11px] text-zinc-600">{message}</p>}
+            {message && <p className="text-[11px] text-slate-600">{message}</p>}
           </CardContent>
         </Card>
       </div>
@@ -1762,18 +1763,18 @@ function CategoryTree({ nodes, metrics, depth }: CategoryTreeProps) {
         return (
           <li key={node.id}>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-zinc-500">{node.id}</span>
-              <span className="font-semibold" style={{ marginLeft: depth * 8 }}>
+              <span className="font-mono text-[10px] text-slate-400">{node.id}</span>
+              <span className="font-semibold text-slate-800" style={{ marginLeft: depth * 8 }}>
                 {node.name}
               </span>
               {metricNames.length > 0 && (
-                <span className="text-[11px] text-zinc-500">
+                <span className="text-[11px] text-slate-500">
                   ({metricNames.length} metric{metricNames.length > 1 ? "s" : ""})
                 </span>
               )}
             </div>
             {metricNames.length > 0 && (
-              <div className="ml-5 text-[11px] text-zinc-600">{metricNames.join(", ")}</div>
+              <div className="ml-5 text-[11px] text-slate-500">{metricNames.join(", ")}</div>
             )}
             {node.children && node.children.length > 0 && (
               <CategoryTree nodes={node.children} metrics={metrics} depth={depth + 1} />

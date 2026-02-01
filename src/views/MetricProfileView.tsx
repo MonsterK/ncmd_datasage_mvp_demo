@@ -32,39 +32,45 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
   )
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              {metric.businessName}
-              <Badge variant="outline" className="text-[10px]">
+    <div className="space-y-6">
+      <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between bg-slate-50/50 border-b border-slate-100 p-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <CardTitle className="text-xl font-bold text-slate-900">{metric.businessName}</CardTitle>
+              <Badge variant="outline" className={`text-[10px] px-2 py-0.5 rounded-full border-slate-200 ${metric.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                 {metric.status}
               </Badge>
-            </CardTitle>
-            <CardDescription className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="font-mono text-[11px] text-zinc-600">{metric.slug}</span>
-              <span className="text-zinc-400">•</span>
-              <span>{metric.categoryPath.join(" › ")}</span>
-              <span className="text-zinc-400">•</span>
-              <span>Domain: {metric.domain}</span>
-            </CardDescription>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">{metric.slug}</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-600">{metric.categoryPath.join(" › ")}</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-600">Domain: {metric.domain}</span>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
-            <span className="inline-flex items-center gap-1">
-              <Flame className="h-3 w-3 text-orange-500" />
-              <span className="font-medium text-zinc-700">{metric.heat ?? 0}</span>
-            </span>
-            <span className="text-zinc-400">•</span>
-            <span>Business owner: {metric.owners.businessOwner}</span>
-            <span className="text-zinc-400">•</span>
-            <span>Tech owner: {metric.owners.techOwner}</span>
+          <div className="flex flex-wrap items-center gap-3 text-xs bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-orange-50 rounded-lg text-orange-700 border border-orange-100">
+              <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-600" />
+              <span className="font-bold">{metric.heat ?? 0}</span>
+            </div>
+            <div className="h-4 w-px bg-slate-200 mx-1"></div>
+            <div className="flex flex-col">
+               <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Business Owner</span>
+               <span className="text-slate-700 font-medium">{metric.owners.businessOwner}</span>
+            </div>
+            <div className="h-4 w-px bg-slate-200 mx-1"></div>
+            <div className="flex flex-col">
+               <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Tech Owner</span>
+               <span className="text-slate-700 font-medium">{metric.owners.techOwner}</span>
+            </div>
             {onDeriveMetric && (
               <>
-                <span className="text-zinc-400">•</span>
+                <div className="h-4 w-px bg-slate-200 mx-1"></div>
                 <button
                   type="button"
-                  className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-md"
+                  className="inline-flex items-center rounded-full bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
                   onClick={() => onDeriveMetric(metric)}
                 >
                   Derive metric
@@ -75,70 +81,64 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
         </CardHeader>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,2fr)]">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Definition</CardTitle>
-            <CardDescription className="text-xs">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <Card className="border-slate-200 shadow-sm rounded-2xl h-fit">
+          <CardHeader className="pb-3 border-b border-slate-50">
+            <CardTitle className="text-sm font-bold text-slate-900">Definition</CardTitle>
+            <CardDescription className="text-xs text-slate-500">
               Business and technical definitions, plus online query configurations.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 text-xs">
-            <div className="space-y-1">
-              <p className="font-semibold text-zinc-800">Business definition</p>
-              <p className="text-zinc-700">{metric.businessDefinition}</p>
+          <CardContent className="space-y-5 p-5 text-xs">
+            <div className="space-y-1.5">
+              <p className="font-semibold text-slate-800">Business definition</p>
+              <p className="text-slate-600 leading-relaxed">{metric.businessDefinition}</p>
             </div>
-            <div className="space-y-1">
-              <p className="font-semibold text-zinc-800">Technical definition (pseudo SQL)</p>
-              <pre className="overflow-x-auto rounded-md bg-zinc-900 p-3 text-[11px] leading-relaxed text-zinc-50">
+            <div className="space-y-1.5">
+              <p className="font-semibold text-slate-800">Technical definition (pseudo SQL)</p>
+              <pre className="overflow-x-auto rounded-xl bg-slate-900 p-4 text-[11px] leading-relaxed text-slate-50 font-mono shadow-inner">
                 <code>{metric.technicalDefinition}</code>
               </pre>
             </div>
-            <div className="space-y-2">
-              <p className="font-semibold text-zinc-800">Online queries</p>
-              <div className="space-y-2">
+            <div className="space-y-3">
+              <p className="font-semibold text-slate-800">Online queries</p>
+              <div className="space-y-3">
                 {metric.queryDefinitions.map((q) => (
                   <div
                     key={q.id}
-                    className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-[11px]"
+                    className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px] transition-all hover:border-blue-200 hover:bg-white hover:shadow-sm"
                   >
-                    <div className="mb-1 flex flex-wrap items-center gap-2">
-                      <Badge variant="outline" className="text-[10px]">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
                         {q.type}
                       </Badge>
-                      <span className="font-mono text-[11px] text-zinc-600">{q.source}</span>
+                      <span className="font-mono text-[11px] text-slate-500">{q.source}</span>
                     </div>
-                    <div className="flex flex-wrap gap-2 text-zinc-600">
-                      <span>
-                        Origin field: <span className="font-mono">{q.originField}</span>
-                      </span>
-                      <span>
-                        Aggregate: <span className="font-mono">{q.aggregate}</span>
-                      </span>
-                      <span>
-                        Business date: <span className="font-mono">{q.businessDate}</span>
-                      </span>
+                    <div className="grid grid-cols-2 gap-2 text-slate-600 mb-2">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">Origin Field</span>
+                        <span className="font-mono font-medium text-slate-700">{q.originField}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">Aggregate</span>
+                        <span className="font-mono font-medium text-slate-700">{q.aggregate}</span>
+                      </div>
                     </div>
                     {q.filters.length > 0 && (
-                      <div className="mt-1 text-zinc-600">
-                        Filters: <span className="font-mono">{q.filters.join(" AND ")}</span>
-                      </div>
-                    )}
-                    {q.analysisDimensions.length > 0 && (
-                      <div className="mt-1 text-zinc-600">
-                        Analysis dimensions: {q.analysisDimensions.join(", ")}
+                      <div className="mt-2 pt-2 border-t border-slate-200/50">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Filters</span>
+                        <code className="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{q.filters.join(" AND ")}</code>
                       </div>
                     )}
                     {q.link && (
-                      <div className="mt-1 text-zinc-600">
-                        Query link:{" "}
+                      <div className="mt-3 pt-2 border-t border-slate-200/50">
                         <a
                           href={q.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-indigo-600 underline"
+                          className="text-blue-600 underline hover:text-blue-800 font-medium flex items-center gap-1"
                         >
-                          {q.link}
+                          Open in Query Tool →
                         </a>
                       </div>
                     )}
@@ -147,67 +147,61 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
               </div>
             </div>
 
-            <div className="space-y-2">
-              <p className="font-semibold text-zinc-800">LarkSheet link</p>
-              {metric.larkSheetLink ? (
-                <a
-                  href={metric.larkSheetLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="break-all text-[11px] text-indigo-600 underline"
-                >
-                  {metric.larkSheetLink}
-                </a>
-              ) : (
-                <p className="text-[11px] text-zinc-500">No LarkSheet link attached in this demo.</p>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <p className="font-semibold text-zinc-800">Available dimensions</p>
+            <div className="space-y-1.5 pt-2 border-t border-slate-100">
+              <p className="font-semibold text-slate-800">Available dimensions</p>
               {boundDimensions.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-2">
                   {boundDimensions.map((d) => (
-                    <Badge key={d.id} variant="outline" className="text-[10px]">
-                      {d.name} ({d.slug})
+                    <Badge key={d.id} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 px-2 py-1">
+                      {d.name} <span className="ml-1 opacity-50 font-normal">({d.slug})</span>
                     </Badge>
                   ))}
                 </div>
               ) : (
-                <p className="text-[11px] text-zinc-500">
-                  No bound dimensions in the mock data. In production, this list is driven by Dimension Management.
+                <p className="text-[11px] text-slate-400 italic">
+                  No bound dimensions in the mock data.
                 </p>
               )}
             </div>
           </CardContent>
         </Card>
 
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <LineChartIcon className="h-4 w-4" />
-                30 day trend (mock data)
+        <div className="space-y-6">
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                <LineChartIcon className="h-4 w-4 text-blue-500" />
+                30 day trend
               </CardTitle>
-              <CardDescription className="text-xs">
-                Trend based on sample daily points to illustrate the metric behaviour.
-              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="h-64">
+            <CardContent className="p-4">
+              <div className="h-52">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={metric.trend30d} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
-                    <RechartsTooltip contentStyle={{ fontSize: 11 }} />
+                  <LineChart data={metric.trend30d} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis 
+                        dataKey="date" 
+                        tick={{ fontSize: 10, fill: '#94a3b8' }} 
+                        tickLine={false} 
+                        axisLine={false} 
+                        dy={10}
+                    />
+                    <YAxis 
+                        tick={{ fontSize: 10, fill: '#94a3b8' }} 
+                        tickLine={false} 
+                        axisLine={false} 
+                    />
+                    <RechartsTooltip 
+                        contentStyle={{ fontSize: 11, borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
+                        cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
+                    />
                     <Line
                       type="monotone"
                       dataKey="value"
-                      stroke="#111827"
-                      strokeWidth={1.5}
-                      dot={false}
-                      activeDot={{ r: 3 }}
+                      stroke="#2563eb"
+                      strokeWidth={2}
+                      dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }}
+                      activeDot={{ r: 6, stroke: '#dbeafe', strokeWidth: 4 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -215,74 +209,68 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Top dimensions distribution (mock)</CardTitle>
-              <CardDescription className="text-xs">
-                The distribution is expressed using curated dimension values from Dimension Management.
-              </CardDescription>
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+              <CardTitle className="text-sm font-bold text-slate-900">Top dimensions</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-64">
+            <CardContent className="p-4">
+              <div className="h-52">
                 {metric.topDimensions.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={metric.topDimensions} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis
-                        dataKey="label"
-                        tick={{ fontSize: 10 }}
-                        tickLine={false}
+                    <BarChart data={metric.topDimensions} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+                      <XAxis type="number" hide />
+                      <YAxis 
+                        dataKey="label" 
+                        type="category" 
+                        tick={{ fontSize: 10, fill: '#64748b' }} 
+                        tickLine={false} 
                         axisLine={false}
-                        interval={0}
+                        width={80}
                       />
-                      <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
-                      <RechartsTooltip contentStyle={{ fontSize: 11 }} />
-                      <Bar dataKey="value" fill="#111827" radius={4} />
+                      <RechartsTooltip 
+                        cursor={{ fill: '#f8fafc' }}
+                        contentStyle={{ fontSize: 11, borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                      />
+                      <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-xs text-zinc-500">
-                    No mock distribution attached to this metric. In a real deployment this would show Top N dimension
-                    values.
-                  </p>
+                  <div className="flex h-full items-center justify-center">
+                      <p className="text-xs text-slate-400">No dimension data available.</p>
+                  </div>
                 )}
               </div>
             </CardContent>
           </Card>
+
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-0 border-b border-slate-100 bg-slate-50/30">
+               <Tabs defaultValue="lineage" className="w-full">
+                <div className="flex items-center justify-between px-4 py-2">
+                    <CardTitle className="text-sm font-bold text-slate-900">Context</CardTitle>
+                    <TabsList className="h-7 bg-slate-200/50 p-0.5 rounded-lg">
+                    <TabsTrigger value="lineage" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Lineage</TabsTrigger>
+                    <TabsTrigger value="knowledge" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Knowledge</TabsTrigger>
+                    </TabsList>
+                </div>
+                <CardContent className="p-4">
+                    <TabsContent value="lineage" className="mt-0">
+                        <MetricLineageDag metric={metric} />
+                    </TabsContent>
+                    <TabsContent value="knowledge" className="mt-0 text-xs text-slate-600">
+                        <ul className="space-y-2 list-disc pl-4 marker:text-slate-400">
+                            <li>Product requirement documents that define the SGI / QBR program logic.</li>
+                            <li>Runbooks explaining how to debug data issues for this metric.</li>
+                            <li>Business guidelines on how to interpret trends and thresholds.</li>
+                        </ul>
+                    </TabsContent>
+                </CardContent>
+              </Tabs>
+            </CardHeader>
+          </Card>
         </div>
       </div>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Lineage & knowledge</CardTitle>
-          <CardDescription className="text-xs">
-            Static tabs that illustrate how lineage and knowledge would be surfaced for this metric.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="lineage">
-            <TabsList className="mb-2">
-              <TabsTrigger value="lineage">Lineage</TabsTrigger>
-              <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
-            </TabsList>
-            <TabsContent value="lineage" className="text-xs text-zinc-700">
-              <MetricLineageDag metric={metric} />
-            </TabsContent>
-            <TabsContent value="knowledge" className="text-xs text-zinc-700">
-              <p className="mb-1 font-semibold">Linked knowledge</p>
-              <ul className="mb-3 list-disc pl-4">
-                <li>Product requirement documents that define the SGI / QBR program logic.</li>
-                <li>Runbooks explaining how to debug data issues for this metric.</li>
-                <li>Business guidelines on how to interpret trends and thresholds.</li>
-              </ul>
-              <p className="text-[11px] text-zinc-500">
-                For this demo the items are static. In a real deployment links would be resolved from the knowledge
-                repository and attached at metric level.
-              </p>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
     </div>
   )
 }
