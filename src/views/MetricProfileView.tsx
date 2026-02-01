@@ -38,7 +38,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <CardTitle className="text-xl font-bold text-slate-900">{metric.businessName}</CardTitle>
-              <Badge variant="outline" className={`text-[10px] px-2 py-0.5 rounded-full border-slate-200 ${metric.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
+              <Badge variant="outline" className={`text-[10px] px-2 py-0.5 rounded-full border-slate-200 ${metric.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                 {metric.status}
               </Badge>
             </div>

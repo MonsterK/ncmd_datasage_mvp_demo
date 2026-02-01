@@ -144,7 +144,7 @@ export function ManagementWorkspaceView({
                     <TableCell className="font-mono text-[11px] text-slate-500">{m.slug}</TableCell>
                     <TableCell className="text-xs text-slate-700">{m.domain}</TableCell>
                     <TableCell className="text-xs">
-                      <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
+                      <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                         {m.status}
                       </Badge>
                     </TableCell>

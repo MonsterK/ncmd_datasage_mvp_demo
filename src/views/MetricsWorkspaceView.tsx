@@ -605,7 +605,7 @@ export function MetricsWorkspaceView({
                           </CardDescription>
                         </div>
                       </div>
-                      <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
+                      <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                         {m.status}
                       </Badge>
                     </CardHeader>
