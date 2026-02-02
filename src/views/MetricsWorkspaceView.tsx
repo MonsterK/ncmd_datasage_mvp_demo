@@ -605,9 +605,16 @@ export function MetricsWorkspaceView({
                           </CardDescription>
                         </div>
                       </div>
-                      <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
-                        {m.status}
-                      </Badge>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
+                          {m.status}
+                        </Badge>
+                        {(m as any)._refVersion && (m as any)._refVersion !== "latest" && (
+                          <span className="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                            {(m as any)._refVersion}
+                          </span>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent className="p-4 pt-2">
                       <p className="line-clamp-2 text-xs text-slate-500 mb-4 h-8 leading-relaxed">
@@ -922,6 +929,17 @@ function AddToMetricSetSheet({
       metricRefs: selectedSlugs.map(slug => ({ slug, version: "latest" })),
       dimensionRefs: [],
       tags: [],
+      createdAt: new Date(now).toISOString(),
+      updatedAt: new Date(now).toISOString(),
+      history: [
+        {
+          version: "v1",
+          editor: "Current User",
+          timestamp: new Date(now).toISOString(),
+          action: "create",
+          comment: "Initial creation via Add to Metric Set",
+        }
+      ]
     }
     onMetricSetsChange([...metricSets, newSet])
     onOpenChange(false)

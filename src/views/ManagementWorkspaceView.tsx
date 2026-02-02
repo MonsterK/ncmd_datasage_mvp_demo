@@ -1701,6 +1701,30 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensio
               </p>
             )}
           </div>
+
+          {metricSet.history && metricSet.history.length > 0 && (
+            <div className="space-y-3 pt-4 border-t border-zinc-100">
+              <p className="text-xs font-semibold text-zinc-800">Version History</p>
+              <div className="space-y-3">
+                {metricSet.history.map((h, i) => (
+                  <div key={i} className="flex gap-3 text-[11px]">
+                    <div className="flex-none w-8 pt-0.5">
+                      <Badge variant="outline" className="text-[10px] h-5 px-1 bg-slate-50 text-slate-500 font-mono border-slate-200">
+                        {h.version}
+                      </Badge>
+                    </div>
+                    <div className="flex-1 space-y-0.5">
+                      <div className="flex items-center justify-between text-slate-500 text-[10px]">
+                        <span>{h.editor}</span>
+                        <span>{formatDate(h.timestamp)}</span>
+                      </div>
+                      <p className="text-slate-700">{h.comment}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>

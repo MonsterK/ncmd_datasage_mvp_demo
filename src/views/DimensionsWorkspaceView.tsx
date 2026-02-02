@@ -152,6 +152,15 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                     )}
                   </div>
                   <div className="flex items-center gap-6 text-sm text-slate-400">
+                     {dim.values && dim.values.length > 0 && (
+                       <div className="hidden md:flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-md border border-slate-100 max-w-[200px]">
+                         <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Values:</span>
+                         <span className="text-xs text-slate-700 truncate">
+                           {dim.values.slice(0, 3).map(v => v.label).join(", ")}
+                           {dim.values.length > 3 && ` +${dim.values.length - 3}`}
+                         </span>
+                       </div>
+                     )}
                      <span className="text-xs font-medium">{dim.values?.length ?? 0} values</span>
                      <div className="flex gap-1 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
                        View details →

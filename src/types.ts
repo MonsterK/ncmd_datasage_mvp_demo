@@ -96,10 +96,11 @@ export interface Album {
   domain: string
   metricRefs: AlbumRef[]
   dimensionRefs: AlbumRef[]
-  metricSlugs?: string[] // Deprecated, kept for backward compatibility if needed, but we should migrate
+  metricSlugs?: string[] // Deprecated
   tags: string[]
   createdAt?: string
   updatedAt?: string
+  history?: ChangeLog[]
 }
 
 export interface CategoryNode {
