@@ -133,7 +133,7 @@ export function MetricsWorkspaceView({
 
   const metricsForSelectedSet = useMemo(() => {
     if (!selectedMetricSet) return []
-    return metrics.filter((m) => selectedMetricSet.metricSlugs.includes(m.slug))
+    return metrics.filter((m) => (selectedMetricSet.metricSlugs ?? []).includes(m.slug))
   }, [metrics, selectedMetricSet])
 
   const metricsForDomain = useMemo(() => {
@@ -148,7 +148,7 @@ export function MetricsWorkspaceView({
     setsInDomain.forEach((set) => {
       if (!set.tags || set.tags.length === 0) return
       if (set.tags.some((tagId) => selectedTagIds.includes(tagId))) {
-        set.metricSlugs.forEach((slug) => slugs.add(slug))
+        (set.metricSlugs ?? []).forEach((slug) => slugs.add(slug))
       }
     })
     return slugs
@@ -883,10 +883,14 @@ function AddToMetricSetSheet({
       return
     }
 
-    const mergedSlugs = Array.from(new Set([...set.metricSlugs, ...selectedSlugs]))
+    const mergedSlugs = Array.from(new Set([...(set.metricSlugs ?? []), ...selectedSlugs]))
     const updatedSet: Album = {
       ...set,
       metricSlugs: mergedSlugs,
+      metricRefs: mergedSlugs.map(slug => {
+        const existing = set.metricRefs?.find(r => r.slug === slug)
+        return existing || { slug, version: "latest" }
+      }),
     }
     const next = metricSets.map((s) => (s.id === set.id ? updatedSet : s))
     onMetricSetsChange(next)
@@ -915,6 +919,8 @@ function AddToMetricSetSheet({
       visibility,
       domain: selectedDomainId || domains[0]?.id || "Custom",
       metricSlugs: selectedSlugs,
+      metricRefs: selectedSlugs.map(slug => ({ slug, version: "latest" })),
+      dimensionRefs: [],
       tags: [],
     }
     onMetricSetsChange([...metricSets, newSet])

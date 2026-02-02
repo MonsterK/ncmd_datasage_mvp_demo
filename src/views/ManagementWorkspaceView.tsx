@@ -876,6 +876,8 @@ export function NewMetricSetSheet({
         visibility,
         domain: domainId || "Custom",
         metricSlugs,
+        metricRefs: metricSlugs.map(slug => ({ slug, version: "latest" })),
+        dimensionRefs: [],
         tags: selectedTagIds,
         createdAt: nowIso,
         updatedAt: nowIso,
