@@ -714,27 +714,32 @@ export function NewMetricSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="text-sm font-semibold">
-            {isEditMode ? "Edit metric" : "New metric"}
-          </SheetTitle>
-        </SheetHeader>
-        <div className="mt-4 pb-6">
-          <MetricRegistrationView
-            key={isEditMode && initialMetric ? initialMetric.id : "new"}
-            categories={categories}
-            initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
-            disableSlugEditing={Boolean(isEditMode)}
-            onRegisterMetric={(payload) => {
-              if (isEditMode && initialMetric && onUpdateMetric) {
-                onUpdateMetric(initialMetric.slug, payload)
-              } else {
-                onRegisterMetric(payload)
-              }
-              onOpenChange(false)
-            }}
-          />
+      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl p-0">
+        <div className="flex flex-col h-full">
+          <SheetHeader className="px-6 py-4 border-b bg-slate-50/50">
+            <SheetTitle className="text-lg font-semibold text-slate-900">
+              {isEditMode ? "Edit Metric" : "Register New Metric"}
+            </SheetTitle>
+            <div className="text-sm text-slate-500">
+              Define the business logic and technical implementation for a metric.
+            </div>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <MetricRegistrationView
+              key={isEditMode && initialMetric ? initialMetric.id : "new"}
+              categories={categories}
+              initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
+              disableSlugEditing={Boolean(isEditMode)}
+              onRegisterMetric={(payload) => {
+                if (isEditMode && initialMetric && onUpdateMetric) {
+                  onUpdateMetric(initialMetric.slug, payload)
+                } else {
+                  onRegisterMetric(payload)
+                }
+                onOpenChange(false)
+              }}
+            />
+          </div>
         </div>
       </SheetContent>
     </Sheet>
@@ -829,11 +834,15 @@ export function NewMetricSetSheet({
   const handleAddMetricRef = () => {
     if (!selectedMetricSlug) return
     if (metricSlugs.includes(selectedMetricSlug)) {
-      setMessage(`Metric "${selectedMetricSlug}" is already added to this metric set (mock).`)
+      setMessage(`Metric "${selectedMetricSlug}" is already added to this metric set.`)
       return
     }
     setMetricSlugs((prev) => [...prev, selectedMetricSlug])
     setMessage(null)
+  }
+
+  const handleRemoveMetricRef = (slugToRemove: string) => {
+    setMetricSlugs((prev) => prev.filter((slug) => slug !== slugToRemove))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -847,7 +856,7 @@ export function NewMetricSetSheet({
       (set) => set.name === trimmedName && (!isEditMode || set.id !== initialMetricSet?.id),
     )
     if (nameClash) {
-      setMessage(`Metric set with name "${trimmedName}" already exists (mock uniqueness validation).`)
+      setMessage(`Metric set with name "${trimmedName}" already exists.`)
       return
     }
     const now = Date.now()
@@ -863,6 +872,16 @@ export function NewMetricSetSheet({
         metricSlugs,
         tags: selectedTagIds,
         updatedAt: nowIso,
+        history: [
+          ...(initialMetricSet.history || []),
+          {
+            version: `v${(initialMetricSet.history?.length || 0) + 1}`,
+            timestamp: nowIso,
+            editor: "Current User",
+            action: "update",
+            comment: "Updated metric set configuration",
+          }
+        ]
       }
       onMetricSetsChange(
         metricSets.map((set) => (set.id === initialMetricSet.id ? updatedSet : set)),
@@ -881,6 +900,15 @@ export function NewMetricSetSheet({
         tags: selectedTagIds,
         createdAt: nowIso,
         updatedAt: nowIso,
+        history: [
+          {
+            version: "v1",
+            timestamp: nowIso,
+            editor: "Current User",
+            action: "create",
+            comment: "Created metric set",
+          }
+        ]
       }
       onMetricSetsChange([...metricSets, newSet])
     }
@@ -889,135 +917,196 @@ export function NewMetricSetSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="text-sm font-semibold">
-            {isEditMode ? "Edit metric set" : "New metric set"}
-          </SheetTitle>
-         </SheetHeader>
-        <div className="mt-4 pb-6">
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Name</label>
-              <Input
-                className="h-8 text-xs"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="2025 Q1 SGI QBR"
-              />
+      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl p-0">
+        <div className="flex flex-col h-full">
+          <SheetHeader className="px-6 py-4 border-b bg-slate-50/50">
+            <SheetTitle className="text-lg font-semibold text-slate-900">
+              {isEditMode ? "Edit Metric Set" : "Create Metric Set"}
+            </SheetTitle>
+            <div className="text-sm text-slate-500">
+              Group related metrics together for better organization and discovery.
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Description</label>
-              <Textarea
-                rows={3}
-                className="text-xs"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Metric set for SGI / QBR core monetization metrics."
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Visibility</label>
-              <Select value={visibility} onValueChange={(value: "team" | "private") => setVisibility(value)}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Select visibility" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="team">Team</SelectItem>
-                  <SelectItem value="private">Private</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Tags</label>
-              {tags.length > 0 ? (
-                <div className="flex flex-wrap gap-1">
-                  {tags.map((tag) => {
-                    const isActive = selectedTagIds.includes(tag.id)
-                    return (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() =>
-                          setSelectedTagIds((prev) =>
-                            prev.includes(tag.id) ? prev.filter((id) => id !== tag.id) : [...prev, tag.id],
-                          )
-                        }
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${
-                          isActive
-                            ? "border-zinc-900 bg-zinc-900 text-white"
-                            : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300"
-                        }`}
-                      >
-                        {tag.name}
-                      </button>
-                    )
-                  })}
+          </SheetHeader>
+          
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <form id="metric-set-form" className="space-y-8" onSubmit={handleSubmit}>
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
+                  Basic Information
+                </h3>
+                <div className="grid gap-5 pl-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Name</label>
+                    <Input
+                      className="h-9 text-sm"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. 2025 Q1 Growth Metrics"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Description</label>
+                    <Textarea
+                      rows={3}
+                      className="text-sm resize-none"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Describe the purpose of this metric set..."
+                    />
+                  </div>
                 </div>
-              ) : (
-                <p className="text-[11px] text-zinc-500">No tags configured yet.</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Domain</label>
-              <Select value={domainId} onValueChange={(value) => setDomainId(value)}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Select a domain" />
-                </SelectTrigger>
-                <SelectContent>
-                  {uniqueDomains.map((d) => (
-                     <SelectItem key={d.id} value={d.id}>
-                       {d.name}
-                     </SelectItem>
-                   ))}
-                 </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-zinc-800">Metric references</p>
-                <span className="text-[11px] text-zinc-500">Add metrics to include in this metric set.</span>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Select value={selectedMetricSlug} onValueChange={(value) => setSelectedMetricSlug(value)}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Select metric" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {metrics.map((m) => (
-                      <SelectItem key={m.id} value={m.slug}>
-                        {m.businessName} ({m.slug})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button type="button" size="sm" className="text-xs" onClick={handleAddMetricRef}>
-                  Add metric
-                </Button>
+
+              <div className="h-px bg-slate-100" />
+
+              {/* Configuration */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                  Configuration
+                </h3>
+                <div className="grid gap-5 pl-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-700">Domain</label>
+                      <Select value={domainId} onValueChange={(value) => setDomainId(value)}>
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue placeholder="Select a domain" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {uniqueDomains.map((d) => (
+                             <SelectItem key={d.id} value={d.id}>
+                               {d.name}
+                             </SelectItem>
+                           ))}
+                         </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-700">Visibility</label>
+                      <Select value={visibility} onValueChange={(value: "team" | "private") => setVisibility(value)}>
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue placeholder="Select visibility" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="team">Team (Public)</SelectItem>
+                          <SelectItem value="private">Private (Only You)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Tags</label>
+                    <div className="flex flex-wrap gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg min-h-[48px]">
+                      {tags.length > 0 ? (
+                        tags.map((tag) => {
+                          const isActive = selectedTagIds.includes(tag.id)
+                          return (
+                            <button
+                              key={tag.id}
+                              type="button"
+                              onClick={() =>
+                                setSelectedTagIds((prev) =>
+                                  prev.includes(tag.id) ? prev.filter((id) => id !== tag.id) : [...prev, tag.id],
+                                )
+                              }
+                              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                                isActive
+                                  ? "border-blue-600 bg-blue-50 text-blue-700"
+                                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                              }`}
+                            >
+                              {tag.name}
+                            </button>
+                          )
+                        })
+                      ) : (
+                        <p className="text-xs text-slate-400 italic">No tags available.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-              {metricSlugs.length > 0 ? (
-                <ul className="space-y-1 text-[11px] text-zinc-700">
-                  {metricSlugs.map((slug) => {
-                    const metric = metrics.find((m) => m.slug === slug)
-                    return (
-                      <li key={slug} className="flex items-center justify-between gap-2">
-                        <span>{metric?.businessName ?? slug}</span>
-                        <span className="font-mono text-[11px] text-zinc-500">{slug}</span>
-                      </li>
-                    )
-                  })}
-                </ul>
-              ) : (
-                <p className="text-[11px] text-zinc-500">No metrics added yet.</p>
-              )}
-            </div>
-            <div className="flex items-center justify-between">
-              <Button type="submit" size="sm" className="text-xs">
-                {isEditMode ? "Save changes" : "Create metric set (mock)"}
+
+              <div className="h-px bg-slate-100" />
+
+              {/* Metrics Selection */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1 h-4 bg-emerald-600 rounded-full"></span>
+                  Included Metrics
+                </h3>
+                <div className="pl-3 space-y-3">
+                  <div className="flex gap-2">
+                    <Select value={selectedMetricSlug} onValueChange={(value) => setSelectedMetricSlug(value)}>
+                      <SelectTrigger className="h-9 text-sm flex-1">
+                        <SelectValue placeholder="Select metric to add" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {metrics.map((m) => (
+                          <SelectItem key={m.id} value={m.slug}>
+                            {m.businessName} <span className="text-slate-400 ml-1">({m.slug})</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button type="button" size="sm" onClick={handleAddMetricRef} className="bg-slate-900 text-white hover:bg-slate-800">
+                      Add
+                    </Button>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-slate-50/50 overflow-hidden">
+                    {metricSlugs.length > 0 ? (
+                      <div className="divide-y divide-slate-100">
+                        {metricSlugs.map((slug) => {
+                          const metric = metrics.find((m) => m.slug === slug)
+                          return (
+                            <div key={slug} className="flex items-center justify-between p-3 hover:bg-white transition-colors">
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-slate-900">{metric?.businessName ?? slug}</span>
+                                <span className="text-xs font-mono text-slate-500">{slug}</span>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full"
+                                onClick={() => handleRemoveMetricRef(slug)}
+                              >
+                                <span className="sr-only">Remove</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                              </Button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center text-xs text-slate-500 italic">
+                        No metrics added to this set yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div className="p-6 border-t bg-white flex items-center justify-between">
+            {message ? (
+              <p className="text-xs text-red-600 font-medium bg-red-50 px-3 py-1.5 rounded-full">{message}</p>
+            ) : (
+              <div></div>
+            )}
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+              <Button type="submit" form="metric-set-form" className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100">
+                {isEditMode ? "Save Changes" : "Create Metric Set"}
               </Button>
-              {message && <p className="text-[11px] text-zinc-600">{message}</p>}
             </div>
-          </form>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
@@ -1499,69 +1588,112 @@ export function NewDimensionSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="text-sm font-semibold">
-            {isEditMode ? "Edit dimension" : "New dimension"}
-          </SheetTitle>
-         </SheetHeader>
-        <div className="mt-4 pb-6">
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Dimension ID (slug)</label>
-              <Input
-                 className="h-8 text-xs"
-                 value={id}
-                 onChange={(e) => setId(e.target.value)}
-                 placeholder="e.g. agency_tier"
-                disabled={Boolean(isEditMode)}
-              />
+      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl p-0">
+        <div className="flex flex-col h-full">
+          <SheetHeader className="px-6 py-4 border-b bg-slate-50/50">
+            <SheetTitle className="text-lg font-semibold text-slate-900">
+              {isEditMode ? "Edit Dimension" : "Create New Dimension"}
+            </SheetTitle>
+            <div className="text-sm text-slate-500">
+              Define a dimension to slice and dice your metrics.
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Name</label>
-              <Input
-                className="h-8 text-xs"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Agency tier"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Description</label>
-              <Textarea
-                rows={3}
-                className="text-xs"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Short description of this dimension term."
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Category</label>
-              <Input
-                className="h-8 text-xs"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="e.g. Monetization entities"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Source link</label>
-              <Input
-                type="url"
-                className="h-8 text-xs"
-                value={sourceLink}
-                onChange={(e) => setSourceLink(e.target.value)}
-                placeholder="https://..."
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Button type="submit" size="sm" className="text-xs">
-                Create dimension (mock)
+          </SheetHeader>
+          
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <form id="dimension-form" className="space-y-8" onSubmit={handleSubmit}>
+              {/* Basic Details */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                  Dimension Details
+                </h3>
+                <div className="grid gap-5 pl-3">
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-700">Dimension ID (slug)</label>
+                      <Input
+                        className="h-9 text-sm font-mono"
+                        value={id}
+                        onChange={(e) => setId(e.target.value)}
+                        placeholder="e.g. agency_tier"
+                        disabled={Boolean(isEditMode)}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-700">Name</label>
+                      <Input
+                        className="h-9 text-sm"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Agency Tier"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Description</label>
+                    <Textarea
+                      rows={3}
+                      className="text-sm resize-none"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Short description of this dimension term."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px bg-slate-100" />
+
+              {/* Data Settings */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                   <span className="w-1 h-4 bg-indigo-600 rounded-full"></span>
+                   Data Settings
+                </h3>
+                <div className="grid gap-5 pl-3">
+                   <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Category</label>
+                    <Input
+                      className="h-9 text-sm"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      placeholder="e.g. Monetization entities"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Source link</label>
+                    <div className="relative">
+                      <Input
+                        type="url"
+                        className="h-9 text-sm pl-8"
+                        value={sourceLink}
+                        onChange={(e) => setSourceLink(e.target.value)}
+                        placeholder="https://..."
+                      />
+                      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div className="p-6 border-t bg-white flex items-center justify-between">
+            {message ? (
+              <p className="text-xs text-red-600 font-medium bg-red-50 px-3 py-1.5 rounded-full">{message}</p>
+            ) : (
+              <div></div>
+            )}
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+              <Button type="submit" form="dimension-form" className="bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-100">
+                {isEditMode ? "Save Changes" : "Create Dimension"}
               </Button>
-              {message && <p className="text-[11px] text-zinc-600">{message}</p>}
             </div>
-          </form>
+          </div>
         </div>
       </SheetContent>
     </Sheet>

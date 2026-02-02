@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search as SearchIcon, Flame } from "lucide-react"
+import { Search as SearchIcon, Flame, Filter, ArrowUpDown, User, BarChart2, LayoutGrid, List } from "lucide-react"
 import { ResponsiveContainer, LineChart, Line } from "recharts"
 
 import { Metric } from "@/types"
@@ -42,7 +42,7 @@ export type HasQueryFilter = "all" | "yes" | "no"
 
 export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAddToMetricSetFromSelection }: MetricSearchViewProps) {
   const [search, setSearch] = useState("")
-  const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "list")
+  const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "card")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [businessOwnerFilter, setBusinessOwnerFilter] = useState<string>("all")
   const [techOwnerFilter, setTechOwnerFilter] = useState<string>("all")
@@ -139,315 +139,282 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
   }, [metrics])
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <div className="space-y-3 p-6">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <CardTitle>Metric search & list</CardTitle>
-                <CardDescription>
-                  Search across metric registry and open a metric profile. Toggle between card and list view.
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-2 py-1">
-                  <SearchIcon className="h-4 w-4 text-zinc-500" />
-                  <Input
-                    className="h-8 border-0 px-1 text-xs shadow-none focus-visible:ring-0"
-                    placeholder="Search by business name, slug or definition…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-                <div className="inline-flex rounded-md border border-zinc-200 bg-white p-0.5 text-xs">
-                  <button
-                    type="button"
-                    className={`flex items-center gap-1 rounded px-2 py-1 ${
-                      viewMode === "card" ? "bg-zinc-900 text-white" : "text-zinc-700"
-                    }`}
-                    onClick={() => setViewMode("card")}
-                  >
-                    Cards
-                  </button>
-                  <button
-                    type="button"
-                    className={`flex items-center gap-1 rounded px-2 py-1 ${
-                      viewMode === "list" ? "bg-zinc-900 text-white" : "text-zinc-700"
-                    }`}
-                    onClick={() => setViewMode("list")}
-                  >
-                    List
-                  </button>
-                </div>
-              </div>
+    <div className="h-full flex flex-col bg-slate-50/50">
+      {/* Header Section */}
+      <div className="border-b bg-white px-8 py-6 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Metrics Library</h1>
+            <p className="text-slate-500">Search and discover metrics across your organization</p>
+          </div>
+          
+          <div className="flex gap-4 items-center">
+            <div className="relative flex-1 max-w-2xl">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                placeholder="Search metrics by name, description, or ID..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 h-11 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              />
             </div>
-            <div className="flex flex-wrap gap-3 text-xs">
-              <div className="flex min-w-0 flex-1 flex-col gap-1 md:basis-1/4">
-                <span className="text-[11px] font-medium text-zinc-600">Category path</span>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="All categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {categoryOptions.map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-1 md:basis-1/4">
-                <span className="text-[11px] font-medium text-zinc-600">Business owner</span>
-                <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="All business owners" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {businessOwnerOptions.map((owner) => (
-                      <SelectItem key={owner} value={owner}>
-                        {owner}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-1 md:basis-1/4">
-                <span className="text-[11px] font-medium text-zinc-600">Tech owner</span>
-                <Select value={techOwnerFilter} onValueChange={setTechOwnerFilter}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="All tech owners" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {techOwnerOptions.map((owner) => (
-                      <SelectItem key={owner} value={owner}>
-                        {owner}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-1 md:basis-1/4">
-                <span className="text-[11px] font-medium text-zinc-600">Query & sort</span>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Select value={hasQueryFilter} onValueChange={(value: HasQueryFilter) => setHasQueryFilter(value)}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Has bound query" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All queries</SelectItem>
-                      <SelectItem value="yes">Has bound query</SelectItem>
-                      <SelectItem value="no">No bound query</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="flex flex-1 gap-2">
-                    <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Sort field" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="createdAt">Created time</SelectItem>
-                        <SelectItem value="updatedAt">Updated time</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={sortDirection}
-                      onValueChange={(value: MetricSortDirection) => setSortDirection(value)}
-                    >
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Order" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="asc">Asc</SelectItem>
-                        <SelectItem value="desc">Desc</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+            <div className="flex items-center gap-2 border-l pl-4 ml-2">
+               <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 w-8 p-0 rounded-md ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                  onClick={() => setViewMode('card')}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 w-8 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
-        </CardHeader>
-      </Card>
 
-      {hasBulkSelection && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs">
-          <span className="text-[11px] text-zinc-600">
-            {selectedMetricSlugs.length
-              ? `${selectedMetricSlugs.length} selected for metric set.`
-              : "Select metrics in card or list view, then add them into a metric set."}
-          </span>
-          <Button
-            type="button"
-            size="sm"
-            className="text-xs"
-            variant="outline"
-            disabled={selectedMetricSlugs.length === 0}
-            onClick={() => {
-              if (!onAddToMetricSetFromSelection || selectedMetricSlugs.length === 0) return
-              onAddToMetricSetFromSelection(selectedMetricSlugs)
-            }}
-          >
-            Add to metric set
-          </Button>
-        </div>
-      )}
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3 pt-2">
+             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="h-8 text-xs w-[180px] bg-white">
+                <SelectValue placeholder="All categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categoryOptions.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-      {viewMode === "card" && (
-        <div className="grid gap-3 md:grid-cols-2">
-          {filtered.map((m) => (
-            <Card
-              key={m.id}
-              className="cursor-pointer transition hover:border-zinc-300 hover:shadow-md"
-              onClick={() => onOpenMetric(m.slug)}
+            <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
+              <SelectTrigger className="h-8 text-xs w-[160px] bg-white">
+                <SelectValue placeholder="All business owners" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Business Owners</SelectItem>
+                {businessOwnerOptions.map((owner) => (
+                  <SelectItem key={owner} value={owner}>{owner}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
+              <SelectTrigger className="h-8 text-xs w-[140px] bg-white">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="createdAt">Created Date</SelectItem>
+                <SelectItem value="updatedAt">Updated Date</SelectItem>
+              </SelectContent>
+            </Select>
+
+             <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 text-xs text-slate-500"
+              onClick={() => {
+                setCategoryFilter("all")
+                setBusinessOwnerFilter("all")
+                setTechOwnerFilter("all")
+                setHasQueryFilter("all")
+                setSearch("")
+              }}
             >
-              <CardHeader className="flex flex-row items-start justify-between gap-2">
-                <div className="flex flex-1 items-start gap-2">
-                  {hasBulkSelection && (
-                    <Checkbox
-                      className="mt-1"
-                      aria-label="Select metric"
-                      checked={selectedMetricSlugs.includes(m.slug)}
-                      onCheckedChange={(value) => {
-                        const isChecked = value === true
-                        setSelectedMetricSlugs((prev) => {
-                          if (isChecked) {
-                            if (prev.includes(m.slug)) return prev
-                            return [...prev, m.slug]
-                          }
-                          return prev.filter((slug) => slug !== m.slug)
-                        })
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                      }}
-                    />
-                  )}
-                  <div>
-                    <CardTitle className="text-sm">{m.businessName}</CardTitle>
-                    <CardDescription className="text-[11px] font-mono text-zinc-500">
-                      {m.slug}
-                    </CardDescription>
-                  </div>
+              Reset Filters
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Results Section */}
+      <div className="flex-1 overflow-auto p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          
+          {hasBulkSelection && (
+             <div className="flex items-center justify-between bg-blue-50 border border-blue-100 px-4 py-3 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 p-1.5 rounded-full">
+                  <BarChart2 className="h-4 w-4 text-blue-600" />
                 </div>
-                <div className="flex flex-col items-end gap-1 text-right">
-                  <Badge variant="outline" className="text-[10px]">
-                    {m.status}
-                  </Badge>
-                  <div className="text-[11px] text-zinc-500">{m.categoryPath.join(" › ")}</div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="line-clamp-2 text-xs text-zinc-700">{m.businessDefinition}</p>
-                <div className="mt-3 flex items-end justify-between gap-2">
-                  <div className="flex items-center gap-1 text-[11px] text-zinc-500">
-                    <Flame className="h-3 w-3 text-orange-500" />
-                    <span className="font-medium text-zinc-700">{m.heat ?? 0}</span>
-                  </div>
-                  {m.trend30d && m.trend30d.length > 0 && (
-                    <div className="h-10 w-24">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={m.trend30d} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                          <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke="#111827"
-                            strokeWidth={1.5}
-                            dot={false}
-                            isAnimationActive={false}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
+                <span className="text-sm text-blue-900 font-medium">
+                  {selectedMetricSlugs.length
+                    ? `${selectedMetricSlugs.length} metrics selected`
+                    : "Select metrics to add to your set"}
+                </span>
+              </div>
+              <Button
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                disabled={selectedMetricSlugs.length === 0}
+                onClick={() => {
+                  if (!onAddToMetricSetFromSelection || selectedMetricSlugs.length === 0) return
+                  onAddToMetricSetFromSelection(selectedMetricSlugs)
+                }}
+              >
+                Add to Metric Set
+              </Button>
+            </div>
+          )}
+
+          {filtered.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-xl border border-dashed border-slate-200">
+              <div className="bg-slate-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <SearchIcon className="h-8 w-8 text-slate-300" />
+              </div>
+              <h3 className="text-lg font-medium text-slate-900">No metrics found</h3>
+              <p className="text-slate-500 mt-1 max-w-sm mx-auto">
+                We couldn't find any metrics matching your criteria. Try adjusting your search terms or filters.
+              </p>
+            </div>
+          ) : viewMode === 'card' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map(metric => (
+                <Card 
+                  key={metric.id} 
+                  className={`group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col ${selectedMetricSlugs.includes(metric.slug) ? 'ring-2 ring-blue-500 border-transparent' : 'hover:border-blue-200'}`}
+                  onClick={() => onOpenMetric(metric.slug)}
+                >
+                  <CardHeader className="space-y-3 pb-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1 flex-1 min-w-0">
+                         {hasBulkSelection && (
+                          <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedMetricSlugs.includes(metric.slug)}
+                              onCheckedChange={(checked) => {
+                                setSelectedMetricSlugs(prev => 
+                                  checked 
+                                    ? [...prev, metric.slug]
+                                    : prev.filter(s => s !== metric.slug)
+                                )
+                              }}
+                            />
+                          </div>
+                        )}
+                        <CardTitle className="text-lg font-semibold leading-tight group-hover:text-blue-600 transition-colors truncate">
+                          {metric.businessName}
+                        </CardTitle>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+                          <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{metric.slug}</span>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant={metric.status === 'Active' ? 'default' : 'secondary'}
+                        className={`shrink-0 ${metric.status === 'Active' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200' : ''}`}
+                      >
+                        {metric.status}
+                      </Badge>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          {filtered.length === 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>No metrics match the search</CardTitle>
-                <CardDescription>Try a different keyword or clear the search input.</CardDescription>
-              </CardHeader>
+                    <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10">
+                      {metric.businessDefinition}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="pb-4 flex-1">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        <User className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="truncate">{metric.owners.businessOwner}</span>
+                      </div>
+                      
+                      <div className="flex items-end justify-between gap-2 pt-2">
+                        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-orange-50 px-2 py-1 rounded-full border border-orange-100">
+                          <Flame className="h-3 w-3 text-orange-500" />
+                          <span>{metric.heat ?? 0} Heat</span>
+                        </div>
+                        
+                        {metric.trend30d && metric.trend30d.length > 0 && (
+                          <div className="h-8 w-20 opacity-70 group-hover:opacity-100 transition-opacity">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={metric.trend30d}>
+                                <Line
+                                  type="monotone"
+                                  dataKey="value"
+                                  stroke="#3b82f6"
+                                  strokeWidth={2}
+                                  dot={false}
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
+                    <span className="truncate max-w-[150px]">{metric.categoryPath.join(" › ")}</span>
+                    <span>{new Date(metric.updatedAt).toLocaleDateString()}</span>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="overflow-hidden border-slate-200 shadow-sm">
+              <Table>
+                <TableHeader className="bg-slate-50">
+                  <TableRow>
+                    {hasBulkSelection && <TableHead className="w-12"></TableHead>}
+                    <TableHead>Metric Name</TableHead>
+                    <TableHead>Slug</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Owner</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Updated</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((m) => (
+                    <TableRow 
+                      key={m.id} 
+                      className="cursor-pointer hover:bg-slate-50/80"
+                      onClick={() => onOpenMetric(m.slug)}
+                    >
+                      {hasBulkSelection && (
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <Checkbox
+                            checked={selectedMetricSlugs.includes(m.slug)}
+                            onCheckedChange={(checked) => {
+                              setSelectedMetricSlugs(prev => 
+                                checked 
+                                  ? [...prev, m.slug]
+                                  : prev.filter(s => s !== m.slug)
+                              )
+                            }}
+                          />
+                        </TableCell>
+                      )}
+                      <TableCell className="font-medium text-slate-900">{m.businessName}</TableCell>
+                      <TableCell className="font-mono text-xs text-slate-500">{m.slug}</TableCell>
+                      <TableCell className="text-xs text-slate-600 max-w-[200px] truncate" title={m.categoryPath.join(" > ")}>
+                        {m.categoryPath.join(" › ")}
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-600">{m.owners.businessOwner}</TableCell>
+                      <TableCell>
+                         <Badge 
+                          variant="outline" 
+                          className={`text-[10px] ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}`}
+                        >
+                          {m.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-500 text-right">{new Date(m.updatedAt).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </Card>
           )}
         </div>
-      )}
-
-      {viewMode === "list" && (
-        <Card>
-          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle className="text-sm">Metric list</CardTitle>
-              <CardDescription>Click a row to open the metric profile.</CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {hasBulkSelection && <TableHead className="w-8" />}
-                  <TableHead>Name</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Domain</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((m) => (
-                  <TableRow key={m.id} className="cursor-pointer" onClick={() => onOpenMetric(m.slug)}>
-                    {hasBulkSelection && (
-                      <TableCell
-                        className="w-8"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                        }}
-                      >
-                        <Checkbox
-                          aria-label="Select metric"
-                          checked={selectedMetricSlugs.includes(m.slug)}
-                          onCheckedChange={(value) => {
-                            const isChecked = value === true
-                            setSelectedMetricSlugs((prev) => {
-                              if (isChecked) {
-                                if (prev.includes(m.slug)) return prev
-                                return [...prev, m.slug]
-                              }
-                              return prev.filter((slug) => slug !== m.slug)
-                            })
-                          }}
-                        />
-                      </TableCell>
-                    )}
-                    <TableCell className="text-xs font-medium">{m.businessName}</TableCell>
-                    <TableCell className="text-[11px] font-mono text-zinc-600">{m.slug}</TableCell>
-                    <TableCell className="text-xs text-zinc-600">{m.domain}</TableCell>
-                    <TableCell className="text-xs text-zinc-600">
-                      {m.categoryPath.join(" › ")}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-[10px]">
-                        {m.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-              <TableCaption className="text-xs">
-                {hasBulkSelection
-                  ? "Listing metrics from the mock registry. Select metrics above and click \"Add to metric set\" to group them."
-                  : "Listing metrics from the mock registry. Click any row to inspect its metric profile."}
-              </TableCaption>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+      </div>
     </div>
   )
 }
