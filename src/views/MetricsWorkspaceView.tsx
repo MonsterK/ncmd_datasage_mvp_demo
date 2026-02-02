@@ -496,7 +496,7 @@ export function MetricsWorkspaceView({
                   <p className="mt-3 line-clamp-2 text-xs text-slate-500 leading-relaxed">{set.description}</p>
                   <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between w-full">
                     <span className="text-[10px] font-medium text-slate-400">
-                      {set.metricSlugs.length} metric{set.metricSlugs.length === 1 ? "" : "s"}
+                      {(set.metricSlugs?.length ?? 0)} metric{(set.metricSlugs?.length ?? 0) === 1 ? "" : "s"}
                     </span>
                     <span className="text-[10px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
                       View details →

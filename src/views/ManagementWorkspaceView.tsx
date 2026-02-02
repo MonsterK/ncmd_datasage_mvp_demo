@@ -241,7 +241,7 @@ export function ManagementWorkspaceView({
                         <span className="text-[11px] text-slate-400">-</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-slate-700">{set.metricSlugs.length}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{set.metricSlugs?.length ?? 0}</TableCell>
                     <TableCell className="text-[11px] text-slate-500">{formatDate(set.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
