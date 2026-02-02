@@ -790,7 +790,8 @@ export function NewMetricSetSheet({
 
   const [domainId, setDomainId] = useState<string>(uniqueDomains[0]?.id ?? "")
   const [selectedMetricSlug, setSelectedMetricSlug] = useState<string>(metrics[0]?.slug ?? "")
-  const [metricSlugs, setMetricSlugs] = useState<string[]>([])
+  // Use AlbumRef[] instead of string[] to support versioning
+  const [metricRefs, setMetricRefs] = useState<{ slug: string; version?: string }[]>([])
   const [message, setMessage] = useState<string | null>(null)
 
   const isEditMode = mode === "edit" && initialMetricSet
@@ -804,9 +805,17 @@ export function NewMetricSetSheet({
       setVisibility(initialMetricSet.visibility)
       setDomainId(initialMetricSet.domain || uniqueDomains[0]?.id || "")
       setSelectedTagIds(initialMetricSet.tags ?? [])
-      const initial = initialMetricSet.metricSlugs ?? []
-      setMetricSlugs(initial)
-      const firstSlug = initial[0] ?? metrics[0]?.slug ?? ""
+      
+      // Load existing refs or fallback to legacy metricSlugs
+      if (initialMetricSet.metricRefs && initialMetricSet.metricRefs.length > 0) {
+        setMetricRefs(initialMetricSet.metricRefs)
+      } else if (initialMetricSet.metricSlugs) {
+        setMetricRefs(initialMetricSet.metricSlugs.map(slug => ({ slug, version: "latest" })))
+      } else {
+        setMetricRefs([])
+      }
+
+      const firstSlug = initialMetricSet.metricRefs?.[0]?.slug ?? initialMetricSet.metricSlugs?.[0] ?? metrics[0]?.slug ?? ""
       setSelectedMetricSlug(firstSlug)
     } else {
       setName("")
@@ -814,10 +823,14 @@ export function NewMetricSetSheet({
       setVisibility("team")
       setDomainId(initialDomainId || uniqueDomains[0]?.id || "")
       setSelectedTagIds([])
-      const initial = initialMetricSlugs ?? []
-      setMetricSlugs(initial)
-      const firstSlug = initial[0] ?? metrics[0]?.slug ?? ""
-      setSelectedMetricSlug(firstSlug)
+      
+      if (initialMetricSlugs) {
+        setMetricRefs(initialMetricSlugs.map(slug => ({ slug, version: "latest" })))
+        setSelectedMetricSlug(initialMetricSlugs[0] ?? metrics[0]?.slug ?? "")
+      } else {
+        setMetricRefs([])
+        setSelectedMetricSlug(metrics[0]?.slug ?? "")
+      }
     }
 
     setMessage(null)
@@ -833,16 +846,17 @@ export function NewMetricSetSheet({
 
   const handleAddMetricRef = () => {
     if (!selectedMetricSlug) return
-    if (metricSlugs.includes(selectedMetricSlug)) {
+    if (metricRefs.some(ref => ref.slug === selectedMetricSlug)) {
       setMessage(`Metric "${selectedMetricSlug}" is already added to this metric set.`)
       return
     }
-    setMetricSlugs((prev) => [...prev, selectedMetricSlug])
+    // Default to "latest" version when adding
+    setMetricRefs((prev) => [...prev, { slug: selectedMetricSlug, version: "latest" }])
     setMessage(null)
   }
 
   const handleRemoveMetricRef = (slugToRemove: string) => {
-    setMetricSlugs((prev) => prev.filter((slug) => slug !== slugToRemove))
+    setMetricRefs((prev) => prev.filter((ref) => ref.slug !== slugToRemove))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -862,6 +876,8 @@ export function NewMetricSetSheet({
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
 
+    const metricSlugs = metricRefs.map(r => r.slug)
+
     if (isEditMode && initialMetricSet) {
       const updatedSet: Album = {
         ...initialMetricSet,
@@ -869,7 +885,8 @@ export function NewMetricSetSheet({
         description: description.trim(),
         visibility,
         domain: domainId || "Custom",
-        metricSlugs,
+        metricSlugs, // Keep simplified list for backward compatibility if needed
+        metricRefs,
         tags: selectedTagIds,
         updatedAt: nowIso,
         history: [
@@ -895,7 +912,7 @@ export function NewMetricSetSheet({
         visibility,
         domain: domainId || "Custom",
         metricSlugs,
-        metricRefs: metricSlugs.map(slug => ({ slug, version: "latest" })),
+        metricRefs,
         dimensionRefs: [],
         tags: selectedTagIds,
         createdAt: nowIso,
@@ -1059,22 +1076,27 @@ export function NewMetricSetSheet({
                   </div>
 
                   <div className="rounded-lg border border-slate-200 bg-slate-50/50 overflow-hidden">
-                    {metricSlugs.length > 0 ? (
+                    {metricRefs.length > 0 ? (
                       <div className="divide-y divide-slate-100">
-                        {metricSlugs.map((slug) => {
-                          const metric = metrics.find((m) => m.slug === slug)
+                        {metricRefs.map((ref) => {
+                          const metric = metrics.find((m) => m.slug === ref.slug)
                           return (
-                            <div key={slug} className="flex items-center justify-between p-3 hover:bg-white transition-colors">
+                            <div key={ref.slug} className="flex items-center justify-between p-3 hover:bg-white transition-colors">
                               <div className="flex flex-col">
-                                <span className="text-sm font-medium text-slate-900">{metric?.businessName ?? slug}</span>
-                                <span className="text-xs font-mono text-slate-500">{slug}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-slate-900">{metric?.businessName ?? ref.slug}</span>
+                                  <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-500 border-slate-200 font-mono h-5 px-1.5">
+                                    {ref.version ?? "latest"}
+                                  </Badge>
+                                </div>
+                                <span className="text-xs font-mono text-slate-500">{ref.slug}</span>
                               </div>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="sm"
                                 className="h-7 w-7 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full"
-                                onClick={() => handleRemoveMetricRef(slug)}
+                                onClick={() => handleRemoveMetricRef(ref.slug)}
                               >
                                 <span className="sr-only">Remove</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>

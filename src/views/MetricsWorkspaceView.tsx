@@ -133,6 +133,19 @@ export function MetricsWorkspaceView({
 
   const metricsForSelectedSet = useMemo(() => {
     if (!selectedMetricSet) return []
+    
+    // Prefer metricRefs to get version info
+    if (selectedMetricSet.metricRefs && selectedMetricSet.metricRefs.length > 0) {
+      return selectedMetricSet.metricRefs
+        .map(ref => {
+          const metric = metrics.find(m => m.slug === ref.slug)
+          if (!metric) return null
+          // Attach _refVersion for display
+          return { ...metric, _refVersion: ref.version }
+        })
+        .filter(m => m !== null) as (Metric & { _refVersion?: string })[]
+    }
+    
     return metrics.filter((m) => (selectedMetricSet.metricSlugs ?? []).includes(m.slug))
   }, [metrics, selectedMetricSet])
 

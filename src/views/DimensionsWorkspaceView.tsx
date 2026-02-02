@@ -1,8 +1,40 @@
 import { useMemo, useState } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { DimensionTreeNode, Dimension } from "@/types"
-import { Folder, Tag, Plus, ArrowLeft, Search, Layers, Flame, FileText, Share2, ArrowRight, History } from "lucide-react"
+import { 
+  Folder, 
+  Tag, 
+  Plus, 
+  Search, 
+  LayoutGrid, 
+  List, 
+  Filter, 
+  ArrowUpDown,
+  Database,
+  Share2,
+  History,
+  FileText,
+  Flame,
+  ArrowRight
+} from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
 export interface DimensionsWorkspaceViewProps {
@@ -10,229 +42,254 @@ export interface DimensionsWorkspaceViewProps {
   dimensions: Dimension[]
 }
 
+export type DimensionViewMode = "card" | "list"
+export type DimensionSortField = "name" | "updatedAt" | "usage"
+
 export function DimensionsWorkspaceView({ dimensionTree, dimensions }: DimensionsWorkspaceViewProps) {
-  const [activeNodeId, setActiveNodeId] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
+  const [viewMode, setViewMode] = useState<DimensionViewMode>("card")
   const [selectedDimension, setSelectedDimension] = useState<Dimension | null>(null)
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false)
+  const [sortField, setSortField] = useState<DimensionSortField>("updatedAt")
+  const [typeFilter, setTypeFilter] = useState<string>("all")
 
-  // -- Data Processing for Grid View --
-  const categories = useMemo(() => {
-    return dimensionTree.map(node => {
-      // Calculate total fields (dimensions) in this category recursively
-      const countFields = (n: DimensionTreeNode): number => {
-        let count = n.dimensionSlugs?.length ?? 0
-        if (n.children) {
-          count += n.children.reduce((acc, child) => acc + countFields(child), 0)
-        }
-        return count
-      }
-      
-      const totalFields = countFields(node)
-      
-      // Determine badge/tag based on name or other logic
-      let badge = "Business"
-      let badgeColor = "bg-purple-50 text-purple-700 border-purple-100"
-      
-      const lower = node.name.toLowerCase()
-      if (lower.includes("user") || lower.includes("core")) {
-        badge = "Core"
-        badgeColor = "bg-blue-50 text-blue-700 border-blue-100"
-      } else if (lower.includes("finance") || lower.includes("pay")) {
-        badge = "Financial"
-        badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-100"
-      } else if (lower.includes("meta") || lower.includes("system")) {
-        badge = "System"
-        badgeColor = "bg-slate-100 text-slate-700 border-slate-200"
-      } else if (lower.includes("analytic")) {
-        badge = "Reporting"
-        badgeColor = "bg-orange-50 text-orange-700 border-orange-100"
-      }
+  const filteredDimensions = useMemo(() => {
+    let result = dimensions
+    
+    const q = search.toLowerCase().trim()
+    if (q) {
+      result = result.filter(d => 
+        d.name.toLowerCase().includes(q) || 
+        d.slug.toLowerCase().includes(q) ||
+        d.description?.toLowerCase().includes(q)
+      )
+    }
 
-      return {
-        ...node,
-        totalFields,
-        badge,
-        badgeColor,
-        description: getDescriptionForCategory(node.name)
+    if (typeFilter !== "all") {
+      result = result.filter(d => d.type === typeFilter)
+    }
+
+    return result.sort((a, b) => {
+      if (sortField === "name") {
+        return a.name.localeCompare(b.name)
       }
+      if (sortField === "usage") {
+        return b.boundMetricSlugs.length - a.boundMetricSlugs.length
+      }
+      // updatedAt
+      const tA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
+      const tB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
+      return tB - tA
     })
-  }, [dimensionTree])
+  }, [dimensions, search, typeFilter, sortField])
 
-  // -- Data Processing for Detail View --
-  const activeNode = useMemo(() => {
-    if (!activeNodeId) return null
-    
-    // Find node in tree (recursive)
-    const findNode = (nodes: DimensionTreeNode[]): DimensionTreeNode | null => {
-      for (const node of nodes) {
-        if (node.id === activeNodeId) return node
-        if (node.children) {
-          const found = findNode(node.children)
-          if (found) return found
-        }
-      }
-      return null
-    }
-    return findNode(dimensionTree)
-  }, [dimensionTree, activeNodeId])
-
-  const activeDimensions = useMemo(() => {
-    if (!activeNode) return []
-    // Gather all dimension slugs from this node and children
-    const slugs = new Set<string>()
-    const collectSlugs = (n: DimensionTreeNode) => {
-      n.dimensionSlugs?.forEach(s => slugs.add(s))
-      n.children?.forEach(collectSlugs)
-    }
-    collectSlugs(activeNode)
-    
-    return dimensions.filter(d => slugs.has(d.slug))
-  }, [activeNode, dimensions])
-
+  const typeOptions = useMemo(() => {
+    const types = new Set(dimensions.map(d => d.type))
+    return Array.from(types).sort()
+  }, [dimensions])
 
   const handleDimensionClick = (dim: Dimension) => {
     setSelectedDimension(dim)
     setIsDetailSheetOpen(true)
   }
 
-  // -- Render --
+  return (
+    <div className="h-full flex flex-col bg-slate-50/50">
+      {/* Header Section */}
+      <div className="border-b bg-white px-8 py-6 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dimensions Library</h1>
+            <p className="text-slate-500">Organize and categorize your data fields</p>
+          </div>
+          
+          <div className="flex gap-4 items-center">
+            <div className="relative flex-1 max-w-2xl">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                placeholder="Search dimensions by name, slug, or description..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 h-11 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              />
+            </div>
+            <div className="flex items-center gap-2 border-l pl-4 ml-2">
+               <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 w-8 p-0 rounded-md ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                  onClick={() => setViewMode('card')}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 w-8 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
 
-  if (activeNodeId && activeNode) {
-    return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => setActiveNodeId(null)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900 hover:border-blue-200"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">{activeNode.name}</h2>
-            <p className="text-slate-500">Viewing {activeDimensions.length} fields in this category</p>
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3 pt-2">
+             <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="h-8 text-xs w-[160px] bg-white">
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {typeOptions.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select value={sortField} onValueChange={(value: DimensionSortField) => setSortField(value)}>
+              <SelectTrigger className="h-8 text-xs w-[140px] bg-white">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="updatedAt">Updated Date</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="usage">Usage Count</SelectItem>
+              </SelectContent>
+            </Select>
+
+             <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 text-xs text-slate-500"
+              onClick={() => {
+                setTypeFilter("all")
+                setSearch("")
+                setSortField("updatedAt")
+              }}
+            >
+              Reset Filters
+            </Button>
           </div>
         </div>
+      </div>
 
-        <Card className="border-slate-200 shadow-sm bg-white rounded-2xl overflow-hidden">
-          <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between bg-slate-50/50">
-             <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-               <Layers className="h-4 w-4" />
-               <span>Dimensions List</span>
-             </div>
-             <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search fields..." 
-                  className="h-9 w-64 rounded-lg border border-slate-200 bg-white pl-9 pr-4 text-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-50 transition-all"
-                />
-             </div>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {activeDimensions.length === 0 ? (
-              <div className="py-12 text-center text-slate-500">
-                No dimensions found in this category.
+      {/* Results Section */}
+      <div className="flex-1 overflow-auto p-8">
+        <div className="max-w-7xl mx-auto">
+          {filteredDimensions.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-xl border border-dashed border-slate-200">
+              <div className="bg-slate-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="h-8 w-8 text-slate-300" />
               </div>
-            ) : (
-              activeDimensions.map((dim) => (
-                <div 
+              <h3 className="text-lg font-medium text-slate-900">No dimensions found</h3>
+              <p className="text-slate-500 mt-1 max-w-sm mx-auto">
+                We couldn't find any dimensions matching your criteria. Try adjusting your search terms or filters.
+              </p>
+            </div>
+          ) : viewMode === 'card' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredDimensions.map(dim => (
+                <Card 
                   key={dim.id} 
-                  className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group cursor-pointer"
+                  className="group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col hover:border-blue-200"
                   onClick={() => handleDimensionClick(dim)}
                 >
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold text-slate-900 text-sm group-hover:text-blue-700 transition-colors">{dim.name}</span>
-                      <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600 uppercase tracking-wide">
+                  <CardHeader className="space-y-3 pb-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <CardTitle className="text-lg font-semibold leading-tight group-hover:text-blue-600 transition-colors truncate">
+                          {dim.name}
+                        </CardTitle>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+                          <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{dim.slug}</span>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant="secondary"
+                        className="shrink-0 bg-slate-100 text-slate-600 border-slate-200"
+                      >
                         {dim.type}
-                      </span>
+                      </Badge>
                     </div>
-                    {dim.description && (
-                      <p className="mt-1 text-xs text-slate-500 line-clamp-1">{dim.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-6 text-sm text-slate-400">
-                     {dim.values && dim.values.length > 0 && (
-                       <div className="hidden md:flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-md border border-slate-100 max-w-[200px]">
-                         <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Values:</span>
-                         <span className="text-xs text-slate-700 truncate">
-                           {dim.values.slice(0, 3).map(v => v.label).join(", ")}
-                           {dim.values.length > 3 && ` +${dim.values.length - 3}`}
-                         </span>
-                       </div>
-                     )}
-                     <span className="text-xs font-medium">{dim.values?.length ?? 0} values</span>
-                     <div className="flex gap-1 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-                       View details →
-                     </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </Card>
+                    <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10">
+                      {dim.description || "No description provided."}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="pb-4 flex-1">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        <Database className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="truncate">{dim.domain}</span>
+                      </div>
+                      
+                      <div className="flex items-end justify-between gap-2 pt-2">
+                        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
+                          <Share2 className="h-3 w-3 text-blue-500" />
+                          <span>{dim.boundMetricSlugs.length} Metrics</span>
+                        </div>
+                        
+                        {dim.values && dim.values.length > 0 && (
+                          <div className="text-[10px] text-slate-400">
+                            {dim.values.length} values
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
 
-        <DimensionDetailSheet 
-          open={isDetailSheetOpen} 
-          onOpenChange={setIsDetailSheetOpen} 
-          dimension={selectedDimension} 
-        />
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Dimensions</h2>
-          <p className="text-slate-500 mt-1">Organize and categorize your data fields</p>
+                  <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
+                    <span className="truncate max-w-[150px]">{dim.category ?? "Uncategorized"}</span>
+                    <span>{dim.updatedAt ? new Date(dim.updatedAt).toLocaleDateString() : "-"}</span>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="overflow-hidden border-slate-200 shadow-sm">
+              <Table>
+                <TableHeader className="bg-slate-50">
+                  <TableRow>
+                    <TableHead>Dimension Name</TableHead>
+                    <TableHead>Slug</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Domain</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Usage</TableHead>
+                    <TableHead className="text-right">Updated</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredDimensions.map((d) => (
+                    <TableRow 
+                      key={d.id} 
+                      className="cursor-pointer hover:bg-slate-50/80"
+                      onClick={() => handleDimensionClick(d)}
+                    >
+                      <TableCell className="font-medium text-slate-900">{d.name}</TableCell>
+                      <TableCell className="font-mono text-xs text-slate-500">{d.slug}</TableCell>
+                      <TableCell>
+                         <Badge 
+                          variant="secondary" 
+                          className="text-[10px] bg-slate-100 text-slate-600 border-slate-200"
+                        >
+                          {d.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-600">{d.domain}</TableCell>
+                      <TableCell className="text-xs text-slate-600">{d.category ?? "-"}</TableCell>
+                      <TableCell className="text-xs text-slate-600">{d.boundMetricSlugs.length} metrics</TableCell>
+                      <TableCell className="text-xs text-slate-500 text-right">{d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
         </div>
-        <button className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all">
-          <Plus className="h-4 w-4" />
-          Create Dimension
-        </button>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {categories.map((category) => (
-          <Card 
-            key={category.id} 
-            className="group relative overflow-hidden rounded-2xl border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-blue-900/5 hover:border-blue-200 hover:-translate-y-1 cursor-pointer"
-            onClick={() => setActiveNodeId(category.id)}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
-                    <Folder className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors">{category.name}</h3>
-                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider mt-1 ${category.badgeColor}`}>
-                      {category.badge}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-sm text-slate-500 mb-6 line-clamp-2 h-10 leading-relaxed">
-                {category.description}
-              </p>
-
-              <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                <div className="flex items-center gap-2 text-slate-500">
-                  <Tag className="h-3.5 w-3.5" />
-                  <span className="text-xs font-medium">{category.totalFields} fields</span>
-                </div>
-                <button className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors group-hover:translate-x-1">
-                  View Fields
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       <DimensionDetailSheet 
@@ -242,17 +299,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       />
     </div>
   )
-}
-
-function getDescriptionForCategory(name: string): string {
-  const lower = name.toLowerCase()
-  if (lower.includes("user")) return "Fields related to user information, profiles, and account settings."
-  if (lower.includes("product")) return "Product catalog, inventory status, and SKU details."
-  if (lower.includes("order")) return "Order processing, shipping tracking, and fulfillment data."
-  if (lower.includes("pay")) return "Payment methods, transaction history, and billing records."
-  if (lower.includes("analytic")) return "Key performance indicators, usage metrics, and analytics tracking."
-  if (lower.includes("meta")) return "System-level metadata, timestamps, and version control info."
-  return "General data fields and dimensions for this category."
 }
 
 interface DimensionDetailSheetProps {
