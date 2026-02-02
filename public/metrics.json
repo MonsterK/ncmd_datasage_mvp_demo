@@ -2,11 +2,11 @@
   "metrics": [
     {
       "id": "m1",
-      "businessName": "SGI Payout",
-      "slug": "sgi_payout",
+      "businessName": "S++ Revenue",
+      "slug": "spp_revenue",
       "categoryPath": ["Monetization", "Revenue", "SGI"],
-      "businessDefinition": "Total SGI payout amount for qualifying agencies within the selected period.",
-      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) AS sgi_payout FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
+      "businessDefinition": "Total S++ revenue for qualifying agencies within the selected period.",
+      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) AS spp_revenue FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
       "status": "Active",
       "domain": "SGI",
       "owners": {
@@ -45,7 +45,23 @@
         { "label": "Agency B", "value": 33 },
         { "label": "Agency C", "value": 25 }
       ],
-      "boundDimensionSlugs": ["agency", "region", "platform"]
+      "boundDimensionSlugs": ["agency", "region", "platform"],
+      "history": [
+        {
+          "version": "v1.0",
+          "editor": "Alice (Data Eng)",
+          "timestamp": "2025-12-15T10:00:00Z",
+          "action": "create",
+          "comment": "Initial registration"
+        },
+        {
+          "version": "v1.1",
+          "editor": "Bob (PM)",
+          "timestamp": "2026-01-10T14:30:00Z",
+          "action": "update",
+          "comment": "Updated business definition"
+        }
+      ]
     },
     {
       "id": "m2",
@@ -92,7 +108,16 @@
         { "label": "Europe", "value": 30 },
         { "label": "APAC", "value": 15 }
       ],
-      "boundDimensionSlugs": ["region", "vertical"]
+      "boundDimensionSlugs": ["region", "vertical"],
+      "history": [
+        {
+          "version": "v1.0",
+          "editor": "Charlie (Data Steward)",
+          "timestamp": "2025-11-01T09:00:00Z",
+          "action": "create",
+          "comment": "Imported from legacy system"
+        }
+      ]
     },
     {
       "id": "m3",
@@ -139,15 +164,24 @@
         { "label": "Live Streaming", "value": 25 },
         { "label": "Other", "value": 15 }
       ],
-      "boundDimensionSlugs": ["platform", "region"]
+      "boundDimensionSlugs": ["platform", "region"],
+      "history": [
+        {
+          "version": "v0.1",
+          "editor": "Dave (Analyst)",
+          "timestamp": "2025-12-01T11:00:00Z",
+          "action": "create",
+          "comment": "Draft definition"
+        }
+      ]
     },
     {
       "id": "m4",
-      "businessName": "SGI Payout per Agency",
-      "slug": "sgi_payout_per_agency",
+      "businessName": "S++ Revenue Penetration",
+      "slug": "spp_revenue_penetration",
       "categoryPath": ["Monetization", "Revenue", "SGI"],
-      "businessDefinition": "Average SGI payout per active agency in the selected period.",
-      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / COUNT(DISTINCT agency_id) AS sgi_payout_per_agency FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
+      "businessDefinition": "S++ Revenue as a percentage of Total Revenue (or similar penetration logic).",
+      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / SUM(total_revenue) AS spp_revenue_penetration FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
       "status": "Draft",
       "domain": "SGI",
       "owners": {
@@ -170,23 +204,32 @@
         }
       ],
       "trend30d": [
-        { "date": "2026-01-01", "value": 10 },
-        { "date": "2026-01-02", "value": 11 },
-        { "date": "2026-01-03", "value": 10 },
-        { "date": "2026-01-04", "value": 12 },
-        { "date": "2026-01-05", "value": 12 },
-        { "date": "2026-01-06", "value": 13 },
-        { "date": "2026-01-07", "value": 13 },
-        { "date": "2026-01-08", "value": 14 },
-        { "date": "2026-01-09", "value": 15 },
-        { "date": "2026-01-10", "value": 15 }
+        { "date": "2026-01-01", "value": 0.10 },
+        { "date": "2026-01-02", "value": 0.11 },
+        { "date": "2026-01-03", "value": 0.10 },
+        { "date": "2026-01-04", "value": 0.12 },
+        { "date": "2026-01-05", "value": 0.12 },
+        { "date": "2026-01-06", "value": 0.13 },
+        { "date": "2026-01-07", "value": 0.13 },
+        { "date": "2026-01-08", "value": 0.14 },
+        { "date": "2026-01-09", "value": 0.15 },
+        { "date": "2026-01-10", "value": 0.15 }
       ],
       "topDimensions": [
-        { "label": "Agency A", "value": 15 },
-        { "label": "Agency B", "value": 12 },
-        { "label": "Agency C", "value": 8 }
+        { "label": "Agency A", "value": 0.15 },
+        { "label": "Agency B", "value": 0.12 },
+        { "label": "Agency C", "value": 0.08 }
       ],
-      "boundDimensionSlugs": ["agency", "region"]
+      "boundDimensionSlugs": ["agency", "region"],
+      "history": [
+        {
+          "version": "v1.0",
+          "editor": "Alice (Data Eng)",
+          "timestamp": "2025-12-20T10:00:00Z",
+          "action": "create",
+          "comment": "Initial draft"
+        }
+      ]
     },
     {
       "id": "m5",
@@ -233,7 +276,72 @@
         { "label": "Live Streaming", "value": 25 },
         { "label": "Other", "value": 10 }
       ],
-      "boundDimensionSlugs": ["platform", "region", "vertical"]
+      "boundDimensionSlugs": ["platform", "region", "vertical"],
+      "history": [
+        {
+          "version": "v1.0",
+          "editor": "Eve (PM)",
+          "timestamp": "2025-12-10T14:00:00Z",
+          "action": "create",
+          "comment": "Metric launch"
+        }
+      ]
+    },
+    {
+      "id": "m6",
+      "businessName": "NA S++ Revenue Penetration",
+      "slug": "na_spp_revenue_penetration",
+      "categoryPath": ["Monetization", "Revenue", "SGI"],
+      "businessDefinition": "S++ Revenue Penetration for North America region.",
+      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / SUM(total_revenue) AS na_spp_revenue_penetration FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date AND region = 'NA' GROUP BY biz_date",
+      "status": "Active",
+      "domain": "SGI",
+      "owners": {
+        "businessOwner": "Monetization Strategy (NA)",
+        "techOwner": "Ads Data Engineering"
+      },
+      "createdAt": "2026-01-20T00:00:00Z",
+      "updatedAt": "2026-01-20T00:00:00Z",
+      "heat": 45,
+      "queryDefinitions": [
+        {
+          "id": "q6",
+          "type": "Aeolus Visual Query",
+          "source": "fabric_sgi_payout_daily",
+          "originField": "payout_amount",
+          "aggregate": "AVG_BY_AGENCY",
+          "businessDate": "biz_date",
+          "filters": ["product_line = 'Ads'", "region = 'NA'"],
+          "analysisDimensions": ["agency"]
+        }
+      ],
+      "trend30d": [
+        { "date": "2026-01-01", "value": 0.12 },
+        { "date": "2026-01-02", "value": 0.13 },
+        { "date": "2026-01-03", "value": 0.11 },
+        { "date": "2026-01-04", "value": 0.14 },
+        { "date": "2026-01-05", "value": 0.15 },
+        { "date": "2026-01-06", "value": 0.16 },
+        { "date": "2026-01-07", "value": 0.16 },
+        { "date": "2026-01-08", "value": 0.17 },
+        { "date": "2026-01-09", "value": 0.18 },
+        { "date": "2026-01-10", "value": 0.18 }
+      ],
+      "topDimensions": [
+        { "label": "Agency A", "value": 0.20 },
+        { "label": "Agency B", "value": 0.15 },
+        { "label": "Agency C", "value": 0.10 }
+      ],
+      "boundDimensionSlugs": ["agency"],
+      "history": [
+        {
+          "version": "v1.0",
+          "editor": "Alice (Data Eng)",
+          "timestamp": "2026-01-20T10:00:00Z",
+          "action": "create",
+          "comment": "Derived from S++ Revenue Penetration for NA market"
+        }
+      ]
     }
   ]
 }

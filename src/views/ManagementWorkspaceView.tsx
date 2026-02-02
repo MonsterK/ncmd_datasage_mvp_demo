@@ -641,6 +641,7 @@ export function ManagementWorkspaceView({
           }}
           metricSet={metricSetToView}
           metrics={metrics}
+          dimensions={dimensions}
         />
       )}
 
@@ -1570,13 +1571,31 @@ interface MetricSetDetailSheetProps {
   onOpenChange: (open: boolean) => void
   metricSet: Album
   metrics: Metric[]
+  dimensions: Dimension[]
 }
 
-function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics }: MetricSetDetailSheetProps) {
-  const metricsInSet = useMemo(
-    () => metrics.filter((m) => metricSet.metricSlugs.includes(m.slug)),
-    [metrics, metricSet],
-  )
+function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensions }: MetricSetDetailSheetProps) {
+  const metricsInSet = useMemo(() => {
+    return metricSet.metricRefs.map((ref) => {
+      const metric = metrics.find((m) => m.slug === ref.slug)
+      return {
+        ...metric,
+        refVersion: ref.version,
+        slug: ref.slug, // ensure slug exists even if metric not found
+      }
+    })
+  }, [metrics, metricSet])
+
+  const dimensionsInSet = useMemo(() => {
+    return metricSet.dimensionRefs.map((ref) => {
+      const dimension = dimensions.find((d) => d.slug === ref.slug)
+      return {
+        ...dimension,
+        refVersion: ref.version,
+        slug: ref.slug,
+      }
+    })
+  }, [dimensions, metricSet])
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -1584,7 +1603,7 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics }: Metric
         <SheetHeader>
           <SheetTitle className="text-sm font-semibold">Metric set details</SheetTitle>
         </SheetHeader>
-        <div className="mt-4 space-y-4 pb-6 text-xs">
+        <div className="mt-4 space-y-6 pb-6 text-xs">
           <div className="space-y-1">
             <p className="text-sm font-semibold text-zinc-900">{metricSet.name}</p>
             <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
@@ -1597,9 +1616,9 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics }: Metric
             )}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="text-xs font-semibold text-zinc-800">
-              Metrics in this set ({metricSet.metricSlugs.length})
+              Metrics ({metricsInSet.length})
             </p>
             {metricsInSet.length > 0 ? (
               <Table>
@@ -1607,20 +1626,26 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics }: Metric
                   <TableRow>
                     <TableHead className="text-xs">Name</TableHead>
                     <TableHead className="text-xs">Slug</TableHead>
-                    <TableHead className="text-xs">Domain</TableHead>
+                    <TableHead className="text-xs">Version</TableHead>
                     <TableHead className="text-xs">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {metricsInSet.map((m) => (
-                    <TableRow key={m.id} className="hover:bg-zinc-50">
-                      <TableCell className="text-xs font-medium text-zinc-900">{m.businessName}</TableCell>
+                    <TableRow key={m.slug} className="hover:bg-zinc-50">
+                      <TableCell className="text-xs font-medium text-zinc-900">{m.businessName ?? "-"}</TableCell>
                       <TableCell className="font-mono text-[11px] text-zinc-500">{m.slug}</TableCell>
-                      <TableCell className="text-xs text-zinc-700">{m.domain}</TableCell>
-                      <TableCell className="text-xs">
-                        <Badge variant="outline" className="text-[10px]">
-                          {m.status}
+                      <TableCell className="text-xs text-zinc-700">
+                        <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 font-mono">
+                          {m.refVersion ?? "latest"}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {m.status && (
+                          <Badge variant="outline" className="text-[10px]">
+                            {m.status}
+                          </Badge>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -1629,6 +1654,48 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics }: Metric
             ) : (
               <p className="text-[11px] text-zinc-500">
                 No metrics from the registry are currently mapped to this metric set.
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-zinc-800">
+              Dimensions ({dimensionsInSet.length})
+            </p>
+            {dimensionsInSet.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs">Name</TableHead>
+                    <TableHead className="text-xs">Slug</TableHead>
+                    <TableHead className="text-xs">Version</TableHead>
+                    <TableHead className="text-xs">Type</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dimensionsInSet.map((d) => (
+                    <TableRow key={d.slug} className="hover:bg-zinc-50">
+                      <TableCell className="text-xs font-medium text-zinc-900">{d.name ?? "-"}</TableCell>
+                      <TableCell className="font-mono text-[11px] text-zinc-500">{d.slug}</TableCell>
+                      <TableCell className="text-xs text-zinc-700">
+                        <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 font-mono">
+                          {d.refVersion ?? "latest"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {d.type && (
+                          <Badge variant="outline" className="text-[10px]">
+                            {d.type}
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-[11px] text-zinc-500">
+                No dimensions mapped to this metric set.
               </p>
             )}
           </div>

@@ -15,7 +15,16 @@
         { "code": "AGENCY_B", "label": "Agency B" },
         { "code": "AGENCY_C", "label": "Agency C" }
       ],
-      "boundMetricSlugs": ["sgi_payout", "sgi_payout_per_agency"]
+      "boundMetricSlugs": ["spp_revenue", "spp_revenue_penetration", "na_spp_revenue_penetration"],
+      "history": [
+        {
+          "version": "v1",
+          "editor": "System",
+          "timestamp": "2025-01-01T00:00:00Z",
+          "action": "create",
+          "comment": "Initial import"
+        }
+      ]
     },
     {
       "id": "d2",
@@ -32,7 +41,23 @@
         { "code": "EU", "label": "Europe" },
         { "code": "APAC", "label": "Asia Pacific" }
       ],
-      "boundMetricSlugs": ["sgi_payout", "qbr_revenue", "active_monetized_creators", "sgi_payout_per_agency", "creator_rev_per_creator"]
+      "boundMetricSlugs": ["spp_revenue", "qbr_revenue", "active_monetized_creators", "spp_revenue_penetration", "creator_rev_per_creator"],
+      "history": [
+        {
+          "version": "v1",
+          "editor": "System",
+          "timestamp": "2025-01-01T00:00:00Z",
+          "action": "create",
+          "comment": "Initial import"
+        },
+        {
+          "version": "v2",
+          "editor": "Alice (Data Eng)",
+          "timestamp": "2025-06-01T00:00:00Z",
+          "action": "update",
+          "comment": "Added hierarchy levels"
+        }
+      ]
     },
     {
       "id": "d3",
@@ -49,7 +74,16 @@
         { "code": "LIVE", "label": "Live Streaming" },
         { "code": "OTHER", "label": "Other" }
       ],
-      "boundMetricSlugs": ["active_monetized_creators", "creator_rev_per_creator"]
+      "boundMetricSlugs": ["active_monetized_creators", "creator_rev_per_creator"],
+      "history": [
+        {
+          "version": "v1",
+          "editor": "System",
+          "timestamp": "2025-01-01T00:00:00Z",
+          "action": "create",
+          "comment": "Initial import"
+        }
+      ]
     },
     {
       "id": "d4",
@@ -66,7 +100,16 @@
         { "code": "GAMING", "label": "Gaming" },
         { "code": "BRAND", "label": "Brand" }
       ],
-      "boundMetricSlugs": ["qbr_revenue", "creator_rev_per_creator"]
+      "boundMetricSlugs": ["qbr_revenue", "creator_rev_per_creator"],
+      "history": [
+        {
+          "version": "v1",
+          "editor": "System",
+          "timestamp": "2025-01-01T00:00:00Z",
+          "action": "create",
+          "comment": "Initial import"
+        }
+      ]
     }
   ]
 }

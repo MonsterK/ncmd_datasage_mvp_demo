@@ -2,12 +2,22 @@
   "metricSets": [
     {
       "id": "ms1",
-      "name": "SGI Core Metrics",
-      "description": "Core SGI payout metrics used for incentive performance tracking.",
+      "name": "2026H1 NA SGI",
+      "description": "Core SGI payout metrics used for incentive performance tracking in North America.",
       "scope": "SGI",
       "visibility": "team",
       "domain": "SGI",
-      "metricSlugs": ["sgi_payout", "sgi_payout_per_agency"]
+      "metricRefs": [
+        { "slug": "spp_revenue", "version": "v1.1" },
+        { "slug": "spp_revenue_penetration", "version": "v1.0" },
+        { "slug": "na_spp_revenue_penetration", "version": "v1.0" }
+      ],
+      "dimensionRefs": [
+        { "slug": "agency", "version": "v1" },
+        { "slug": "region", "version": "v2" }
+      ],
+      "metricSlugs": ["spp_revenue", "spp_revenue_penetration", "na_spp_revenue_penetration"],
+      "tags": ["tag-na"]
     },
     {
       "id": "ms2",
@@ -16,7 +26,12 @@
       "scope": "QBR",
       "visibility": "team",
       "domain": "QBR",
-      "metricSlugs": ["qbr_revenue"]
+      "metricRefs": [
+        { "slug": "qbr_revenue", "version": "v1.0" }
+      ],
+      "dimensionRefs": [],
+      "metricSlugs": ["qbr_revenue"],
+      "tags": []
     },
     {
       "id": "ms3",
@@ -25,7 +40,13 @@
       "scope": "Creator",
       "visibility": "team",
       "domain": "Creator",
-      "metricSlugs": ["active_monetized_creators", "creator_rev_per_creator"]
+      "metricRefs": [
+        { "slug": "active_monetized_creators", "version": "v0.1" },
+        { "slug": "creator_rev_per_creator", "version": "v1.0" }
+      ],
+      "dimensionRefs": [],
+      "metricSlugs": ["active_monetized_creators", "creator_rev_per_creator"],
+      "tags": []
     },
     {
       "id": "ms4",
@@ -34,7 +55,13 @@
       "scope": "SGI/QBR",
       "visibility": "team",
       "domain": "QBR",
-      "metricSlugs": ["sgi_payout", "qbr_revenue"]
+      "metricRefs": [
+        { "slug": "spp_revenue", "version": "v1.1" },
+        { "slug": "qbr_revenue", "version": "v1.0" }
+      ],
+      "dimensionRefs": [],
+      "metricSlugs": ["spp_revenue", "qbr_revenue"],
+      "tags": []
     },
     {
       "id": "ms5",
@@ -43,7 +70,13 @@
       "scope": "Creator",
       "visibility": "team",
       "domain": "Creator",
-      "metricSlugs": ["active_monetized_creators", "creator_rev_per_creator"]
+      "metricRefs": [
+        { "slug": "active_monetized_creators", "version": "v0.1" },
+        { "slug": "creator_rev_per_creator", "version": "v1.0" }
+      ],
+      "dimensionRefs": [],
+      "metricSlugs": ["active_monetized_creators", "creator_rev_per_creator"],
+      "tags": []
     }
   ]
 }

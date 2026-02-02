@@ -42,6 +42,15 @@ export interface Metric {
   updatedAt?: string
   heat?: number
   larkSheetLink?: string
+  history?: ChangeLog[]
+}
+
+export interface ChangeLog {
+  version: string
+  editor: string
+  timestamp: string
+  action: "create" | "update" | "delete"
+  comment?: string
 }
 
 export interface DimensionValue {
@@ -65,11 +74,17 @@ export interface Dimension {
   sourceLink?: string
   createdAt?: string
   updatedAt?: string
+  history?: ChangeLog[]
 }
 
 export interface Tag {
   id: string
   name: string
+}
+
+export interface AlbumRef {
+  slug: string
+  version?: string
 }
 
 export interface Album {
@@ -79,7 +94,9 @@ export interface Album {
   scope: string
   visibility: "team" | "private"
   domain: string
-  metricSlugs: string[]
+  metricRefs: AlbumRef[]
+  dimensionRefs: AlbumRef[]
+  metricSlugs?: string[] // Deprecated, kept for backward compatibility if needed, but we should migrate
   tags: string[]
   createdAt?: string
   updatedAt?: string

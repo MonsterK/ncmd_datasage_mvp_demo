@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DimensionTreeNode, Dimension } from "@/types"
-import { Folder, Tag, Plus, ArrowLeft, Search, Layers, Flame, FileText, Share2, ArrowRight } from "lucide-react"
+import { Folder, Tag, Plus, ArrowLeft, Search, Layers, Flame, FileText, Share2, ArrowRight, History } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
 export interface DimensionsWorkspaceViewProps {
@@ -340,6 +340,37 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                   No metrics are currently bound to this dimension.
                 </div>
               )}
+           </div>
+
+           {/* History */}
+           <div className="space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <History className="h-4 w-4 text-purple-500" />
+                Version History
+              </h3>
+              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden p-4">
+                  <div className="space-y-4">
+                    {dimension.history?.map((log, i) => (
+                        <div key={i} className="flex gap-3 text-xs">
+                            <div className="min-w-[30px] pt-1 flex flex-col items-center">
+                                <div className="h-1.5 w-1.5 rounded-full bg-purple-500 ring-2 ring-purple-50"></div>
+                                {i !== (dimension.history?.length ?? 0) - 1 && <div className="w-px h-full bg-slate-100 my-1"></div>}
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                    <span className="font-bold text-slate-900">{log.version}</span>
+                                    <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleDateString()}</span>
+                                </div>
+                                <div className="text-slate-600">
+                                    <span className="font-medium text-slate-800 mr-1">{log.editor}</span>
+                                    <span>{log.action}d this dimension.</span>
+                                </div>
+                                {log.comment && <p className="text-slate-500 italic mt-0.5">"{log.comment}"</p>}
+                            </div>
+                        </div>
+                    )) ?? <p className="text-slate-400 italic">No history available.</p>}
+                  </div>
+              </div>
            </div>
         </div>
       </SheetContent>

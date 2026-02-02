@@ -252,6 +252,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
                     <TabsList className="h-7 bg-slate-200/50 p-0.5 rounded-lg">
                     <TabsTrigger value="lineage" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Lineage</TabsTrigger>
                     <TabsTrigger value="knowledge" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Knowledge</TabsTrigger>
+                    <TabsTrigger value="history" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">History</TabsTrigger>
                     </TabsList>
                 </div>
                 <CardContent className="p-4">
@@ -266,6 +267,33 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
                             <li>Runbooks explaining how to debug data issues for this metric.</li>
                             <li>Business guidelines on how to interpret trends and thresholds.</li>
                         </ul>
+                    </TabsContent>
+                    <TabsContent value="history" className="mt-0">
+                        <div className="space-y-3">
+                            {metric.history?.map((log, i) => (
+                                <div key={i} className="flex gap-3 text-xs">
+                                    <div className="min-w-[40px] pt-0.5 flex flex-col items-center">
+                                        <div className="h-2 w-2 rounded-full bg-blue-500 ring-4 ring-blue-50"></div>
+                                        {i !== (metric.history?.length ?? 0) - 1 && <div className="w-px h-full bg-slate-200 my-1"></div>}
+                                    </div>
+                                    <div className="flex-1 pb-4">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="font-bold text-slate-900">{log.version}</span>
+                                            <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleString()}</span>
+                                        </div>
+                                        <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Badge variant="outline" className="text-[9px] bg-white px-1.5 py-0 h-4">
+                                                    {log.action}
+                                                </Badge>
+                                                <span className="font-medium text-slate-700">{log.editor}</span>
+                                            </div>
+                                            {log.comment && <p className="text-slate-600 italic">"{log.comment}"</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            )) ?? <p className="text-slate-400 italic">No history available.</p>}
+                        </div>
                     </TabsContent>
                 </CardContent>
               </Tabs>

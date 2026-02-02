@@ -172,6 +172,15 @@ function App() {
       createdAt: nowIso,
       updatedAt: nowIso,
       heat: 0,
+      history: [
+        {
+          version: "v1",
+          editor: "Current User",
+          timestamp: nowIso,
+          action: "create",
+          comment: "Initial registration via UI",
+        },
+      ],
     }
 
     setData((prev) => ({
@@ -265,6 +274,15 @@ function App() {
         createdAt: nowIso,
         updatedAt: nowIso,
         heat: 0,
+        history: [
+          {
+            version: "v1",
+            editor: "Current User",
+            timestamp: nowIso,
+            action: "create",
+            comment: "Derived metric creation",
+          },
+        ],
       }
     } else {
       const other = data.metrics.find((m) => m.slug === spec.otherMetricSlug && m.domain === base.domain)
@@ -323,6 +341,15 @@ function App() {
         createdAt: nowIso,
         updatedAt: nowIso,
         heat: 0,
+        history: [
+          {
+            version: "v1",
+            editor: "Current User",
+            timestamp: nowIso,
+            action: "create",
+            comment: "Derived metric creation",
+          },
+        ],
       }
     }
 
@@ -396,6 +423,15 @@ function App() {
       sourceLink: payload.sourceLink,
       createdAt: nowIso,
       updatedAt: nowIso,
+      history: [
+        {
+          version: "v1",
+          editor: "Current User",
+          timestamp: nowIso,
+          action: "create",
+          comment: "Initial creation via UI",
+        },
+      ],
     }
 
     setData((prev) => ({
@@ -436,6 +472,16 @@ function App() {
           ],
           boundDimensionSlugs: payload.query.analysisDimensions,
           updatedAt: nowIso,
+          history: [
+            ...(m.history ?? []),
+            {
+              version: `v${(m.history?.length ?? 0) + 1}`,
+              editor: "Current User",
+              timestamp: nowIso,
+              action: "update",
+              comment: "Update via UI",
+            },
+          ],
         }
       }),
     }))
@@ -451,10 +497,11 @@ function App() {
       })),
     }))
 
-    setMetricSetsState((prevSets) =>
+      setMetricSetsState((prevSets) =>
       prevSets.map((set) => ({
         ...set,
-        metricSlugs: set.metricSlugs.filter((s) => s !== slug),
+        metricRefs: set.metricRefs.filter((ref) => ref.slug !== slug),
+        metricSlugs: set.metricSlugs ? set.metricSlugs.filter((s) => s !== slug) : [],
       })),
     )
   }
@@ -480,6 +527,16 @@ function App() {
               category: payload.category,
               sourceLink: payload.sourceLink,
               updatedAt: nowIso,
+              history: [
+                ...(d.history ?? []),
+                {
+                  version: `v${(d.history?.length ?? 0) + 1}`,
+                  editor: "Current User",
+                  timestamp: nowIso,
+                  action: "update",
+                  comment: "Update via UI",
+                },
+              ],
             }
           : d,
       ),
@@ -506,7 +563,7 @@ function App() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563eb] text-white shadow-lg shadow-blue-200">
                 <LineChart className="h-5 w-5" />
               </div>
               <div className="flex flex-col">
