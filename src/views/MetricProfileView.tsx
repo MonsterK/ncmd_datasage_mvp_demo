@@ -81,7 +81,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
         </CardHeader>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+      <div className="grid gap-6">
         <Card className="border-slate-200 shadow-sm rounded-2xl h-fit">
           <CardHeader className="pb-3 border-b border-slate-50">
             <CardTitle className="text-sm font-bold text-slate-900">Definition</CardTitle>
