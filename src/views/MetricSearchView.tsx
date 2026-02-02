@@ -352,7 +352,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
 
                   <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
                     <span className="truncate max-w-[150px]">{metric.categoryPath.join(" › ")}</span>
-                    <span>{new Date(metric.updatedAt).toLocaleDateString()}</span>
+                    <span>{metric.updatedAt ? new Date(metric.updatedAt).toLocaleDateString() : "-"}</span>
                   </CardFooter>
                 </Card>
               ))}
@@ -406,7 +406,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                           {m.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500 text-right">{new Date(m.updatedAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-xs text-slate-500 text-right">{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : "-"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
