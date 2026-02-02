@@ -252,7 +252,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
                     <TabsList className="h-7 bg-slate-200/50 p-0.5 rounded-lg">
                     <TabsTrigger value="lineage" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Lineage</TabsTrigger>
                     <TabsTrigger value="knowledge" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Knowledge</TabsTrigger>
-                    <TabsTrigger value="history" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">History</TabsTrigger>
+                    <TabsTrigger value="history" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Version History</TabsTrigger>
                     </TabsList>
                 </div>
                 <CardContent className="p-4">
