@@ -148,18 +148,12 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700">Category</label>
-              <Select value={categoryPathStr} onValueChange={setCategoryPathStr}>
-                <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
-                  <SelectValue placeholder="Select a category path" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoryOptions.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CategoryTreeSelect
+                categories={categories}
+                value={categoryPathStr ? categoryPathStr.split(" > ") : []}
+                onChange={(path) => setCategoryPathStr(path.join(" > "))}
+                placeholder="Select a category path"
+              />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700">Business name</label>
