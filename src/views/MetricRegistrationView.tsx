@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 
 import { NewMetricPayload, CategoryNode, Metric } from "@/types"
 import { normalizeFilters, normalizeDimensions } from "@/lib/utils"
@@ -151,7 +152,7 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
               <CategoryTreeSelect
                 categories={categories}
                 value={categoryPathStr ? categoryPathStr.split(" > ") : []}
-                onChange={(path) => setCategoryPathStr(path.join(" > "))}
+                onChange={(path: string[]) => setCategoryPathStr(path.join(" > "))}
                 placeholder="Select a category path"
               />
             </div>
