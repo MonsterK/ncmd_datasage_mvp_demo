@@ -1949,7 +1949,7 @@ function CategoryManagementView({ categories, metrics }: CategoryManagementViewP
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-slate-900">Category tree</CardTitle>
             <CardDescription className="text-xs text-slate-500">
-              Static category tree from mock JSON (Monetization &gt; Revenue &gt; SGI / QBR, Supply &gt; Creators).
+              Static category tree from mock JSON (max depth: 3 levels).
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -2023,7 +2023,7 @@ function CategoryTree({ nodes, metrics, depth }: CategoryTreeProps) {
             {metricNames.length > 0 && (
               <div className="ml-5 text-[11px] text-slate-500">{metricNames.join(", ")}</div>
             )}
-            {node.children && node.children.length > 0 && (
+            {node.children && node.children.length > 0 && depth < 2 && (
               <CategoryTree nodes={node.children} metrics={metrics} depth={depth + 1} />
             )}
           </li>
