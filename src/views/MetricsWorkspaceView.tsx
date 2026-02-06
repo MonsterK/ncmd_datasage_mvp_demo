@@ -21,7 +21,7 @@ import { Flame, Search, Filter, ArrowUpDown } from "lucide-react"
 import type {
   Metric,
   Album,
-  Domain,
+  Tenant,
   DimensionTreeNode,
   Dimension,
   CategoryNode,
@@ -41,12 +41,12 @@ import { NewMetricSheet, NewMetricSetSheet, NewDimensionSheet } from "@/views/Ma
 export interface MetricsWorkspaceViewProps {
   metrics: Metric[]
   metricSets: Album[]
-  domains: Domain[]
+  tenants: Tenant[]
   dimensionTree: DimensionTreeNode[]
   dimensions: Dimension[]
   categories: CategoryNode[]
-  activeGlobalDomainId: string | null
-  onOpenMetric: (slug: string) => void
+  activeGlobalTenantId: string | null
+  onOpenMetric: (fieldName: string) => void
   onRegisterMetric: (payload: NewMetricPayload) => void
   onMetricSetsChange: (sets: Album[]) => void
   onCreateDimension: (payload: {
@@ -69,11 +69,11 @@ function getMetricSetTimestamp(metricSet: Album, key: "createdAt" | "updatedAt")
 export function MetricsWorkspaceView({
   metrics,
   metricSets,
-  domains,
+  tenants,
   dimensionTree,
   dimensions,
   categories,
-  activeGlobalDomainId,
+  activeGlobalTenantId,
   onOpenMetric,
   onRegisterMetric,
   onMetricSetsChange,
@@ -81,7 +81,7 @@ export function MetricsWorkspaceView({
   tags,
 }: MetricsWorkspaceViewProps) {
 
-  const selectedDomainId = activeGlobalDomainId
+  const selectedTenantId = activeGlobalTenantId
 
   const [selectedMetricSetId, setSelectedMetricSetId] = useState<string | null>(null)
   const [workspaceMode, setWorkspaceMode] = useState<"metricSets" | "metrics" | "dimensions">("metricSets")
@@ -91,19 +91,19 @@ export function MetricsWorkspaceView({
   const [isNewMetricSheetOpen, setIsNewMetricSheetOpen] = useState(false)
   const [isNewMetricSetSheetOpen, setIsNewMetricSetSheetOpen] = useState(false)
   const [isNewDimensionSheetOpen, setIsNewDimensionSheetOpen] = useState(false)
-  const [selectedSlugsForQuery, setSelectedSlugsForQuery] = useState<string[]>([])
+  const [selectedFieldNamesForQuery, setSelectedFieldNamesForQuery] = useState<string[]>([])
   const [isCombinedQuerySheetOpen, setIsCombinedQuerySheetOpen] = useState(false)
   const [isAddToMetricSetSheetOpen, setIsAddToMetricSetSheetOpen] = useState(false)
-  const [selectedSlugsForAddToMetricSet, setSelectedSlugsForAddToMetricSet] = useState<string[]>([])
+  const [selectedFieldNamesForAddToMetricSet, setSelectedFieldNamesForAddToMetricSet] = useState<string[]>([])
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
 
-  const metricSetsForDomain = useMemo(() => {
-    if (!selectedDomainId) return metricSets
-    return metricSets.filter((set) => set.domain === selectedDomainId)
-  }, [metricSets, selectedDomainId])
+  const metricSetsForTenant = useMemo(() => {
+    if (!selectedTenantId) return metricSets
+    return metricSets.filter((set) => set.tenant === selectedTenantId)
+  }, [metricSets, selectedTenantId])
 
   const filteredSets = useMemo(() => {
-    let result = metricSetsForDomain
+    let result = metricSetsForTenant
 
     const q = metricSetSearch.toLowerCase().trim()
     if (q) {
@@ -124,7 +124,7 @@ export function MetricsWorkspaceView({
     })
 
     return sorted
-  }, [metricSetsForDomain, metricSetSearch, metricSetSortField, metricSetSortDirection, selectedTagIds])
+  }, [metricSetsForTenant, metricSetSearch, metricSetSortField, metricSetSortDirection, selectedTagIds])
 
   const selectedMetricSet = useMemo(() => {
     if (!selectedMetricSetId) return null
@@ -138,7 +138,7 @@ export function MetricsWorkspaceView({
     if (selectedMetricSet.metricRefs && selectedMetricSet.metricRefs.length > 0) {
       return selectedMetricSet.metricRefs
         .map(ref => {
-          const metric = metrics.find(m => m.slug === ref.slug)
+          const metric = metrics.find(m => m.fieldName === ref.fieldName)
           if (!metric) return null
           // Attach _refVersion for display
           return { ...metric, _refVersion: ref.version }
@@ -146,46 +146,46 @@ export function MetricsWorkspaceView({
         .filter(m => m !== null) as (Metric & { _refVersion?: string })[]
     }
     
-    return metrics.filter((m) => (selectedMetricSet.metricSlugs ?? []).includes(m.slug))
+    return metrics.filter((m) => (selectedMetricSet.metricFieldNames ?? []).includes(m.fieldName))
   }, [metrics, selectedMetricSet])
 
-  const metricsForDomain = useMemo(() => {
-    if (!selectedDomainId) return metrics
-    return metrics.filter((m) => m.domain === selectedDomainId)
-  }, [metrics, selectedDomainId])
+  const metricsForTenant = useMemo(() => {
+    if (!selectedTenantId) return metrics
+    return metrics.filter((m) => m.tenant === selectedTenantId)
+  }, [metrics, selectedTenantId])
 
-  const metricSlugsForSelectedTags = useMemo(() => {
+  const metricFieldNamesForSelectedTags = useMemo(() => {
     if (!selectedTagIds.length) return null
-    const setsInDomain = selectedDomainId ? metricSets.filter((set) => set.domain === selectedDomainId) : metricSets
-    const slugs = new Set<string>()
-    setsInDomain.forEach((set) => {
+    const setsInTenant = selectedTenantId ? metricSets.filter((set) => set.tenant === selectedTenantId) : metricSets
+    const fieldNames = new Set<string>()
+    setsInTenant.forEach((set) => {
       if (!set.tags || set.tags.length === 0) return
       if (set.tags.some((tagId) => selectedTagIds.includes(tagId))) {
-        (set.metricSlugs ?? []).forEach((slug) => slugs.add(slug))
+        (set.metricFieldNames ?? []).forEach((fieldName) => fieldNames.add(fieldName))
       }
     })
-    return slugs
-  }, [metricSets, selectedDomainId, selectedTagIds])
+    return fieldNames
+  }, [metricSets, selectedTenantId, selectedTagIds])
 
-  const metricsForDomainWithTagFilter = useMemo(() => {
-    if (!metricSlugsForSelectedTags) return metricsForDomain
-    return metricsForDomain.filter((m) => metricSlugsForSelectedTags.has(m.slug))
-  }, [metricsForDomain, metricSlugsForSelectedTags])
+  const metricsForTenantWithTagFilter = useMemo(() => {
+    if (!metricFieldNamesForSelectedTags) return metricsForTenant
+    return metricsForTenant.filter((m) => metricFieldNamesForSelectedTags.has(m.fieldName))
+  }, [metricsForTenant, metricFieldNamesForSelectedTags])
 
-  const dimensionsForDomain = useMemo(() => {
-    if (!selectedDomainId) return dimensions
+  const dimensionsForTenant = useMemo(() => {
+    if (!selectedTenantId) return dimensions
     return dimensions.filter(
-      (d) => d.domain === selectedDomainId || (d.scope && d.scope.includes(selectedDomainId)),
+      (d) => d.tenant === selectedTenantId || (d.scope && d.scope.includes(selectedTenantId)),
     )
-  }, [dimensions, selectedDomainId])
+  }, [dimensions, selectedTenantId])
 
-  const dimensionSlugsForDomain = useMemo(
-    () => new Set(dimensionsForDomain.map((d) => d.slug)),
-    [dimensionsForDomain],
+  const dimensionFieldNamesForTenant = useMemo(
+    () => new Set(dimensionsForTenant.map((d) => d.fieldName)),
+    [dimensionsForTenant],
   )
 
   const filteredDimensionTree = useMemo(() => {
-    if (!selectedDomainId) return dimensionTree
+    if (!selectedTenantId) return dimensionTree
 
     const filterNode = (node: DimensionTreeNode): DimensionTreeNode | null => {
       const children =
@@ -193,9 +193,9 @@ export function MetricsWorkspaceView({
           ?.map(filterNode)
           .filter((child): child is DimensionTreeNode => child !== null) ?? []
 
-      const ownSlugs = node.dimensionSlugs?.filter((slug) => dimensionSlugsForDomain.has(slug)) ?? []
+      const ownFieldNames = node.dimensionFieldNames?.filter((fieldName) => dimensionFieldNamesForTenant.has(fieldName)) ?? []
       const childrenCount = children.reduce((sum, child) => sum + child.count, 0)
-      const totalCount = ownSlugs.length + childrenCount
+      const totalCount = ownFieldNames.length + childrenCount
 
       if (totalCount === 0) {
         return null
@@ -204,7 +204,7 @@ export function MetricsWorkspaceView({
       return {
         ...node,
         children: children.length ? children : undefined,
-        dimensionSlugs: ownSlugs.length ? ownSlugs : undefined,
+        dimensionFieldNames: ownFieldNames.length ? ownFieldNames : undefined,
         count: totalCount,
       }
     }
@@ -214,7 +214,7 @@ export function MetricsWorkspaceView({
       .filter((node): node is DimensionTreeNode => node !== null)
 
     return roots
-  }, [dimensionTree, dimensionSlugsForDomain, selectedDomainId])
+  }, [dimensionTree, dimensionFieldNamesForTenant, selectedTenantId])
 
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
@@ -261,7 +261,7 @@ export function MetricsWorkspaceView({
       result = result.filter((m) => {
         return (
           m.businessName.toLowerCase().includes(q) ||
-          m.slug.toLowerCase().includes(q) ||
+          m.fieldName.toLowerCase().includes(q) ||
           m.businessDefinition.toLowerCase().includes(q)
         )
       })
@@ -305,7 +305,7 @@ export function MetricsWorkspaceView({
   ])
 
   useEffect(() => {
-    setSelectedSlugsForQuery([])
+    setSelectedFieldNamesForQuery([])
     setIsCombinedQuerySheetOpen(false)
   }, [selectedMetricSetId, workspaceMode])
 
@@ -356,11 +356,11 @@ export function MetricsWorkspaceView({
                 Dimensions
               </ToggleGroupItem>
             </ToggleGroup>
-            {selectedDomainId && (
+            {selectedTenantId && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-[11px] text-slate-500 font-medium">
-                <span>Domain:</span>
+                <span>Tenant:</span>
                 <span className="text-slate-900">
-                  {domains.find((d) => d.id === selectedDomainId)?.name ?? selectedDomainId}
+                  {tenants.find((d) => d.id === selectedTenantId)?.name ?? selectedTenantId}
                 </span>
               </div>
             )}
@@ -500,7 +500,7 @@ export function MetricsWorkspaceView({
                   <div className="flex items-start justify-between gap-3 w-full">
                     <div>
                       <div className="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors">{set.name}</div>
-                      <div className="text-[11px] font-medium text-slate-500 mt-0.5">Domain: {set.domain}</div>
+                      <div className="text-[11px] font-medium text-slate-500 mt-0.5">Tenant: {set.tenant}</div>
                     </div>
                     <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 border-slate-200">
                       {set.visibility}
@@ -509,7 +509,7 @@ export function MetricsWorkspaceView({
                   <p className="mt-3 line-clamp-2 text-xs text-slate-500 leading-relaxed">{set.description}</p>
                   <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between w-full">
                     <span className="text-[10px] font-medium text-slate-400">
-                      {(set.metricSlugs?.length ?? 0)} metric{(set.metricSlugs?.length ?? 0) === 1 ? "" : "s"}
+                      {(set.metricFieldNames?.length ?? 0)} metric{(set.metricFieldNames?.length ?? 0) === 1 ? "" : "s"}
                     </span>
                     <span className="text-[10px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
                       View details →
@@ -573,10 +573,10 @@ export function MetricsWorkspaceView({
                         type="button"
                         size="sm"
                         className="h-9 text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all"
-                        disabled={selectedSlugsForQuery.length === 0}
+                        disabled={selectedFieldNamesForQuery.length === 0}
                         onClick={() => setIsCombinedQuerySheetOpen(true)}
                       >
-                        Query Selected ({selectedSlugsForQuery.length})
+                        Query Selected ({selectedFieldNamesForQuery.length})
                       </Button>
                   </div>
                 </div>
@@ -587,21 +587,21 @@ export function MetricsWorkspaceView({
                   <Card
                     key={m.id}
                     className="group cursor-pointer border-slate-200 shadow-sm transition-all duration-200 hover:border-blue-300 hover:shadow-md hover:bg-white"
-                    onClick={() => onOpenMetric(m.slug)}
+                    onClick={() => onOpenMetric(m.fieldName)}
                   >
                     <CardHeader className="flex flex-row items-start justify-between gap-3 p-4 pb-2 space-y-0">
                       <div className="flex flex-1 items-start gap-3">
                         <Checkbox
                           className="mt-1 border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                          checked={selectedSlugsForQuery.includes(m.slug)}
+                          checked={selectedFieldNamesForQuery.includes(m.fieldName)}
                           onCheckedChange={(value) => {
                             const isChecked = value === true
-                            setSelectedSlugsForQuery((prev) => {
+                            setSelectedFieldNamesForQuery((prev) => {
                               if (isChecked) {
-                                if (prev.includes(m.slug)) return prev
-                                return [...prev, m.slug]
+                                if (prev.includes(m.fieldName)) return prev
+                                return [...prev, m.fieldName]
                               }
-                              return prev.filter((slug) => slug !== m.slug)
+                              return prev.filter((fieldName) => fieldName !== m.fieldName)
                             })
                           }}
                           onClick={(e) => {
@@ -614,7 +614,7 @@ export function MetricsWorkspaceView({
                             {m.businessName}
                           </CardTitle>
                           <CardDescription className="text-[10px] font-mono text-slate-400 mt-0.5">
-                            {m.slug}
+                            {m.fieldName}
                           </CardDescription>
                         </div>
                       </div>
@@ -673,11 +673,11 @@ export function MetricsWorkspaceView({
 
         {workspaceMode === "metrics" && (
           <MetricSearchView
-            metrics={metricsForDomainWithTagFilter}
+            metrics={metricsForTenantWithTagFilter}
             onOpenMetric={onOpenMetric}
             initialViewMode="card"
-            onAddToMetricSetFromSelection={(slugs) => {
-              setSelectedSlugsForAddToMetricSet(slugs)
+            onAddToMetricSetFromSelection={(fieldNames) => {
+              setSelectedFieldNamesForAddToMetricSet(fieldNames)
               setIsAddToMetricSetSheetOpen(true)
             }}
           />
@@ -685,8 +685,8 @@ export function MetricsWorkspaceView({
 
         {workspaceMode === "dimensions" && (
           <DimensionsWorkspaceView
-            dimensionTree={selectedDomainId ? filteredDimensionTree : dimensionTree}
-            dimensions={dimensionsForDomain}
+            dimensionTree={selectedTenantId ? filteredDimensionTree : dimensionTree}
+            dimensions={dimensionsForTenant}
           />
         )}
       </div>
@@ -704,8 +704,8 @@ export function MetricsWorkspaceView({
         metrics={metrics}
         metricSets={metricSets}
         onMetricSetsChange={onMetricSetsChange}
-        domains={domains}
-        initialDomainId={selectedDomainId ?? undefined}
+        tenants={tenants}
+        initialTenantId={selectedTenantId ?? undefined}
         tags={tags}
       />
 
@@ -720,9 +720,9 @@ export function MetricsWorkspaceView({
         onOpenChange={setIsAddToMetricSetSheetOpen}
         metricSets={metricSets}
         onMetricSetsChange={onMetricSetsChange}
-        domains={domains}
-        selectedSlugs={selectedSlugsForAddToMetricSet}
-        selectedDomainId={selectedDomainId ?? undefined}
+        tenants={tenants}
+        selectedFieldNames={selectedFieldNamesForAddToMetricSet}
+        selectedTenantId={selectedTenantId ?? undefined}
       />
 
       {workspaceMode === "metricSets" && selectedMetricSet && (
@@ -730,7 +730,7 @@ export function MetricsWorkspaceView({
           open={isCombinedQuerySheetOpen}
           onOpenChange={setIsCombinedQuerySheetOpen}
           metrics={metricsForSelectedSet}
-          selectedSlugs={selectedSlugsForQuery}
+          selectedFieldNames={selectedFieldNamesForQuery}
           metricSetName={selectedMetricSet.name}
         />
       )}
@@ -758,7 +758,7 @@ interface CombinedQuerySheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   metrics: Metric[]
-  selectedSlugs: string[]
+  selectedFieldNames: string[]
   metricSetName: string
 }
 
@@ -766,12 +766,12 @@ function CombinedQuerySheet({
   open,
   onOpenChange,
   metrics,
-  selectedSlugs,
+  selectedFieldNames,
   metricSetName,
 }: CombinedQuerySheetProps) {
   const selectedMetrics = useMemo(
-    () => metrics.filter((m) => selectedSlugs.includes(m.slug)),
-    [metrics, selectedSlugs],
+    () => metrics.filter((m) => selectedFieldNames.includes(m.fieldName)),
+    [metrics, selectedFieldNames],
   )
 
   const querySources = useMemo(
@@ -786,7 +786,7 @@ function CombinedQuerySheet({
     [selectedMetrics],
   )
 
-  const exampleLink = `aeolus://combined?metrics=${encodeURIComponent(selectedSlugs.join(","))}`
+  const exampleLink = `aeolus://combined?metrics=${encodeURIComponent(selectedFieldNames.join(","))}`
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -797,7 +797,7 @@ function CombinedQuerySheet({
         <div className="mt-4 space-y-4 pb-6 text-xs">
           <p className="text-zinc-600">
             You are about to open a combined query for{" "}
-            <span className="font-semibold text-zinc-900">{selectedSlugs.length}</span> metrics in metric set{" "}
+            <span className="font-semibold text-zinc-900">{selectedFieldNames.length}</span> metrics in metric set{" "}
             <span className="font-semibold text-zinc-900">{metricSetName}</span>.
           </p>
 
@@ -806,9 +806,9 @@ function CombinedQuerySheet({
             {selectedMetrics.length > 0 ? (
               <ul className="space-y-1">
                 {selectedMetrics.map((m) => (
-                  <li key={m.slug} className="flex items-center justify-between gap-2">
+                  <li key={m.fieldName} className="flex items-center justify-between gap-2">
                     <span>{m.businessName}</span>
-                    <span className="font-mono text-[11px] text-zinc-500">{m.slug}</span>
+                    <span className="font-mono text-[11px] text-zinc-500">{m.fieldName}</span>
                   </li>
                 ))}
               </ul>
@@ -836,7 +836,7 @@ function CombinedQuerySheet({
             size="sm"
             className="text-xs"
             onClick={() => {
-              console.log("[mock] Open combined query for metrics:", selectedSlugs)
+              console.log("[mock] Open combined query for metrics:", selectedFieldNames)
               onOpenChange(false)
             }}
           >
@@ -854,9 +854,9 @@ interface AddToMetricSetSheetProps {
   onOpenChange: (open: boolean) => void
   metricSets: Album[]
   onMetricSetsChange: (sets: Album[]) => void
-  domains: Domain[]
-  selectedSlugs: string[]
-  selectedDomainId?: string
+  tenants: Tenant[]
+  selectedFieldNames: string[]
+  selectedTenantId?: string
 }
 
 function AddToMetricSetSheet({
@@ -864,9 +864,9 @@ function AddToMetricSetSheet({
   onOpenChange,
   metricSets,
   onMetricSetsChange,
-  domains,
-  selectedSlugs,
-  selectedDomainId,
+  tenants,
+  selectedFieldNames,
+  selectedTenantId,
 }: AddToMetricSetSheetProps) {
   const [selectedMetricSetId, setSelectedMetricSetId] = useState<string | undefined>(undefined)
   const [name, setName] = useState("")
@@ -874,10 +874,10 @@ function AddToMetricSetSheet({
   const [visibility, setVisibility] = useState<"team" | "private">("team")
   const [message, setMessage] = useState<string | null>(null)
 
-  const metricSetsForDomain = useMemo(() => {
-    if (!selectedDomainId) return metricSets
-    return metricSets.filter((set) => set.domain === selectedDomainId)
-  }, [metricSets, selectedDomainId])
+  const metricSetsForTenant = useMemo(() => {
+    if (!selectedTenantId) return metricSets
+    return metricSets.filter((set) => set.tenant === selectedTenantId)
+  }, [metricSets, selectedTenantId])
 
   useEffect(() => {
     if (!open) return
@@ -886,14 +886,14 @@ function AddToMetricSetSheet({
     setDescription("")
     setVisibility("team")
 
-    const defaultSetId = metricSetsForDomain[0]?.id ?? metricSets[0]?.id ?? undefined
+    const defaultSetId = metricSetsForTenant[0]?.id ?? metricSets[0]?.id ?? undefined
     setSelectedMetricSetId(defaultSetId)
 
     setMessage(null)
-  }, [open, metricSetsForDomain, metricSets])
+  }, [open, metricSetsForTenant, metricSets])
 
   const handleAddSelectionToSet = () => {
-    if (!selectedMetricSetId || selectedSlugs.length === 0) {
+    if (!selectedMetricSetId || selectedFieldNames.length === 0) {
       setMessage("Select a metric set and at least one metric.")
       return
     }
@@ -903,19 +903,19 @@ function AddToMetricSetSheet({
       return
     }
 
-    const mergedSlugs = Array.from(new Set([...(set.metricSlugs ?? []), ...selectedSlugs]))
+    const mergedFieldNames = Array.from(new Set([...(set.metricFieldNames ?? []), ...selectedFieldNames]))
     const updatedSet: Album = {
       ...set,
-      metricSlugs: mergedSlugs,
-      metricRefs: mergedSlugs.map(slug => {
-        const existing = set.metricRefs?.find(r => r.slug === slug)
-        return existing || { slug, version: "latest" }
+      metricFieldNames: mergedFieldNames,
+      metricRefs: mergedFieldNames.map(fieldName => {
+        const existing = set.metricRefs?.find(r => r.fieldName === fieldName)
+        return existing || { fieldName, version: "latest" }
       }),
     }
     const next = metricSets.map((s) => (s.id === set.id ? updatedSet : s))
     onMetricSetsChange(next)
     setMessage(
-      `Added ${selectedSlugs.length} metric${selectedSlugs.length === 1 ? "" : "s"} to "${set.name}" (mock).`,
+      `Added ${selectedFieldNames.length} metric${selectedFieldNames.length === 1 ? "" : "s"} to "${set.name}" (mock).`,
     )
   }
 
@@ -937,9 +937,9 @@ function AddToMetricSetSheet({
       description: description.trim(),
       scope: "",
       visibility,
-      domain: selectedDomainId || domains[0]?.id || "Custom",
-      metricSlugs: selectedSlugs,
-      metricRefs: selectedSlugs.map(slug => ({ slug, version: "latest" })),
+      tenant: selectedTenantId || tenants[0]?.id || "Custom",
+      metricFieldNames: selectedFieldNames,
+      metricRefs: selectedFieldNames.map(fieldName => ({ fieldName, version: "latest" })),
       dimensionRefs: [],
       tags: [],
       createdAt: new Date(now).toISOString(),
@@ -969,14 +969,14 @@ function AddToMetricSetSheet({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs font-semibold text-zinc-800">Add to existing metric set</p>
               <span className="text-[11px] text-zinc-500">
-                {selectedSlugs.length
-                  ? `${selectedSlugs.length} metrics selected.`
+                {selectedFieldNames.length
+                  ? `${selectedFieldNames.length} metrics selected.`
                   : "No metrics selected in the workspace."}
               </span>
             </div>
             <div className="grid gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-zinc-700">Metric set (filtered by domain)</label>
+                <label className="text-[11px] font-medium text-zinc-700">Metric set (filtered by tenant)</label>
                 <Select
                   value={selectedMetricSetId ?? ""}
                   onValueChange={(value) => setSelectedMetricSetId(value)}
@@ -985,7 +985,7 @@ function AddToMetricSetSheet({
                     <SelectValue placeholder="Select metric set" />
                   </SelectTrigger>
                   <SelectContent>
-                    {metricSetsForDomain.map((set) => (
+                    {metricSetsForTenant.map((set) => (
                       <SelectItem key={set.id} value={set.id}>
                         {set.name}
                       </SelectItem>
@@ -999,7 +999,7 @@ function AddToMetricSetSheet({
                   size="sm"
                   className="w-full text-xs"
                   variant="outline"
-                  disabled={selectedSlugs.length === 0 || metricSetsForDomain.length === 0}
+                  disabled={selectedFieldNames.length === 0 || metricSetsForTenant.length === 0}
                   onClick={handleAddSelectionToSet}
                 >
                   Add

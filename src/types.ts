@@ -24,12 +24,12 @@ export interface TopDimensionPoint {
 export interface Metric {
   id: string
   businessName: string
-  slug: string
+  fieldName: string
   categoryPath: string[]
   businessDefinition: string
   technicalDefinition: string
   status: "Active" | "Draft"
-  domain: string
+  tenant: string
   owners: {
     businessOwner: string
     techOwner: string
@@ -37,7 +37,7 @@ export interface Metric {
   queryDefinitions: MetricQueryDefinition[]
   trend30d: TrendPoint[]
   topDimensions: TopDimensionPoint[]
-  boundDimensionSlugs: string[]
+  boundDimensionFieldNames: string[]
   createdAt?: string
   updatedAt?: string
   heat?: number
@@ -61,15 +61,15 @@ export interface DimensionValue {
 export interface Dimension {
   id: string
   name: string
-  slug: string
+  fieldName: string
   aliases: string[]
   description: string
-  domain: string
+  tenant: string
   version: string
   scope: string[]
   type: string
   values: DimensionValue[]
-  boundMetricSlugs: string[]
+  boundMetricFieldNames: string[]
   category?: string
   sourceLink?: string
   createdAt?: string
@@ -83,7 +83,7 @@ export interface Tag {
 }
 
 export interface AlbumRef {
-  slug: string
+  fieldName: string
   version?: string
 }
 
@@ -93,10 +93,10 @@ export interface Album {
   description: string
   scope: string
   visibility: "team" | "private"
-  domain: string
+  tenant: string
   metricRefs: AlbumRef[]
   dimensionRefs: AlbumRef[]
-  metricSlugs?: string[] // Deprecated
+  metricFieldNames?: string[] // Deprecated
   tags: string[]
   createdAt?: string
   updatedAt?: string
@@ -108,10 +108,10 @@ export interface CategoryNode {
   name: string
   description?: string
   children?: CategoryNode[]
-  metricSlugs?: string[]
+  metricFieldNames?: string[]
 }
 
-export interface Domain {
+export interface Tenant {
   id: string
   name: string
   description?: string
@@ -125,7 +125,7 @@ export interface DimensionTreeNode {
   name: string
   count: number
   children?: DimensionTreeNode[]
-  dimensionSlugs?: string[]
+  dimensionFieldNames?: string[]
 }
 
 export interface DataState {
@@ -133,14 +133,14 @@ export interface DataState {
   dimensions: Dimension[]
   metricSets: Album[]
   categories: CategoryNode[]
-  domains: Domain[]
+  tenants: Tenant[]
   dimensionTree: DimensionTreeNode[]
 }
 
 export interface NewMetricPayload {
   businessName: string
   businessDefinition: string
-  slug: string
+  fieldName: string
   technicalDefinition: string
   categoryPath: string[]
   larkSheetLink?: string
@@ -157,14 +157,14 @@ export interface NewMetricPayload {
 }
 
 export interface FilterBasedDerivedDimensionFilter {
-  dimensionSlug: string
+  dimensionFieldName: string
   values: string
 }
 
 export interface FilterBasedDerivedSpec {
   mode: "filter"
   businessName: string
-  slug: string
+  fieldName: string
   description?: string
   dimensionFilters: FilterBasedDerivedDimensionFilter[]
 }
@@ -172,9 +172,9 @@ export interface FilterBasedDerivedSpec {
 export interface ArithmeticDerivedSpec {
   mode: "arithmetic"
   businessName: string
-  slug: string
+  fieldName: string
   description?: string
-  otherMetricSlug: string
+  otherMetricFieldName: string
   operator: "add" | "sub" | "mul" | "div"
   coefficient?: number
 }

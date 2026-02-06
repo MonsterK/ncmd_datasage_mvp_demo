@@ -57,7 +57,7 @@ export function HomeView({ metrics, dimensions, metricSets, onNavigateTopNav }: 
             <QuickLinkCard
               icon={FolderKanban}
               title="Manage metric sets"
-              description="Organize metrics into collections for specific business domains."
+              description="Organize metrics into collections for specific business areas."
               onClick={() => onNavigateTopNav("metrics")}
               color="orange"
             />

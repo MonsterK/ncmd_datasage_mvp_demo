@@ -24,38 +24,38 @@ export interface DimensionManagementViewProps {
 }
 
 export function DimensionManagementView({ metrics, dimensions }: DimensionManagementViewProps) {
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(dimensions[0]?.slug ?? null)
-  const [validationMetricSlug, setValidationMetricSlug] = useState("")
+  const [selectedFieldName, setSelectedFieldName] = useState<string | null>(dimensions[0]?.fieldName ?? null)
+  const [validationMetricFieldName, setValidationMetricFieldName] = useState("")
   const [validationResult, setValidationResult] = useState<string | null>(null)
 
   const selected = useMemo(
-    () => dimensions.find((d) => d.slug === selectedSlug) ?? null,
-    [dimensions, selectedSlug],
+    () => dimensions.find((d) => d.fieldName === selectedFieldName) ?? null,
+    [dimensions, selectedFieldName],
   )
 
   const boundMetricsForSelected = useMemo(() => {
     if (!selected) return []
-    return metrics.filter((m) => selected.boundMetricSlugs.includes(m.slug))
+    return metrics.filter((m) => selected.boundMetricFieldNames.includes(m.fieldName))
   }, [metrics, selected])
 
   const handleValidateBinding = () => {
-    const slug = validationMetricSlug.trim()
-    if (!slug || !selected) {
-      setValidationResult("Enter a metric slug and select a dimension first.")
+    const fieldName = validationMetricFieldName.trim()
+    if (!fieldName || !selected) {
+      setValidationResult("Enter a metric field name and select a dimension first.")
       return
     }
-    const metric = metrics.find((m) => m.slug === slug)
+    const metric = metrics.find((m) => m.fieldName === fieldName)
     if (!metric) {
-      setValidationResult(`Metric slug "${slug}" does not exist in the registry.`)
+      setValidationResult(`Metric field name "${fieldName}" does not exist in the registry.`)
       return
     }
-    if (selected.boundMetricSlugs.includes(slug)) {
+    if (selected.boundMetricFieldNames.includes(fieldName)) {
       setValidationResult(
-        `Binding is valid: metric "${slug}" is declared to use dimension "${selected.slug}".`,
+        `Binding is valid: metric "${fieldName}" is declared to use dimension "${selected.fieldName}".`,
       )
     } else {
       setValidationResult(
-        `Binding is missing: metric "${slug}" does not reference dimension "${selected.slug}" in the mock data.`,
+        `Binding is missing: metric "${fieldName}" does not reference dimension "${selected.fieldName}" in the mock data.`,
       )
     }
   }
@@ -87,16 +87,16 @@ export function DimensionManagementView({ metrics, dimensions }: DimensionManage
                   <button
                     key={d.id}
                     type="button"
-                    onClick={() => setSelectedSlug(d.slug)}
+                    onClick={() => setSelectedFieldName(d.fieldName)}
                     className={`flex w-full items-start justify-between gap-2 px-3 py-2 text-left text-xs ${
-                      selectedSlug === d.slug ? "bg-zinc-900 text-white" : "hover:bg-zinc-100"
+                      selectedFieldName === d.fieldName ? "bg-zinc-900 text-white" : "hover:bg-zinc-100"
                     }`}
                   >
                     <div>
                       <div className="font-semibold">{d.name}</div>
-                      <div className="font-mono text-[10px] opacity-80">{d.slug}</div>
+                      <div className="font-mono text-[10px] opacity-80">{d.fieldName}</div>
                     </div>
-                    <div className="text-[10px] opacity-80">{d.domain}</div>
+                    <div className="text-[10px] opacity-80">{d.tenant}</div>
                   </button>
                 ))}
                 {dimensions.length === 0 && (
@@ -120,14 +120,14 @@ export function DimensionManagementView({ metrics, dimensions }: DimensionManage
                 <div className="space-y-1 text-xs">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold">{selected.name}</span>
-                    <span className="font-mono text-[11px] text-zinc-500">{selected.slug}</span>
+                    <span className="font-mono text-[11px] text-zinc-500">{selected.fieldName}</span>
                     <Badge variant="outline" className="text-[10px]">
                       {selected.type}
                     </Badge>
                   </div>
                   <p className="text-zinc-700">{selected.description}</p>
                   <div className="flex flex-wrap gap-2 text-[11px] text-zinc-500">
-                    <span>Domain: {selected.domain}</span>
+                    <span>Tenant: {selected.tenant}</span>
                     <span>Version: {selected.version}</span>
                     <span>Scope: {selected.scope.join(", ")}</span>
                   </div>
@@ -179,7 +179,7 @@ export function DimensionManagementView({ metrics, dimensions }: DimensionManage
                       {boundMetricsForSelected.map((m) => (
                         <li key={m.id} className="flex items-center justify-between gap-2">
                           <span>{m.businessName}</span>
-                          <span className="font-mono text-[11px] text-zinc-500">{m.slug}</span>
+                          <span className="font-mono text-[11px] text-zinc-500">{m.fieldName}</span>
                         </li>
                       ))}
                     </ul>
@@ -191,15 +191,15 @@ export function DimensionManagementView({ metrics, dimensions }: DimensionManage
                 <div className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3">
                   <p className="text-xs font-semibold text-zinc-800">Binding validation (mock)</p>
                   <p className="text-[11px] text-zinc-500">
-                    Enter a metric slug to validate if the registry states that it uses this dimension. This simulates
+                    Enter a metric field name to validate if the registry states that it uses this dimension. This simulates
                     binding validation in the real platform.
                   </p>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <Input
                       className="h-8 text-xs"
                       placeholder="e.g. sgi_payout"
-                      value={validationMetricSlug}
-                      onChange={(e) => setValidationMetricSlug(e.target.value)}
+                      value={validationMetricFieldName}
+                      onChange={(e) => setValidationMetricFieldName(e.target.value)}
                     />
                     <Button type="button" size="sm" className="text-xs" onClick={handleValidateBinding}>
                       Validate binding

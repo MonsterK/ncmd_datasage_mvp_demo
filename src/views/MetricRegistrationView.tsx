@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react"
+
+import { useMemo, useState, useEffect } from "react"
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,7 +21,7 @@ export interface MetricRegistrationViewProps {
   categories: CategoryNode[]
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric
-  disableSlugEditing?: boolean
+  disableFieldNameEditing?: boolean
 }
 
 function flattenCategoryPaths(nodes: CategoryNode[], prefix: string[] = []): string[] {
@@ -36,7 +37,7 @@ function flattenCategoryPaths(nodes: CategoryNode[], prefix: string[] = []): str
   return paths
 }
 
-export function MetricRegistrationView({ categories, onRegisterMetric, initialMetric, disableSlugEditing }: MetricRegistrationViewProps) {
+export function MetricRegistrationView({ categories, onRegisterMetric, initialMetric, disableFieldNameEditing }: MetricRegistrationViewProps) {
   const baseQuery = initialMetric?.queryDefinitions?.[0]
 
   const [categoryPathStr, setCategoryPathStr] = useState<string | undefined>(
@@ -44,38 +45,62 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
   )
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
-  const [slug, setSlug] = useState(initialMetric?.slug ?? "")
+  const [fieldName, setFieldName] = useState(initialMetric?.fieldName ?? "")
   const [technicalDefinition, setTechnicalDefinition] = useState(initialMetric?.technicalDefinition ?? "")
   const [larkSheetLink, setLarkSheetLink] = useState(initialMetric?.larkSheetLink ?? "")
   const [importMessage, setImportMessage] = useState<string | null>(null)
 
-  const [queryType, setQueryType] = useState(baseQuery?.type ?? "Aeolus Visual Query")
+  // 3. Query Type defaults to Aeolus Visual Query, not allowed to change
+  const [queryType] = useState("Aeolus Visual Query")
   const [querySource, setQuerySource] = useState(baseQuery?.source ?? "")
   const [originField, setOriginField] = useState(baseQuery?.originField ?? "")
   const [aggregate, setAggregate] = useState(baseQuery?.aggregate ?? "SUM")
-  const [businessDate, setBusinessDate] = useState(baseQuery?.businessDate ?? "")
+  
+  // 4. Business date field defaults to partition, user doesn't fill
+  const [businessDate] = useState("partition")
+  
   const [filtersRaw, setFiltersRaw] = useState(
     baseQuery?.filters && baseQuery.filters.length ? baseQuery.filters.join(", ") : "",
   )
+  
+  // 5. Analysis dimensions parsed from Aeolus query (link)
+  // We'll calculate this dynamically or update state when link changes
   const [analysisDimsRaw, setAnalysisDimsRaw] = useState(
     baseQuery?.analysisDimensions && baseQuery.analysisDimensions.length
       ? baseQuery.analysisDimensions.join(", ")
       : "",
   )
+  
   const [queryLink, setQueryLink] = useState(baseQuery?.link ?? "")
 
-  const [submittedSlug, setSubmittedSlug] = useState<string | null>(null)
+  const [submittedFieldName, setSubmittedFieldName] = useState<string | null>(null)
+
+  // Effect to parse dims from query link (Mock implementation)
+  useEffect(() => {
+    if (!queryLink) return
+    try {
+        // Mock parsing logic: look for "dims=a,b,c" or similar
+        // Or just extract some mock data if it matches a pattern
+        const url = new URL(queryLink)
+        const dimsParam = url.searchParams.get("dims") || url.searchParams.get("dimensions")
+        if (dimsParam) {
+            setAnalysisDimsRaw(dimsParam.split(",").join(", "))
+        }
+    } catch (e) {
+        // ignore invalid url
+    }
+  }, [queryLink])
 
   const categoryOptions = useMemo(() => flattenCategoryPaths(categories), [categories])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!businessName || !slug) return
+    if (!businessName || !fieldName) return
 
     const payload: NewMetricPayload = {
       businessName,
       businessDefinition,
-      slug,
+      fieldName,
       technicalDefinition,
       categoryPath: categoryPathStr ? categoryPathStr.split(" > ") : [],
       larkSheetLink: larkSheetLink.trim() || undefined,
@@ -92,7 +117,7 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
     }
 
     onRegisterMetric(payload)
-    setSubmittedSlug(slug)
+    setSubmittedFieldName(fieldName)
   }
 
   return (
@@ -180,12 +205,12 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Slug</label>
+              <label className="text-xs font-semibold text-slate-700">Field Name</label>
               <Input
                 placeholder="sgi_payout"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                disabled={Boolean(disableSlugEditing)}
+                value={fieldName}
+                onChange={(e) => setFieldName(e.target.value)}
+                disabled={Boolean(disableFieldNameEditing)}
                 className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
               />
             </div>
@@ -205,14 +230,12 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Query type</label>
-                <Select value={queryType} onValueChange={setQueryType}>
+                <Select value={queryType} disabled>
                   <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Aeolus Visual Query">Aeolus Visual Query</SelectItem>
-                    <SelectItem value="Crux HTTP Query">Crux HTTP Query</SelectItem>
-                    <SelectItem value="Hive SQL">Hive SQL</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -227,7 +250,7 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
               </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Origin field</label>
                 <Input
@@ -251,13 +274,18 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
                   </SelectContent>
                 </Select>
               </div>
+              {/* Business date field is hidden/removed as per requirement */}
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-1">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Business date field</label>
+                <label className="text-xs font-semibold text-slate-700">Aeolus query link</label>
                 <Input
-                  placeholder="biz_date"
-                  value={businessDate}
-                  onChange={(e) => setBusinessDate(e.target.value)}
-                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
+                  type="url"
+                  placeholder="https://... (Analysis dimensions parsed from here)"
+                  value={queryLink}
+                  onChange={(e) => setQueryLink(e.target.value)}
+                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
                 />
               </div>
             </div>
@@ -273,26 +301,13 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
                   className="text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono min-h-[80px]"
                 />
               </div>
+              {/* Analysis dimensions hidden/read-only */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Analysis dimensions (comma-separated slugs)</label>
-                <Textarea
-                  rows={3}
-                  placeholder="agency, region, platform"
-                  value={analysisDimsRaw}
-                  onChange={(e) => setAnalysisDimsRaw(e.target.value)}
-                  className="text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono min-h-[80px]"
-                />
+                <label className="text-xs font-semibold text-slate-700">Analysis dimensions (Parsed from query)</label>
+                <div className="text-xs bg-slate-100 p-2 rounded min-h-[80px] text-slate-600 font-mono">
+                  {analysisDimsRaw || "(No dimensions parsed)"}
+                </div>
               </div>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Aeolus query link</label>
-              <Input
-                type="url"
-                placeholder="https://..."
-                value={queryLink}
-                onChange={(e) => setQueryLink(e.target.value)}
-                className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
-              />
             </div>
           </div>
 
@@ -300,10 +315,10 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
             <Button type="submit" className="h-9 px-6 text-xs font-medium bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200 rounded-full">
               {initialMetric ? "Update Metric" : "Register Metric"}
             </Button>
-            {submittedSlug && (
+            {submittedFieldName && (
               <p className="text-xs text-emerald-600 font-medium flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Metric <span className="font-mono font-bold">{submittedSlug}</span> registered successfully!
+                Metric <span className="font-mono font-bold">{submittedFieldName}</span> registered successfully!
               </p>
             )}
           </div>

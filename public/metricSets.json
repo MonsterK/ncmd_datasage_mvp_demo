@@ -4,78 +4,78 @@
       "id": "ms1",
       "name": "2026H1 NA SGI",
       "description": "Core SGI payout metrics used for incentive performance tracking in North America.",
-      "scope": "SGI",
+      "scope": "Strategy Data",
       "visibility": "team",
-      "domain": "SGI",
+      "tenant": "Strategy Data",
       "metricRefs": [
-        { "slug": "spp_revenue", "version": "v1.1" },
-        { "slug": "spp_revenue_penetration", "version": "v1.0" },
-        { "slug": "na_spp_revenue_penetration", "version": "v1.0" }
+        { "fieldName": "spp_revenue", "version": "v1.1" },
+        { "fieldName": "spp_revenue_penetration", "version": "v1.0" },
+        { "fieldName": "na_spp_revenue_penetration", "version": "v1.0" }
       ],
       "dimensionRefs": [
-        { "slug": "agency", "version": "v1" },
-        { "slug": "region", "version": "v2" }
+        { "fieldName": "agency", "version": "v1" },
+        { "fieldName": "region", "version": "v2" }
       ],
-      "metricSlugs": ["spp_revenue", "spp_revenue_penetration", "na_spp_revenue_penetration"],
+      "metricFieldNames": ["spp_revenue", "spp_revenue_penetration", "na_spp_revenue_penetration"],
       "tags": ["tag-na"]
     },
     {
       "id": "ms2",
       "name": "QBR Revenue Pack",
       "description": "Key revenue metrics included in quarterly business reviews.",
-      "scope": "QBR",
+      "scope": "Strategy Data",
       "visibility": "team",
-      "domain": "QBR",
+      "tenant": "Strategy Data",
       "metricRefs": [
-        { "slug": "qbr_revenue", "version": "v1.0" }
+        { "fieldName": "qbr_revenue", "version": "v1.0" }
       ],
       "dimensionRefs": [],
-      "metricSlugs": ["qbr_revenue"],
+      "metricFieldNames": ["qbr_revenue"],
       "tags": []
     },
     {
       "id": "ms3",
       "name": "Creator Monetization Health",
       "description": "Creator-side supply and monetization activity metrics.",
-      "scope": "Creator",
+      "scope": "Creative",
       "visibility": "team",
-      "domain": "Creator",
+      "tenant": "Creative",
       "metricRefs": [
-        { "slug": "active_monetized_creators", "version": "v0.1" },
-        { "slug": "creator_rev_per_creator", "version": "v1.0" }
+        { "fieldName": "active_monetized_creators", "version": "v0.1" },
+        { "fieldName": "creator_rev_per_creator", "version": "v1.0" }
       ],
       "dimensionRefs": [],
-      "metricSlugs": ["active_monetized_creators", "creator_rev_per_creator"],
+      "metricFieldNames": ["active_monetized_creators", "creator_rev_per_creator"],
       "tags": []
     },
     {
       "id": "ms4",
       "name": "SGI vs QBR Revenue Overview",
-      "description": "Cross-domain comparison between SGI payout and QBR revenue.",
+      "description": "Cross-tenant comparison between SGI payout and QBR revenue.",
       "scope": "SGI/QBR",
       "visibility": "team",
-      "domain": "QBR",
+      "tenant": "Strategy Data",
       "metricRefs": [
-        { "slug": "spp_revenue", "version": "v1.1" },
-        { "slug": "qbr_revenue", "version": "v1.0" }
+        { "fieldName": "spp_revenue", "version": "v1.1" },
+        { "fieldName": "qbr_revenue", "version": "v1.0" }
       ],
       "dimensionRefs": [],
-      "metricSlugs": ["spp_revenue", "qbr_revenue"],
+      "metricFieldNames": ["spp_revenue", "qbr_revenue"],
       "tags": []
     },
     {
       "id": "ms5",
       "name": "Creator Monetization Deep Dive",
       "description": "Creator volume and monetization efficiency metrics.",
-      "scope": "Creator",
+      "scope": "Creative",
       "visibility": "team",
-      "domain": "Creator",
+      "tenant": "Creative",
       "metricRefs": [
-        { "slug": "active_monetized_creators", "version": "v0.1" },
-        { "slug": "creator_rev_per_creator", "version": "v1.0" }
+        { "fieldName": "active_monetized_creators", "version": "v0.1" },
+        { "fieldName": "creator_rev_per_creator", "version": "v1.0" }
       ],
       "dimensionRefs": [],
-      "metricSlugs": ["active_monetized_creators", "creator_rev_per_creator"],
+      "metricFieldNames": ["active_monetized_creators", "creator_rev_per_creator"],
       "tags": []
     }
   ]

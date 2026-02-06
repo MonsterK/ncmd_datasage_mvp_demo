@@ -114,7 +114,7 @@ export function MetricLineageDag({ metric }: MetricLineageDagProps) {
               className="fill-zinc-400"
               fontSize={9}
             >
-              {metric.slug}
+              {metric.fieldName}
             </text>
           </g>
 

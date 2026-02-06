@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react"
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
@@ -27,14 +28,14 @@ import {
   Metric,
   Dimension,
   CategoryNode,
-  Domain,
+  Tenant,
   NewMetricPayload,
   Album,
   Tag,
 } from "@/types"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
 
-export type ManagementSection = "metric" | "metricSet" | "dimension" | "category" | "domain"
+export type ManagementSection = "metric" | "metricSet" | "dimension" | "category" | "tenant"
 
 export interface ManagementWorkspaceViewProps {
   activeSection: ManagementSection
@@ -44,12 +45,12 @@ export interface ManagementWorkspaceViewProps {
   setMetricSets: (sets: Album[]) => void
   dimensions: Dimension[]
   categories: CategoryNode[]
-  domains: Domain[]
-  onOpenMetricProfile: (slug: string) => void
+  tenants: Tenant[]
+  onOpenMetricProfile: (fieldName: string) => void
   onRegisterMetric: (payload: NewMetricPayload) => void
-  onUpdateMetric: (slug: string, payload: NewMetricPayload) => void
-  onDeleteMetric: (slug: string) => void
-  onCreateDomain: (payload: {
+  onUpdateMetric: (fieldName: string, payload: NewMetricPayload) => void
+  onDeleteMetric: (fieldName: string) => void
+  onCreateTenant: (payload: {
     id: string
     name: string
     description: string
@@ -84,12 +85,12 @@ export function ManagementWorkspaceView({
   setMetricSets,
   dimensions,
   categories,
-  domains,
+  tenants,
   onOpenMetricProfile,
   onRegisterMetric,
   onUpdateMetric,
   onDeleteMetric,
-  onCreateDomain,
+  onCreateTenant,
   onCreateCategory,
   onCreateDimension,
   onUpdateDimension,
@@ -99,7 +100,7 @@ export function ManagementWorkspaceView({
 }: ManagementWorkspaceViewProps) {
   const [isNewMetricSheetOpen, setIsNewMetricSheetOpen] = useState(false)
   const [isNewMetricSetSheetOpen, setIsNewMetricSetSheetOpen] = useState(false)
-  const [isNewDomainSheetOpen, setIsNewDomainSheetOpen] = useState(false)
+  const [isNewTenantSheetOpen, setIsNewTenantSheetOpen] = useState(false)
   const [isNewCategorySheetOpen, setIsNewCategorySheetOpen] = useState(false)
   const [isNewDimensionSheetOpen, setIsNewDimensionSheetOpen] = useState(false)
   const [metricSheetMode, setMetricSheetMode] = useState<"create" | "edit">("create")
@@ -129,8 +130,8 @@ export function ManagementWorkspaceView({
               <TableHeader>
                 <TableRow className="hover:bg-slate-50 border-slate-100">
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Slug</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Domain</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
@@ -141,8 +142,8 @@ export function ManagementWorkspaceView({
                 {metrics.map((m) => (
                   <TableRow key={m.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
                     <TableCell className="text-sm font-medium text-slate-900">{m.businessName}</TableCell>
-                    <TableCell className="font-mono text-[11px] text-slate-500">{m.slug}</TableCell>
-                    <TableCell className="text-xs text-slate-700">{m.domain}</TableCell>
+                    <TableCell className="font-mono text-[11px] text-slate-500">{m.fieldName}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{m.tenant}</TableCell>
                     <TableCell className="text-xs">
                       <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                         {m.status}
@@ -175,7 +176,7 @@ export function ManagementWorkspaceView({
                           variant="outline"
                           size="sm"
                           className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
-                          onClick={() => onDeleteMetric(m.slug)}
+                          onClick={() => onDeleteMetric(m.fieldName)}
                         >
                           Delete
                         </Button>
@@ -184,7 +185,7 @@ export function ManagementWorkspaceView({
                           variant="outline"
                           size="sm"
                           className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                          onClick={() => onOpenMetricProfile(m.slug)}
+                          onClick={() => onOpenMetricProfile(m.fieldName)}
                         >
                           View
                         </Button>
@@ -210,7 +211,7 @@ export function ManagementWorkspaceView({
               <TableHeader>
                 <TableRow className="hover:bg-slate-50 border-slate-100">
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Domain</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Visibility</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tags</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Metric count</TableHead>
@@ -222,7 +223,7 @@ export function ManagementWorkspaceView({
                 {metricSets.map((set) => (
                   <TableRow key={set.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
                     <TableCell className="text-sm font-medium text-slate-900">{set.name}</TableCell>
-                    <TableCell className="text-xs text-slate-700">{set.domain}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{set.tenant}</TableCell>
                     <TableCell className="text-xs">
                       <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
                         {set.visibility}
@@ -241,7 +242,7 @@ export function ManagementWorkspaceView({
                         <span className="text-[11px] text-slate-400">-</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-slate-700">{set.metricSlugs?.length ?? 0}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{set.metricFieldNames?.length ?? 0}</TableCell>
                     <TableCell className="text-[11px] text-slate-500">{formatDate(set.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
@@ -301,8 +302,8 @@ export function ManagementWorkspaceView({
               <TableHeader>
                 <TableRow className="hover:bg-slate-50 border-slate-100">
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Slug</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Domain</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Bound metric count</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
@@ -313,14 +314,14 @@ export function ManagementWorkspaceView({
                 {dimensions.map((d) => (
                   <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
                     <TableCell className="text-sm font-medium text-slate-900">{d.name}</TableCell>
-                    <TableCell className="font-mono text-[11px] text-slate-500">{d.slug}</TableCell>
-                    <TableCell className="text-xs text-slate-700">{d.domain}</TableCell>
+                    <TableCell className="font-mono text-[11px] text-slate-500">{d.fieldName}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{d.tenant}</TableCell>
                     <TableCell className="text-xs">
                       <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
                         {d.type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-slate-700">{d.boundMetricSlugs.length}</TableCell>
+                    <TableCell className="text-xs text-slate-700">{d.boundMetricFieldNames.length}</TableCell>
                     <TableCell className="text-[11px] text-slate-500">{formatDate(d.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
@@ -363,18 +364,18 @@ export function ManagementWorkspaceView({
         )
       case "category":
         return <CategoryManagementView categories={categories} metrics={metrics} />
-      case "domain":
+      case "tenant":
         return (
           <Card className="border-slate-200 shadow-sm rounded-2xl">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-slate-900">Domain management (mock)</CardTitle>
+              <CardTitle className="text-sm text-slate-900">Tenant management (mock)</CardTitle>
               <CardDescription className="text-xs text-slate-500">
-                Simple overview of domains available in the demo. In a full product this would manage ownership and
+                Simple overview of tenants available in the demo. In a full product this would manage ownership and
                 permissions.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {domains.length > 0 ? (
+              {tenants.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow className="border-slate-100 hover:bg-slate-50">
@@ -387,7 +388,7 @@ export function ManagementWorkspaceView({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {domains.map((d) => (
+                    {tenants.map((d) => (
                       <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
                          <TableCell className="text-[11px] font-mono text-slate-600">{d.id}</TableCell>
                         <TableCell className="text-xs font-medium text-slate-900">{d.name}</TableCell>
@@ -413,7 +414,7 @@ export function ManagementWorkspaceView({
                   </TableBody>
                 </Table>
               ) : (
-                <p className="text-xs text-slate-500">No domains configured in the mock data.</p>
+                <p className="text-xs text-slate-500">No tenants configured in the mock data.</p>
               )}
             </CardContent>
           </Card>
@@ -449,16 +450,16 @@ export function ManagementWorkspaceView({
           description: "Maintain the metric category tree for the registry.",
           addLabel: "New category",
         }
-      case "domain":
+      case "tenant":
         return {
-          title: "Domain management",
-          description: "Configure business domains and high-level permissions.",
-          addLabel: "New domain",
+          title: "Tenant management",
+          description: "Configure business tenants and high-level permissions.",
+          addLabel: "New tenant",
         }
       default:
         return {
           title: "Management",
-          description: "Administer metrics, metric sets, dimensions, categories and domains.",
+          description: "Administer metrics, metric sets, dimensions, categories and tenants.",
           addLabel: "New",
         }
     }
@@ -479,8 +480,8 @@ export function ManagementWorkspaceView({
       setIsNewDimensionSheetOpen(true)
     } else if (activeSection === "category") {
       setIsNewCategorySheetOpen(true)
-    } else if (activeSection === "domain") {
-      setIsNewDomainSheetOpen(true)
+    } else if (activeSection === "tenant") {
+      setIsNewTenantSheetOpen(true)
     }
   }
 
@@ -530,9 +531,9 @@ export function ManagementWorkspaceView({
             />
             <SidebarItem
               icon={Home}
-              label="Domains"
-              active={activeSection === "domain"}
-              onClick={() => onChangeSection("domain")}
+              label="Tenants"
+              active={activeSection === "tenant"}
+              onClick={() => onChangeSection("tenant")}
             />
           </CardContent>
         </Card>
@@ -597,16 +598,16 @@ export function ManagementWorkspaceView({
         metrics={metrics}
         metricSets={metricSets}
         onMetricSetsChange={setMetricSets}
-        domains={domains}
+        tenants={tenants}
         mode={metricSetSheetMode}
         initialMetricSet={metricSetToEdit}
         tags={tags}
       />
 
-      <NewDomainSheet
-        open={isNewDomainSheetOpen}
-        onOpenChange={setIsNewDomainSheetOpen}
-        onCreateDomain={onCreateDomain}
+      <NewTenantSheet
+        open={isNewTenantSheetOpen}
+        onOpenChange={setIsNewTenantSheetOpen}
+        onCreateTenant={onCreateTenant}
       />
 
       <NewCategorySheet
@@ -698,7 +699,7 @@ interface NewMetricSheetProps {
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric | null
   mode?: "create" | "edit"
-  onUpdateMetric?: (slug: string, payload: NewMetricPayload) => void
+  onUpdateMetric?: (fieldName: string, payload: NewMetricPayload) => void
 }
 
 export function NewMetricSheet({
@@ -729,10 +730,10 @@ export function NewMetricSheet({
               key={isEditMode && initialMetric ? initialMetric.id : "new"}
               categories={categories}
               initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
-              disableSlugEditing={Boolean(isEditMode)}
+              disableFieldNameEditing={Boolean(isEditMode)}
               onRegisterMetric={(payload) => {
                 if (isEditMode && initialMetric && onUpdateMetric) {
-                  onUpdateMetric(initialMetric.slug, payload)
+                  onUpdateMetric(initialMetric.fieldName, payload)
                 } else {
                   onRegisterMetric(payload)
                 }
@@ -752,9 +753,9 @@ interface NewMetricSetSheetProps {
   metrics: Metric[]
   metricSets: Album[]
   onMetricSetsChange: (sets: Album[]) => void
-  domains: Domain[]
-  initialMetricSlugs?: string[]
-  initialDomainId?: string
+  tenants: Tenant[]
+  initialMetricFieldNames?: string[]
+  initialTenantId?: string
   initialMetricSet?: Album | null
   mode?: "create" | "edit"
   tags: Tag[]
@@ -766,9 +767,9 @@ export function NewMetricSetSheet({
   metrics,
   metricSets,
   onMetricSetsChange,
-  domains,
-  initialMetricSlugs,
-  initialDomainId,
+  tenants,
+  initialMetricFieldNames,
+  initialTenantId,
   initialMetricSet,
   mode = "create",
   tags,
@@ -778,20 +779,19 @@ export function NewMetricSetSheet({
   const [visibility, setVisibility] = useState<"team" | "private">("team")
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
 
-  const uniqueDomains = useMemo(() => {
-    const map = new Map<string, Domain>()
-    for (const domain of domains) {
-      if (!map.has(domain.id)) {
-        map.set(domain.id, domain)
+  const uniqueTenants = useMemo(() => {
+    const map = new Map<string, Tenant>()
+    for (const tenant of tenants) {
+      if (!map.has(tenant.id)) {
+        map.set(tenant.id, tenant)
       }
     }
     return Array.from(map.values())
-  }, [domains])
+  }, [tenants])
 
-  const [domainId, setDomainId] = useState<string>(uniqueDomains[0]?.id ?? "")
-  const [selectedMetricSlug, setSelectedMetricSlug] = useState<string>(metrics[0]?.slug ?? "")
-  // Use AlbumRef[] instead of string[] to support versioning
-  const [metricRefs, setMetricRefs] = useState<{ slug: string; version?: string }[]>([])
+  const [tenantId, setTenantId] = useState<string>(uniqueTenants[0]?.id ?? "")
+  const [selectedMetricFieldName, setSelectedMetricFieldName] = useState<string>(metrics[0]?.fieldName ?? "")
+  const [metricRefs, setMetricRefs] = useState<{ fieldName: string; version?: string }[]>([])
   const [message, setMessage] = useState<string | null>(null)
 
   const isEditMode = mode === "edit" && initialMetricSet
@@ -803,33 +803,32 @@ export function NewMetricSetSheet({
       setName(initialMetricSet.name)
       setDescription(initialMetricSet.description)
       setVisibility(initialMetricSet.visibility)
-      setDomainId(initialMetricSet.domain || uniqueDomains[0]?.id || "")
+      setTenantId(initialMetricSet.tenant || uniqueTenants[0]?.id || "")
       setSelectedTagIds(initialMetricSet.tags ?? [])
       
-      // Load existing refs or fallback to legacy metricSlugs
       if (initialMetricSet.metricRefs && initialMetricSet.metricRefs.length > 0) {
         setMetricRefs(initialMetricSet.metricRefs)
-      } else if (initialMetricSet.metricSlugs) {
-        setMetricRefs(initialMetricSet.metricSlugs.map(slug => ({ slug, version: "latest" })))
+      } else if (initialMetricSet.metricFieldNames) {
+        setMetricRefs(initialMetricSet.metricFieldNames.map(fieldName => ({ fieldName, version: "latest" })))
       } else {
         setMetricRefs([])
       }
 
-      const firstSlug = initialMetricSet.metricRefs?.[0]?.slug ?? initialMetricSet.metricSlugs?.[0] ?? metrics[0]?.slug ?? ""
-      setSelectedMetricSlug(firstSlug)
+      const firstFieldName = initialMetricSet.metricRefs?.[0]?.fieldName ?? initialMetricSet.metricFieldNames?.[0] ?? metrics[0]?.fieldName ?? ""
+      setSelectedMetricFieldName(firstFieldName)
     } else {
       setName("")
       setDescription("")
       setVisibility("team")
-      setDomainId(initialDomainId || uniqueDomains[0]?.id || "")
+      setTenantId(initialTenantId || uniqueTenants[0]?.id || "")
       setSelectedTagIds([])
       
-      if (initialMetricSlugs) {
-        setMetricRefs(initialMetricSlugs.map(slug => ({ slug, version: "latest" })))
-        setSelectedMetricSlug(initialMetricSlugs[0] ?? metrics[0]?.slug ?? "")
+      if (initialMetricFieldNames) {
+        setMetricRefs(initialMetricFieldNames.map(fieldName => ({ fieldName, version: "latest" })))
+        setSelectedMetricFieldName(initialMetricFieldNames[0] ?? metrics[0]?.fieldName ?? "")
       } else {
         setMetricRefs([])
-        setSelectedMetricSlug(metrics[0]?.slug ?? "")
+        setSelectedMetricFieldName(metrics[0]?.fieldName ?? "")
       }
     }
 
@@ -838,25 +837,24 @@ export function NewMetricSetSheet({
     open,
     isEditMode,
     initialMetricSet,
-    initialMetricSlugs,
-    initialDomainId,
+    initialMetricFieldNames,
+    initialTenantId,
     metrics,
-    uniqueDomains,
+    uniqueTenants,
   ])
 
   const handleAddMetricRef = () => {
-    if (!selectedMetricSlug) return
-    if (metricRefs.some(ref => ref.slug === selectedMetricSlug)) {
-      setMessage(`Metric "${selectedMetricSlug}" is already added to this metric set.`)
+    if (!selectedMetricFieldName) return
+    if (metricRefs.some(ref => ref.fieldName === selectedMetricFieldName)) {
+      setMessage(`Metric "${selectedMetricFieldName}" is already added to this metric set.`)
       return
     }
-    // Default to "latest" version when adding
-    setMetricRefs((prev) => [...prev, { slug: selectedMetricSlug, version: "latest" }])
+    setMetricRefs((prev) => [...prev, { fieldName: selectedMetricFieldName, version: "latest" }])
     setMessage(null)
   }
 
-  const handleRemoveMetricRef = (slugToRemove: string) => {
-    setMetricRefs((prev) => prev.filter((ref) => ref.slug !== slugToRemove))
+  const handleRemoveMetricRef = (fieldNameToRemove: string) => {
+    setMetricRefs((prev) => prev.filter((ref) => ref.fieldName !== fieldNameToRemove))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -876,7 +874,7 @@ export function NewMetricSetSheet({
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
 
-    const metricSlugs = metricRefs.map(r => r.slug)
+    const metricFieldNames = metricRefs.map(r => r.fieldName)
 
     if (isEditMode && initialMetricSet) {
       const updatedSet: Album = {
@@ -884,8 +882,8 @@ export function NewMetricSetSheet({
         name: trimmedName,
         description: description.trim(),
         visibility,
-        domain: domainId || "Custom",
-        metricSlugs, // Keep simplified list for backward compatibility if needed
+        tenant: tenantId || "Custom",
+        metricFieldNames,
         metricRefs,
         tags: selectedTagIds,
         updatedAt: nowIso,
@@ -910,8 +908,8 @@ export function NewMetricSetSheet({
         description: description.trim(),
         scope: "",
         visibility,
-        domain: domainId || "Custom",
-        metricSlugs,
+        tenant: tenantId || "Custom",
+        metricFieldNames,
         metricRefs,
         dimensionRefs: [],
         tags: selectedTagIds,
@@ -987,13 +985,13 @@ export function NewMetricSetSheet({
                 <div className="grid gap-5 pl-3">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">Domain</label>
-                      <Select value={domainId} onValueChange={(value) => setDomainId(value)}>
+                      <label className="text-xs font-semibold text-slate-700">Tenant</label>
+                      <Select value={tenantId} onValueChange={(value) => setTenantId(value)}>
                         <SelectTrigger className="h-9 text-sm">
-                          <SelectValue placeholder="Select a domain" />
+                          <SelectValue placeholder="Select a tenant" />
                         </SelectTrigger>
                         <SelectContent>
-                          {uniqueDomains.map((d) => (
+                          {uniqueTenants.map((d) => (
                              <SelectItem key={d.id} value={d.id}>
                                {d.name}
                              </SelectItem>
@@ -1058,14 +1056,14 @@ export function NewMetricSetSheet({
                 </h3>
                 <div className="pl-3 space-y-3">
                   <div className="flex gap-2">
-                    <Select value={selectedMetricSlug} onValueChange={(value) => setSelectedMetricSlug(value)}>
+                    <Select value={selectedMetricFieldName} onValueChange={(value) => setSelectedMetricFieldName(value)}>
                       <SelectTrigger className="h-9 text-sm flex-1">
                         <SelectValue placeholder="Select metric to add" />
                       </SelectTrigger>
                       <SelectContent>
                         {metrics.map((m) => (
-                          <SelectItem key={m.id} value={m.slug}>
-                            {m.businessName} <span className="text-slate-400 ml-1">({m.slug})</span>
+                          <SelectItem key={m.id} value={m.fieldName}>
+                            {m.businessName} <span className="text-slate-400 ml-1">({m.fieldName})</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -1079,24 +1077,24 @@ export function NewMetricSetSheet({
                     {metricRefs.length > 0 ? (
                       <div className="divide-y divide-slate-100">
                         {metricRefs.map((ref) => {
-                          const metric = metrics.find((m) => m.slug === ref.slug)
+                          const metric = metrics.find((m) => m.fieldName === ref.fieldName)
                           return (
-                            <div key={ref.slug} className="flex items-center justify-between p-3 hover:bg-white transition-colors">
+                            <div key={ref.fieldName} className="flex items-center justify-between p-3 hover:bg-white transition-colors">
                               <div className="flex flex-col">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium text-slate-900">{metric?.businessName ?? ref.slug}</span>
+                                  <span className="text-sm font-medium text-slate-900">{metric?.businessName ?? ref.fieldName}</span>
                                   <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-500 border-slate-200 font-mono h-5 px-1.5">
                                     {ref.version ?? "latest"}
                                   </Badge>
                                 </div>
-                                <span className="text-xs font-mono text-slate-500">{ref.slug}</span>
+                                <span className="text-xs font-mono text-slate-500">{ref.fieldName}</span>
                               </div>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="sm"
                                 className="h-7 w-7 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full"
-                                onClick={() => handleRemoveMetricRef(ref.slug)}
+                                onClick={() => handleRemoveMetricRef(ref.fieldName)}
                               >
                                 <span className="sr-only">Remove</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -1330,13 +1328,13 @@ function TagManagementSheet({
   )
 }
 
-interface NewDomainSheetProps {
+interface NewTenantSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateDomain: (payload: { id: string; name: string; description: string; sourceType: string; sourceLink: string }) => void
+  onCreateTenant: (payload: { id: string; name: string; description: string; sourceType: string; sourceLink: string }) => void
 }
 
-export function NewDomainSheet({ open, onOpenChange, onCreateDomain }: NewDomainSheetProps) {
+export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenantSheetProps) {
   const [id, setId] = useState("")
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
@@ -1365,11 +1363,8 @@ export function NewDomainSheet({ open, onOpenChange, onCreateDomain }: NewDomain
       setMessage("ID, name, data source type and data source link are required.")
       return
     }
-    if (!/^\d+$/.test(trimmedId)) {
-      setMessage("Domain ID must be digits only.")
-      return
-    }
-    onCreateDomain({
+    
+    onCreateTenant({
       id: trimmedId,
       name: trimmedName,
       description: description.trim(),
@@ -1384,20 +1379,17 @@ export function NewDomainSheet({ open, onOpenChange, onCreateDomain }: NewDomain
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
-          <SheetTitle className="text-sm font-semibold">New domain</SheetTitle>
+          <SheetTitle className="text-sm font-semibold">New tenant</SheetTitle>
         </SheetHeader>
         <div className="mt-4 pb-6">
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Domain ID</label>
+              <label className="text-xs font-medium text-zinc-700">Tenant ID</label>
               <Input
-                type="number"
-                inputMode="numeric"
-                pattern="\d*"
                 className="h-8 text-xs"
                 value={id}
                 onChange={(e) => setId(e.target.value)}
-                placeholder="e.g. 1001"
+                placeholder="e.g. strategy-data"
               />
             </div>
             <div className="space-y-2">
@@ -1406,7 +1398,7 @@ export function NewDomainSheet({ open, onOpenChange, onCreateDomain }: NewDomain
                 className="h-8 text-xs"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Strategic Goal Incentive"
+                placeholder="Strategy Data"
               />
             </div>
             <div className="space-y-2">
@@ -1416,7 +1408,7 @@ export function NewDomainSheet({ open, onOpenChange, onCreateDomain }: NewDomain
                 className="text-xs"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="High-level description of this business domain."
+                placeholder="High-level description of this business tenant."
               />
             </div>
             <div className="space-y-2">
@@ -1440,7 +1432,7 @@ export function NewDomainSheet({ open, onOpenChange, onCreateDomain }: NewDomain
             </div>
             <div className="flex items-center justify-between">
               <Button type="submit" size="sm" className="text-xs">
-                Create domain (mock)
+                Create tenant (mock)
               </Button>
               {message && <p className="text-[11px] text-zinc-600">{message}</p>}
             </div>
@@ -1632,7 +1624,7 @@ export function NewDimensionSheet({
                 <div className="grid gap-5 pl-3">
                   <div className="grid grid-cols-2 gap-4">
                      <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">Dimension ID (slug)</label>
+                      <label className="text-xs font-semibold text-slate-700">Dimension ID (field name)</label>
                       <Input
                         className="h-9 text-sm font-mono"
                         value={id}
@@ -1733,22 +1725,22 @@ interface MetricSetDetailSheetProps {
 function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensions }: MetricSetDetailSheetProps) {
   const metricsInSet = useMemo(() => {
     return metricSet.metricRefs.map((ref) => {
-      const metric = metrics.find((m) => m.slug === ref.slug)
+      const metric = metrics.find((m) => m.fieldName === ref.fieldName)
       return {
         ...metric,
         refVersion: ref.version,
-        slug: ref.slug, // ensure slug exists even if metric not found
+        fieldName: ref.fieldName,
       }
     })
   }, [metrics, metricSet])
 
   const dimensionsInSet = useMemo(() => {
     return metricSet.dimensionRefs.map((ref) => {
-      const dimension = dimensions.find((d) => d.slug === ref.slug)
+      const dimension = dimensions.find((d) => d.fieldName === ref.fieldName)
       return {
         ...dimension,
         refVersion: ref.version,
-        slug: ref.slug,
+        fieldName: ref.fieldName,
       }
     })
   }, [dimensions, metricSet])
@@ -1763,7 +1755,7 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensio
           <div className="space-y-1">
             <p className="text-sm font-semibold text-zinc-900">{metricSet.name}</p>
             <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
-              <span>Domain: {metricSet.domain}</span>
+              <span>Tenant: {metricSet.tenant}</span>
               <span>Visibility: {metricSet.visibility}</span>
               {metricSet.updatedAt && <span>Updated: {formatDate(metricSet.updatedAt)}</span>}
             </div>
@@ -1781,16 +1773,16 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensio
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs">Name</TableHead>
-                    <TableHead className="text-xs">Slug</TableHead>
+                    <TableHead className="text-xs">Field Name</TableHead>
                     <TableHead className="text-xs">Version</TableHead>
                     <TableHead className="text-xs">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {metricsInSet.map((m) => (
-                    <TableRow key={m.slug} className="hover:bg-zinc-50">
+                    <TableRow key={m.fieldName} className="hover:bg-zinc-50">
                       <TableCell className="text-xs font-medium text-zinc-900">{m.businessName ?? "-"}</TableCell>
-                      <TableCell className="font-mono text-[11px] text-zinc-500">{m.slug}</TableCell>
+                      <TableCell className="font-mono text-[11px] text-zinc-500">{m.fieldName}</TableCell>
                       <TableCell className="text-xs text-zinc-700">
                         <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 font-mono">
                           {m.refVersion ?? "latest"}
@@ -1823,16 +1815,16 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensio
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs">Name</TableHead>
-                    <TableHead className="text-xs">Slug</TableHead>
+                    <TableHead className="text-xs">Field Name</TableHead>
                     <TableHead className="text-xs">Version</TableHead>
                     <TableHead className="text-xs">Type</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {dimensionsInSet.map((d) => (
-                    <TableRow key={d.slug} className="hover:bg-zinc-50">
+                    <TableRow key={d.fieldName} className="hover:bg-zinc-50">
                       <TableCell className="text-xs font-medium text-zinc-900">{d.name ?? "-"}</TableCell>
-                      <TableCell className="font-mono text-[11px] text-zinc-500">{d.slug}</TableCell>
+                      <TableCell className="font-mono text-[11px] text-zinc-500">{d.fieldName}</TableCell>
                       <TableCell className="text-xs text-zinc-700">
                         <Badge variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 font-mono">
                           {d.refVersion ?? "latest"}
@@ -1901,7 +1893,7 @@ function CategoryManagementView({ categories, metrics }: CategoryManagementViewP
     if (!root) return 0
 
     const countNode = (node: CategoryNode): number => {
-      let total = node.metricSlugs?.length ?? 0
+      let total = node.metricFieldNames?.length ?? 0
       if (node.children) {
         for (const child of node.children) {
           total += countNode(child)
@@ -1911,12 +1903,6 @@ function CategoryManagementView({ categories, metrics }: CategoryManagementViewP
     }
 
     return countNode(root)
-  }
-
-  const handleDragEnd = (result: any) => {
-    // Mock drag end logic - just log for now as state is top-level
-    console.log("Drag ended", result)
-    // In a real app, this would update the category tree structure
   }
 
   const handleBulkMove = () => {
@@ -2007,12 +1993,6 @@ interface CategoryTreeProps {
 }
 
 function CategoryTree({ nodes, metrics, depth }: CategoryTreeProps) {
-  // Since we can't easily install dnd-kit or react-beautiful-dnd in this environment without potential issues,
-  // we will implement a basic visual structure that implies drag capability (UI only) 
-  // or use HTML5 draggable if requested.
-  // The user asked for "drag and drop" support.
-  // Let's add basic HTML5 draggable attributes to the list items for demonstration.
-
   const handleDragStart = (e: React.DragEvent, nodeId: string) => {
     e.dataTransfer.setData("text/plain", nodeId)
   }
@@ -2021,7 +2001,6 @@ function CategoryTree({ nodes, metrics, depth }: CategoryTreeProps) {
     e.preventDefault()
     const sourceId = e.dataTransfer.getData("text/plain")
     console.log(`Dropped ${sourceId} onto ${targetId}`)
-    // Logic to update tree would go here
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -2031,8 +2010,8 @@ function CategoryTree({ nodes, metrics, depth }: CategoryTreeProps) {
   return (
     <ul className="space-y-1 text-xs">
       {nodes.map((node) => {
-        const metricNames = (node.metricSlugs ?? []).map(
-          (slug) => metrics.find((m) => m.slug === slug)?.businessName ?? slug,
+        const metricNames = (node.metricFieldNames ?? []).map(
+          (fieldName) => metrics.find((m) => m.fieldName === fieldName)?.businessName ?? fieldName,
         )
         return (
           <li 

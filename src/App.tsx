@@ -1,8 +1,8 @@
+
 import { useMemo, useState, useEffect } from "react"
 import "./App.css"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart3, Database, LayoutGrid, Plus, LineChart } from "lucide-react"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -31,7 +31,7 @@ import {
   CategoryNode,
   Dimension,
   Tag,
-  Domain
+  Tenant
 } from "@/types"
 
 // ---- Types ----
@@ -85,54 +85,54 @@ function App() {
   const [tags, setTags] = useState<Tag[]>(INITIAL_TAGS)
   const [activeTopNav, setActiveTopNav] = useState<TopNav>("home")
   const [activeManagementSection, setActiveManagementSection] = useState<ManagementSection>("metric")
-  const [selectedMetricSlug, setSelectedMetricSlug] = useState<string | null>(null)
+  const [selectedMetricFieldName, setSelectedMetricFieldName] = useState<string | null>(null)
   const [isMetricProfileOpen, setIsMetricProfileOpen] = useState(false)
-  const [activeGlobalDomainId, setActiveGlobalDomainId] = useState<string | null>(null)
+  const [activeGlobalTenantId, setActiveGlobalTenantId] = useState<string | null>(null)
   const [isDerivedMetricSheetOpen, setIsDerivedMetricSheetOpen] = useState(false)
-  const [derivedMetricBaseSlug, setDerivedMetricBaseSlug] = useState<string | null>(null)
+  const [derivedMetricBaseFieldName, setDerivedMetricBaseFieldName] = useState<string | null>(null)
 
-  const uniqueDomains = useMemo(() => {
-    const map = new Map<string, Domain>()
-    for (const domain of data.domains) {
-      if (!map.has(domain.id)) {
-        map.set(domain.id, domain)
+  const uniqueTenants = useMemo(() => {
+    const map = new Map<string, Tenant>()
+    for (const tenant of data.tenants) {
+      if (!map.has(tenant.id)) {
+        map.set(tenant.id, tenant)
       }
     }
     return Array.from(map.values())
-  }, [data.domains])
+  }, [data.tenants])
 
-  const permittedDomains = useMemo(
-    () => uniqueDomains.filter((d) => d.permitted !== false),
-    [uniqueDomains],
+  const permittedTenants = useMemo(
+    () => uniqueTenants.filter((d) => d.permitted !== false),
+    [uniqueTenants],
   )
 
   useEffect(() => {
-    if (!uniqueDomains.length) return
+    if (!uniqueTenants.length) return
 
-    setActiveGlobalDomainId((current) => {
+    setActiveGlobalTenantId((current) => {
       if (current) return current
-      const fallbackId = permittedDomains[0]?.id ?? uniqueDomains[0]?.id ?? null
+      const fallbackId = permittedTenants[0]?.id ?? uniqueTenants[0]?.id ?? null
       return fallbackId
     })
-  }, [uniqueDomains, permittedDomains])
+  }, [uniqueTenants, permittedTenants])
 
   const selectedMetric = useMemo(
-    () => data.metrics.find((m) => m.slug === selectedMetricSlug) ?? null,
-    [data.metrics, selectedMetricSlug],
+    () => data.metrics.find((m) => m.fieldName === selectedMetricFieldName) ?? null,
+    [data.metrics, selectedMetricFieldName],
   )
 
   const derivedBaseMetric = useMemo(
-    () => (derivedMetricBaseSlug ? data.metrics.find((m) => m.slug === derivedMetricBaseSlug) ?? null : null),
-    [data.metrics, derivedMetricBaseSlug],
+    () => (derivedMetricBaseFieldName ? data.metrics.find((m) => m.fieldName === derivedMetricBaseFieldName) ?? null : null),
+    [data.metrics, derivedMetricBaseFieldName],
   )
 
-  const handleOpenMetricProfile = (slug: string) => {
-    setSelectedMetricSlug(slug)
+  const handleOpenMetricProfile = (fieldName: string) => {
+    setSelectedMetricFieldName(fieldName)
     setIsMetricProfileOpen(true)
   }
 
   const handleOpenDerivedMetricSheet = (metric: Metric) => {
-    setDerivedMetricBaseSlug(metric.slug)
+    setDerivedMetricBaseFieldName(metric.fieldName)
     setIsDerivedMetricSheetOpen(true)
   }
 
@@ -142,12 +142,12 @@ function App() {
     const newMetric: Metric = {
       id: `m-${now}`,
       businessName: payload.businessName,
-      slug: payload.slug,
+      fieldName: payload.fieldName,
       categoryPath: payload.categoryPath.length ? payload.categoryPath : ["Monetization"],
       businessDefinition: payload.businessDefinition,
       technicalDefinition: payload.technicalDefinition,
       status: "Draft",
-      domain: payload.categoryPath[0] ?? "Monetization",
+      tenant: payload.categoryPath[0] ?? "Strategy Data", // Default tenant
       owners: {
         businessOwner: "TBD",
         techOwner: "TBD",
@@ -168,7 +168,7 @@ function App() {
       ],
       trend30d: createFlatTrend(),
       topDimensions: [],
-      boundDimensionSlugs: payload.query.analysisDimensions,
+      boundDimensionFieldNames: payload.query.analysisDimensions,
       createdAt: nowIso,
       updatedAt: nowIso,
       heat: 0,
@@ -190,13 +190,13 @@ function App() {
   }
 
   const handleCreateDerivedMetric = (spec: DerivedMetricSpec) => {
-    if (!derivedMetricBaseSlug) return
+    if (!derivedMetricBaseFieldName) return
 
-    const base = data.metrics.find((m) => m.slug === derivedMetricBaseSlug)
+    const base = data.metrics.find((m) => m.fieldName === derivedMetricBaseFieldName)
     if (!base) return
 
-    if (data.metrics.some((m) => m.slug === spec.slug)) {
-      console.warn(`[mock] Metric slug "${spec.slug}" already exists. Skipping derived metric creation.`)
+    if (data.metrics.some((m) => m.fieldName === spec.fieldName)) {
+      console.warn(`[mock] Metric fieldName "${spec.fieldName}" already exists. Skipping derived metric creation.`)
       return
     }
 
@@ -209,13 +209,13 @@ function App() {
       const baseQuery = base.queryDefinitions[0]
 
       const filterClauses = spec.dimensionFilters
-        .map(({ dimensionSlug, values }) => {
+        .map(({ dimensionFieldName, values }) => {
           const tokens = values
             .split(/,|\n/)
             .map((v) => v.trim())
             .filter(Boolean)
           if (!tokens.length) return null
-          return `${dimensionSlug} IN (${tokens.join(", ")})`
+          return `${dimensionFieldName} IN (${tokens.join(", ")})`
         })
         .filter((clause): clause is string => clause !== null)
 
@@ -239,7 +239,7 @@ function App() {
           : {
               id: `q-${now}`,
               type: "Computed expression",
-              source: base.slug,
+              source: base.fieldName,
               originField: base.queryDefinitions[0]?.originField ?? "",
               aggregate: base.queryDefinitions[0]?.aggregate ?? "SUM",
               businessDate: base.queryDefinitions[0]?.businessDate ?? "",
@@ -247,30 +247,30 @@ function App() {
               analysisDimensions: [],
             }
 
-      const boundDimensionSlugs = Array.from(
-        new Set([...base.boundDimensionSlugs, ...spec.dimensionFilters.map((f) => f.dimensionSlug)]),
+      const boundDimensionFieldNames = Array.from(
+        new Set([...base.boundDimensionFieldNames, ...spec.dimensionFilters.map((f) => f.dimensionFieldName)]),
       )
 
       const businessDefinition = spec.description?.trim()
         ? spec.description.trim()
         : `${base.businessDefinition} (derived with filters on ${spec.dimensionFilters
-            .map((f) => f.dimensionSlug)
+            .map((f) => f.dimensionFieldName)
             .join(", ")})`
 
       newMetric = {
         id: `m-${now}`,
         businessName: spec.businessName,
-        slug: spec.slug,
+        fieldName: spec.fieldName,
         categoryPath: base.categoryPath,
         businessDefinition,
         technicalDefinition,
         status: "Draft",
-        domain: base.domain,
+        tenant: base.tenant,
         owners: base.owners,
         queryDefinitions: [newQuery],
         trend30d: createFlatTrend(),
         topDimensions: base.topDimensions,
-        boundDimensionSlugs,
+        boundDimensionFieldNames,
         createdAt: nowIso,
         updatedAt: nowIso,
         heat: 0,
@@ -285,7 +285,7 @@ function App() {
         ],
       }
     } else {
-      const other = data.metrics.find((m) => m.slug === spec.otherMetricSlug && m.domain === base.domain)
+      const other = data.metrics.find((m) => m.fieldName === spec.otherMetricFieldName && m.tenant === base.tenant)
       if (!other) return
 
       const opSymbol =
@@ -294,21 +294,21 @@ function App() {
       const coefficient =
         typeof spec.coefficient === "number" && !Number.isNaN(spec.coefficient) ? spec.coefficient : 1
 
-      const rhs = coefficient !== 1 ? `${other.slug} * ${coefficient}` : other.slug
-      const expression = `${base.slug} ${opSymbol} ${rhs}`
+      const rhs = coefficient !== 1 ? `${other.fieldName} * ${coefficient}` : other.fieldName
+      const expression = `${base.fieldName} ${opSymbol} ${rhs}`
 
       const technicalDefinition = [
         "-- Derived arithmetic metric",
-        `-- Base: ${base.slug}`,
-        `-- Other: ${other.slug}`,
+        `-- Base: ${base.fieldName}`,
+        `-- Other: ${other.fieldName}`,
         "SELECT",
-        `  ${expression} AS ${spec.slug};`,
+        `  ${expression} AS ${spec.fieldName};`,
       ].join("\n")
 
       const query: MetricQueryDefinition = {
         id: `q-${now}`,
         type: "Computed expression",
-        source: `${base.slug},${other.slug}`,
+        source: `${base.fieldName},${other.fieldName}`,
         originField: "derived_expression",
         aggregate: "NONE",
         businessDate: base.queryDefinitions[0]?.businessDate ?? "",
@@ -320,24 +320,24 @@ function App() {
         ? spec.description.trim()
         : `Derived metric: ${base.businessName} ${opSymbol} ${other.businessName}`
 
-      const boundDimensionSlugs = Array.from(
-        new Set([...base.boundDimensionSlugs, ...other.boundDimensionSlugs]),
+      const boundDimensionFieldNames = Array.from(
+        new Set([...base.boundDimensionFieldNames, ...other.boundDimensionFieldNames]),
       )
 
       newMetric = {
         id: `m-${now}`,
         businessName: spec.businessName,
-        slug: spec.slug,
+        fieldName: spec.fieldName,
         categoryPath: base.categoryPath,
         businessDefinition,
         technicalDefinition,
         status: "Draft",
-        domain: base.domain,
+        tenant: base.tenant,
         owners: base.owners,
         queryDefinitions: [query],
         trend30d: createFlatTrend(),
         topDimensions: base.topDimensions,
-        boundDimensionSlugs,
+        boundDimensionFieldNames,
         createdAt: nowIso,
         updatedAt: nowIso,
         heat: 0,
@@ -359,10 +359,10 @@ function App() {
     }))
     setIsDerivedMetricSheetOpen(false)
     setIsMetricProfileOpen(false)
-    setDerivedMetricBaseSlug(null)
+    setDerivedMetricBaseFieldName(null)
   }
 
-  const handleCreateDomain = (payload: {
+  const handleCreateTenant = (payload: {
     id: string
     name: string
     description: string
@@ -371,8 +371,8 @@ function App() {
   }) => {
     setData((prev) => ({
       ...prev,
-      domains: [
-        ...prev.domains,
+      tenants: [
+        ...prev.tenants,
         {
           id: payload.id,
           name: payload.name,
@@ -410,15 +410,15 @@ function App() {
     const newDimension: Dimension = {
       id: payload.id,
       name: payload.name,
-      slug: payload.id,
+      fieldName: payload.id,
       aliases: [],
       description: payload.description,
-      domain: "General",
+      tenant: "Strategy Data",
       version: "v1",
       scope: [],
       type: "enum",
       values: [],
-      boundMetricSlugs: [],
+      boundMetricFieldNames: [],
       category: payload.category,
       sourceLink: payload.sourceLink,
       createdAt: nowIso,
@@ -440,22 +440,22 @@ function App() {
     }))
   }
 
-  const handleUpdateMetric = (slug: string, payload: NewMetricPayload) => {
+  const handleUpdateMetric = (fieldName: string, payload: NewMetricPayload) => {
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
 
     setData((prev) => ({
       ...prev,
       metrics: prev.metrics.map((m) => {
-        if (m.slug !== slug) return m
+        if (m.fieldName !== fieldName) return m
         return {
           ...m,
           businessName: payload.businessName,
-          slug: payload.slug,
+          fieldName: payload.fieldName,
           categoryPath: payload.categoryPath.length ? payload.categoryPath : ["Monetization"],
           businessDefinition: payload.businessDefinition,
           technicalDefinition: payload.technicalDefinition,
-          domain: payload.categoryPath[0] ?? m.domain,
+          tenant: payload.categoryPath[0] ?? m.tenant,
           larkSheetLink: payload.larkSheetLink?.trim() || undefined,
           queryDefinitions: [
             {
@@ -470,7 +470,7 @@ function App() {
               link: payload.query.link ?? undefined,
             },
           ],
-          boundDimensionSlugs: payload.query.analysisDimensions,
+          boundDimensionFieldNames: payload.query.analysisDimensions,
           updatedAt: nowIso,
           history: [
             ...(m.history ?? []),
@@ -487,21 +487,21 @@ function App() {
     }))
   }
 
-  const handleDeleteMetric = (slug: string) => {
+  const handleDeleteMetric = (fieldName: string) => {
     setData((prev) => ({
       ...prev,
-      metrics: prev.metrics.filter((m) => m.slug !== slug),
+      metrics: prev.metrics.filter((m) => m.fieldName !== fieldName),
       dimensions: prev.dimensions.map((d) => ({
         ...d,
-        boundMetricSlugs: d.boundMetricSlugs.filter((s) => s !== slug),
+        boundMetricFieldNames: d.boundMetricFieldNames.filter((s) => s !== fieldName),
       })),
     }))
 
-      setMetricSetsState((prevSets) =>
+    setMetricSetsState((prevSets) =>
       prevSets.map((set) => ({
         ...set,
-        metricRefs: set.metricRefs.filter((ref) => ref.slug !== slug),
-        metricSlugs: set.metricSlugs ? set.metricSlugs.filter((s) => s !== slug) : [],
+        metricRefs: set.metricRefs.filter((ref) => ref.fieldName !== fieldName),
+        metricFieldNames: set.metricFieldNames ? set.metricFieldNames.filter((s) => s !== fieldName) : [],
       })),
     )
   }
@@ -554,8 +554,8 @@ function App() {
     setActiveTopNav(nav)
   }
 
-  const domainSelectValue =
-    activeGlobalDomainId ?? permittedDomains[0]?.id ?? uniqueDomains[0]?.id ?? ""
+  const tenantSelectValue =
+    activeGlobalTenantId ?? permittedTenants[0]?.id ?? uniqueTenants[0]?.id ?? ""
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
@@ -584,14 +584,14 @@ function App() {
             </div>
 
             <div className="flex items-center gap-3 ml-4 border-l-2 border-slate-100 pl-6">
-               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Domain</span>
-               {data.domains.length > 0 && (
-                  <Select value={domainSelectValue} onValueChange={(value) => setActiveGlobalDomainId(value)}>
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tenant</span>
+               {data.tenants.length > 0 && (
+                  <Select value={tenantSelectValue} onValueChange={(value) => setActiveGlobalTenantId(value)}>
                     <SelectTrigger className="h-8 w-[150px] border-slate-200 bg-white text-sm rounded-lg hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:ring-2 focus:ring-blue-100">
-                      <SelectValue placeholder="Select domain" />
+                      <SelectValue placeholder="Select tenant" />
                     </SelectTrigger>
                     <SelectContent>
-                      {(permittedDomains.length ? permittedDomains : uniqueDomains).map((d) => (
+                      {(permittedTenants.length ? permittedTenants : uniqueTenants).map((d) => (
                         <SelectItem key={d.id} value={d.id}>
                           {d.name}
                         </SelectItem>
@@ -657,12 +657,12 @@ function App() {
               <MetricsWorkspaceView
                 metrics={data.metrics}
                 metricSets={metricSetsState}
-                domains={data.domains}
+                tenants={data.tenants}
                 dimensionTree={data.dimensionTree}
                 dimensions={data.dimensions}
                 categories={data.categories}
                 tags={tags}
-                activeGlobalDomainId={activeGlobalDomainId}
+                activeGlobalTenantId={activeGlobalTenantId}
                 onOpenMetric={handleOpenMetricProfile}
                 onRegisterMetric={handleRegisterMetric}
                 onMetricSetsChange={setMetricSetsState}
@@ -687,10 +687,10 @@ function App() {
                 tags={tags}
                 dimensions={data.dimensions}
                 categories={data.categories}
-                domains={data.domains}
+                tenants={data.tenants}
                 onOpenMetricProfile={handleOpenMetricProfile}
                 onRegisterMetric={handleRegisterMetric}
-                onCreateDomain={handleCreateDomain}
+                onCreateTenant={handleCreateTenant}
                 onCreateCategory={handleCreateCategory}
                 onCreateDimension={handleCreateDimension}
                 onUpdateMetric={handleUpdateMetric}
@@ -722,7 +722,7 @@ function App() {
             onOpenChange={(open) => {
               setIsDerivedMetricSheetOpen(open)
               if (!open) {
-                setDerivedMetricBaseSlug(null)
+                setDerivedMetricBaseFieldName(null)
               }
             }}
             onCreate={handleCreateDerivedMetric}

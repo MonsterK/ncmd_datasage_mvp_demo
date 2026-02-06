@@ -27,8 +27,8 @@ export interface MetricProfileViewProps {
 
 export function MetricProfileView({ metric, dimensions, onDeriveMetric }: MetricProfileViewProps) {
   const boundDimensions = useMemo(
-    () => dimensions.filter((d) => metric.boundDimensionSlugs.includes(d.slug)),
-    [dimensions, metric.boundDimensionSlugs],
+    () => dimensions.filter((d) => metric.boundDimensionFieldNames.includes(d.fieldName)),
+    [dimensions, metric.boundDimensionFieldNames],
   )
 
   return (
@@ -43,11 +43,11 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
               </Badge>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">{metric.slug}</span>
+              <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">{metric.fieldName}</span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-600">{metric.categoryPath.join(" › ")}</span>
               <span className="text-slate-300">•</span>
-              <span className="text-slate-600">Domain: {metric.domain}</span>
+              <span className="text-slate-600">Tenant: {metric.tenant}</span>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
@@ -153,7 +153,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
                 <div className="flex flex-wrap gap-2 mt-2">
                   {boundDimensions.map((d) => (
                     <Badge key={d.id} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 px-2 py-1">
-                      {d.name} <span className="ml-1 opacity-50 font-normal">({d.slug})</span>
+                      {d.name} <span className="ml-1 opacity-50 font-normal">({d.fieldName})</span>
                     </Badge>
                   ))}
                 </div>

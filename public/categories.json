@@ -11,12 +11,12 @@
             {
               "id": "c1-1-1",
               "name": "SGI",
-              "metricSlugs": ["sgi_payout"]
+              "metricFieldNames": ["spp_revenue"]
             },
             {
               "id": "c1-1-2",
               "name": "QBR",
-              "metricSlugs": ["qbr_revenue"]
+              "metricFieldNames": ["qbr_revenue"]
             }
           ]
         },
@@ -27,7 +27,7 @@
             {
               "id": "c1-2-1",
               "name": "Creators",
-              "metricSlugs": ["active_monetized_creators"]
+              "metricFieldNames": ["active_monetized_creators"]
             }
           ]
         }

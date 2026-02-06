@@ -60,7 +60,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
     if (q) {
       result = result.filter(d => 
         d.name.toLowerCase().includes(q) || 
-        d.slug.toLowerCase().includes(q) ||
+        d.fieldName.toLowerCase().includes(q) ||
         d.description?.toLowerCase().includes(q)
       )
     }
@@ -74,7 +74,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
         return a.name.localeCompare(b.name)
       }
       if (sortField === "usage") {
-        return b.boundMetricSlugs.length - a.boundMetricSlugs.length
+        return b.boundMetricFieldNames.length - a.boundMetricFieldNames.length
       }
       // updatedAt
       const tA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
@@ -107,7 +107,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
             <div className="relative flex-1 max-w-2xl">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Search dimensions by name, slug, or description..."
+                placeholder="Search dimensions by name, field name, or description..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10 h-11 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
@@ -204,7 +204,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                           {dim.name}
                         </CardTitle>
                         <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-                          <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{dim.slug}</span>
+                          <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{dim.fieldName}</span>
                         </div>
                       </div>
                       <Badge 
@@ -223,13 +223,13 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 text-xs text-slate-600">
                         <Database className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="truncate">{dim.domain}</span>
+                        <span className="truncate">{dim.tenant}</span>
                       </div>
                       
                       <div className="flex items-end justify-between gap-2 pt-2">
                         <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
                           <Share2 className="h-3 w-3 text-blue-500" />
-                          <span>{dim.boundMetricSlugs.length} Metrics</span>
+                          <span>{dim.boundMetricFieldNames.length} Metrics</span>
                         </div>
                         
                         {dim.values && dim.values.length > 0 && (
@@ -254,9 +254,9 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                 <TableHeader className="bg-slate-50">
                   <TableRow>
                     <TableHead>Dimension Name</TableHead>
-                    <TableHead>Slug</TableHead>
+                    <TableHead>Field Name</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Domain</TableHead>
+                    <TableHead>Tenant</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Usage</TableHead>
                     <TableHead className="text-right">Updated</TableHead>
@@ -270,7 +270,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                       onClick={() => handleDimensionClick(d)}
                     >
                       <TableCell className="font-medium text-slate-900">{d.name}</TableCell>
-                      <TableCell className="font-mono text-xs text-slate-500">{d.slug}</TableCell>
+                      <TableCell className="font-mono text-xs text-slate-500">{d.fieldName}</TableCell>
                       <TableCell>
                          <Badge 
                           variant="secondary" 
@@ -279,9 +279,9 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                           {d.type}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-600">{d.domain}</TableCell>
+                      <TableCell className="text-xs text-slate-600">{d.tenant}</TableCell>
                       <TableCell className="text-xs text-slate-600">{d.category ?? "-"}</TableCell>
-                      <TableCell className="text-xs text-slate-600">{d.boundMetricSlugs.length} metrics</TableCell>
+                      <TableCell className="text-xs text-slate-600">{d.boundMetricFieldNames.length} metrics</TableCell>
                       <TableCell className="text-xs text-slate-500 text-right">{d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : "-"}</TableCell>
                     </TableRow>
                   ))}
@@ -320,7 +320,7 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             </div>
             <div>
                <SheetTitle className="text-lg font-bold text-slate-900">{dimension.name}</SheetTitle>
-               <p className="font-mono text-xs text-slate-500">{dimension.slug}</p>
+               <p className="font-mono text-xs text-slate-500">{dimension.fieldName}</p>
             </div>
           </div>
         </SheetHeader>
@@ -334,8 +334,8 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
               </h3>
               <div className="grid grid-cols-2 gap-4 text-xs">
                  <div className="space-y-1">
-                   <span className="text-slate-500">Domain</span>
-                   <p className="font-medium text-slate-900">{dimension.domain}</p>
+                   <span className="text-slate-500">Tenant</span>
+                   <p className="font-medium text-slate-900">{dimension.tenant}</p>
                  </div>
                  <div className="space-y-1">
                    <span className="text-slate-500">Type</span>
@@ -364,7 +364,7 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                     <span className="text-[10px] font-medium text-orange-700/70 uppercase tracking-wide mt-1">Usage Heat</span>
                  </div>
                  <div className="flex-1 bg-blue-50 rounded-xl p-4 border border-blue-100 flex flex-col items-center justify-center text-center">
-                    <span className="text-2xl font-bold text-blue-600">{dimension.boundMetricSlugs.length}</span>
+                    <span className="text-2xl font-bold text-blue-600">{dimension.boundMetricFieldNames.length}</span>
                     <span className="text-[10px] font-medium text-blue-700/70 uppercase tracking-wide mt-1">Bound Metrics</span>
                  </div>
               </div>
@@ -376,15 +376,15 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                 <Share2 className="h-4 w-4 text-blue-500" />
                 Metric Lineage (Bound Metrics)
               </h3>
-              {dimension.boundMetricSlugs.length > 0 ? (
+              {dimension.boundMetricFieldNames.length > 0 ? (
                 <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
                    <div className="bg-slate-50/50 px-4 py-2 border-b border-slate-100 text-[10px] font-medium text-slate-500 uppercase tracking-wider">
                      Metrics using this dimension
                    </div>
                    <ul className="divide-y divide-slate-100">
-                     {dimension.boundMetricSlugs.map(slug => (
-                       <li key={slug} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                          <span className="text-xs font-medium text-slate-700">{slug}</span>
+                     {dimension.boundMetricFieldNames.map(fieldName => (
+                       <li key={fieldName} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                          <span className="text-xs font-medium text-slate-700">{fieldName}</span>
                           <ArrowRight className="h-3 w-3 text-slate-300" />
                        </li>
                      ))}

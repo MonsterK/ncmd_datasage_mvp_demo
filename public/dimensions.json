@@ -3,19 +3,19 @@
     {
       "id": "d1",
       "name": "Agency",
-      "slug": "agency",
+      "fieldName": "agency",
       "aliases": ["Partner", "Client"],
       "description": "Advertising agency or commercial partner.",
-      "domain": "SGI",
+      "tenant": "Strategy Data",
       "version": "v1",
-      "scope": ["SGI", "QBR"],
+      "scope": ["Strategy Data"],
       "type": "enum",
       "values": [
         { "code": "AGENCY_A", "label": "Agency A" },
         { "code": "AGENCY_B", "label": "Agency B" },
         { "code": "AGENCY_C", "label": "Agency C" }
       ],
-      "boundMetricSlugs": ["spp_revenue", "spp_revenue_penetration", "na_spp_revenue_penetration"],
+      "boundMetricFieldNames": ["spp_revenue", "spp_revenue_penetration", "na_spp_revenue_penetration"],
       "history": [
         {
           "version": "v1",
@@ -29,19 +29,19 @@
     {
       "id": "d2",
       "name": "Region",
-      "slug": "region",
+      "fieldName": "region",
       "aliases": ["Geo", "Market"],
       "description": "Geographical region where the revenue is recognized.",
-      "domain": "Global",
+      "tenant": "Strategy Data",
       "version": "v2",
-      "scope": ["SGI", "QBR", "Creator"],
+      "scope": ["Strategy Data", "Creative"],
       "type": "hierarchy",
       "values": [
         { "code": "NA", "label": "North America" },
         { "code": "EU", "label": "Europe" },
         { "code": "APAC", "label": "Asia Pacific" }
       ],
-      "boundMetricSlugs": ["spp_revenue", "qbr_revenue", "active_monetized_creators", "spp_revenue_penetration", "creator_rev_per_creator"],
+      "boundMetricFieldNames": ["spp_revenue", "qbr_revenue", "active_monetized_creators", "spp_revenue_penetration", "creator_rev_per_creator"],
       "history": [
         {
           "version": "v1",
@@ -62,19 +62,19 @@
     {
       "id": "d3",
       "name": "Platform",
-      "slug": "platform",
+      "fieldName": "platform",
       "aliases": ["Surface"],
       "description": "Product surface where monetization happens (e.g. Short Video, Live).",
-      "domain": "Creator",
+      "tenant": "Creative",
       "version": "v1",
-      "scope": ["Creator"],
+      "scope": ["Creative"],
       "type": "enum",
       "values": [
         { "code": "SHORT_VIDEO", "label": "Short Video" },
         { "code": "LIVE", "label": "Live Streaming" },
         { "code": "OTHER", "label": "Other" }
       ],
-      "boundMetricSlugs": ["active_monetized_creators", "creator_rev_per_creator"],
+      "boundMetricFieldNames": ["active_monetized_creators", "creator_rev_per_creator"],
       "history": [
         {
           "version": "v1",
@@ -88,19 +88,19 @@
     {
       "id": "d4",
       "name": "Vertical",
-      "slug": "vertical",
+      "fieldName": "vertical",
       "aliases": ["Industry"],
       "description": "Advertiser vertical for QBR revenue analysis.",
-      "domain": "QBR",
+      "tenant": "Strategy Data",
       "version": "v1",
-      "scope": ["QBR"],
+      "scope": ["Strategy Data"],
       "type": "enum",
       "values": [
         { "code": "E_COM", "label": "E-commerce" },
         { "code": "GAMING", "label": "Gaming" },
         { "code": "BRAND", "label": "Brand" }
       ],
-      "boundMetricSlugs": ["qbr_revenue", "creator_rev_per_creator"],
+      "boundMetricFieldNames": ["qbr_revenue", "creator_rev_per_creator"],
       "history": [
         {
           "version": "v1",

@@ -3,12 +3,12 @@
     {
       "id": "m1",
       "businessName": "S++ Revenue",
-      "slug": "spp_revenue",
+      "fieldName": "spp_revenue",
       "categoryPath": ["Monetization", "Revenue", "SGI"],
       "businessDefinition": "Total S++ revenue for qualifying agencies within the selected period.",
       "technicalDefinition": "SELECT biz_date, SUM(payout_amount) AS spp_revenue FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
       "status": "Active",
-      "domain": "SGI",
+      "tenant": "Strategy Data",
       "owners": {
         "businessOwner": "Monetization Strategy",
         "techOwner": "Ads Data Engineering"
@@ -45,7 +45,7 @@
         { "label": "Agency B", "value": 33 },
         { "label": "Agency C", "value": 25 }
       ],
-      "boundDimensionSlugs": ["agency", "region", "platform"],
+      "boundDimensionFieldNames": ["agency", "region", "platform"],
       "history": [
         {
           "version": "v1.0",
@@ -66,12 +66,12 @@
     {
       "id": "m2",
       "businessName": "QBR Revenue",
-      "slug": "qbr_revenue",
+      "fieldName": "qbr_revenue",
       "categoryPath": ["Monetization", "Revenue", "QBR"],
       "businessDefinition": "Net revenue recognized for quarterly business review scope.",
       "technicalDefinition": "SELECT biz_date, SUM(net_revenue) AS qbr_revenue FROM fact_qbr_revenue WHERE is_qbr = 1 GROUP BY biz_date",
       "status": "Active",
-      "domain": "QBR",
+      "tenant": "Strategy Data",
       "owners": {
         "businessOwner": "Global Monetization PMO",
         "techOwner": "Ads Data Engineering"
@@ -108,7 +108,7 @@
         { "label": "Europe", "value": 30 },
         { "label": "APAC", "value": 15 }
       ],
-      "boundDimensionSlugs": ["region", "vertical"],
+      "boundDimensionFieldNames": ["region", "vertical"],
       "history": [
         {
           "version": "v1.0",
@@ -122,12 +122,12 @@
     {
       "id": "m3",
       "businessName": "Active Monetized Creators",
-      "slug": "active_monetized_creators",
+      "fieldName": "active_monetized_creators",
       "categoryPath": ["Monetization", "Supply", "Creators"],
       "businessDefinition": "Number of creators with at least one monetization event in the selected period.",
       "technicalDefinition": "SELECT biz_date, COUNT(DISTINCT creator_id) AS active_monetized_creators FROM fact_creator_monetization WHERE biz_date BETWEEN :start_date AND :end_date",
       "status": "Draft",
-      "domain": "Creator",
+      "tenant": "Creative",
       "owners": {
         "businessOwner": "Creator Monetization PM",
         "techOwner": "Creator Data Engineering"
@@ -164,7 +164,7 @@
         { "label": "Live Streaming", "value": 25 },
         { "label": "Other", "value": 15 }
       ],
-      "boundDimensionSlugs": ["platform", "region"],
+      "boundDimensionFieldNames": ["platform", "region"],
       "history": [
         {
           "version": "v0.1",
@@ -178,12 +178,12 @@
     {
       "id": "m4",
       "businessName": "S++ Revenue Penetration",
-      "slug": "spp_revenue_penetration",
+      "fieldName": "spp_revenue_penetration",
       "categoryPath": ["Monetization", "Revenue", "SGI"],
       "businessDefinition": "S++ Revenue as a percentage of Total Revenue (or similar penetration logic).",
       "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / SUM(total_revenue) AS spp_revenue_penetration FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
       "status": "Draft",
-      "domain": "SGI",
+      "tenant": "Strategy Data",
       "owners": {
         "businessOwner": "Monetization Strategy",
         "techOwner": "Ads Data Engineering"
@@ -220,7 +220,7 @@
         { "label": "Agency B", "value": 0.12 },
         { "label": "Agency C", "value": 0.08 }
       ],
-      "boundDimensionSlugs": ["agency", "region"],
+      "boundDimensionFieldNames": ["agency", "region"],
       "history": [
         {
           "version": "v1.0",
@@ -234,12 +234,12 @@
     {
       "id": "m5",
       "businessName": "Creator Revenue per Active Creator",
-      "slug": "creator_rev_per_creator",
+      "fieldName": "creator_rev_per_creator",
       "categoryPath": ["Monetization", "Supply", "Creators"],
       "businessDefinition": "Average monetization revenue per active monetized creator.",
       "technicalDefinition": "SELECT biz_date, SUM(revenue) / COUNT(DISTINCT creator_id) AS creator_rev_per_creator FROM fact_creator_monetization WHERE biz_date BETWEEN :start_date AND :end_date",
       "status": "Active",
-      "domain": "Creator",
+      "tenant": "Creative",
       "owners": {
         "businessOwner": "Creator Monetization PM",
         "techOwner": "Creator Data Engineering"
@@ -276,7 +276,7 @@
         { "label": "Live Streaming", "value": 25 },
         { "label": "Other", "value": 10 }
       ],
-      "boundDimensionSlugs": ["platform", "region", "vertical"],
+      "boundDimensionFieldNames": ["platform", "region", "vertical"],
       "history": [
         {
           "version": "v1.0",
@@ -290,12 +290,12 @@
     {
       "id": "m6",
       "businessName": "NA S++ Revenue Penetration",
-      "slug": "na_spp_revenue_penetration",
+      "fieldName": "na_spp_revenue_penetration",
       "categoryPath": ["Monetization", "Revenue", "SGI"],
       "businessDefinition": "S++ Revenue Penetration for North America region.",
       "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / SUM(total_revenue) AS na_spp_revenue_penetration FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date AND region = 'NA' GROUP BY biz_date",
       "status": "Active",
-      "domain": "SGI",
+      "tenant": "Strategy Data",
       "owners": {
         "businessOwner": "Monetization Strategy (NA)",
         "techOwner": "Ads Data Engineering"
@@ -332,7 +332,7 @@
         { "label": "Agency B", "value": 0.15 },
         { "label": "Agency C", "value": 0.10 }
       ],
-      "boundDimensionSlugs": ["agency"],
+      "boundDimensionFieldNames": ["agency"],
       "history": [
         {
           "version": "v1.0",

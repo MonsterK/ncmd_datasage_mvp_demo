@@ -29,9 +29,9 @@ import { getMetricTimestamp } from "@/lib/utils"
 
 export interface MetricSearchViewProps {
   metrics: Metric[]
-  onOpenMetric: (slug: string) => void
+  onOpenMetric: (fieldName: string) => void
   initialViewMode?: MetricViewMode
-  onAddToMetricSetFromSelection?: (metricSlugs: string[]) => void
+  onAddToMetricSetFromSelection?: (metricFieldNames: string[]) => void
 }
 
 export type MetricViewMode = "card" | "list"
@@ -49,7 +49,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
   const [hasQueryFilter, setHasQueryFilter] = useState<HasQueryFilter>("all")
   const [sortField, setSortField] = useState<MetricSortField>("updatedAt")
   const [sortDirection, setSortDirection] = useState<MetricSortDirection>("desc")
-  const [selectedMetricSlugs, setSelectedMetricSlugs] = useState<string[]>([])
+  const [selectedMetricFieldNames, setSelectedMetricFieldNames] = useState<string[]>([])
 
   const hasBulkSelection = typeof onAddToMetricSetFromSelection === "function"
 
@@ -91,7 +91,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
       result = result.filter((m) => {
         return (
           m.businessName.toLowerCase().includes(q) ||
-          m.slug.toLowerCase().includes(q) ||
+          m.fieldName.toLowerCase().includes(q) ||
           m.businessDefinition.toLowerCase().includes(q)
         )
       })
@@ -135,7 +135,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
   ])
 
   useEffect(() => {
-    setSelectedMetricSlugs((prev) => prev.filter((slug) => metrics.some((m) => m.slug === slug)))
+    setSelectedMetricFieldNames((prev) => prev.filter((fieldName) => metrics.some((m) => m.fieldName === fieldName)))
   }, [metrics])
 
   return (
@@ -245,18 +245,18 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                   <BarChart2 className="h-4 w-4 text-blue-600" />
                 </div>
                 <span className="text-sm text-blue-900 font-medium">
-                  {selectedMetricSlugs.length
-                    ? `${selectedMetricSlugs.length} metrics selected`
+                  {selectedMetricFieldNames.length
+                    ? `${selectedMetricFieldNames.length} metrics selected`
                     : "Select metrics to add to your set"}
                 </span>
               </div>
               <Button
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-                disabled={selectedMetricSlugs.length === 0}
+                disabled={selectedMetricFieldNames.length === 0}
                 onClick={() => {
-                  if (!onAddToMetricSetFromSelection || selectedMetricSlugs.length === 0) return
-                  onAddToMetricSetFromSelection(selectedMetricSlugs)
+                  if (!onAddToMetricSetFromSelection || selectedMetricFieldNames.length === 0) return
+                  onAddToMetricSetFromSelection(selectedMetricFieldNames)
                 }}
               >
                 Add to Metric Set
@@ -279,8 +279,8 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
               {filtered.map(metric => (
                 <Card 
                   key={metric.id} 
-                  className={`group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col ${selectedMetricSlugs.includes(metric.slug) ? 'ring-2 ring-blue-500 border-transparent' : 'hover:border-blue-200'}`}
-                  onClick={() => onOpenMetric(metric.slug)}
+                  className={`group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col ${selectedMetricFieldNames.includes(metric.fieldName) ? 'ring-2 ring-blue-500 border-transparent' : 'hover:border-blue-200'}`}
+                  onClick={() => onOpenMetric(metric.fieldName)}
                 >
                   <CardHeader className="space-y-3 pb-4">
                     <div className="flex justify-between items-start gap-4">
@@ -288,12 +288,12 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                          {hasBulkSelection && (
                           <div className="mb-2" onClick={(e) => e.stopPropagation()}>
                             <Checkbox
-                              checked={selectedMetricSlugs.includes(metric.slug)}
+                              checked={selectedMetricFieldNames.includes(metric.fieldName)}
                               onCheckedChange={(checked) => {
-                                setSelectedMetricSlugs(prev => 
+                                setSelectedMetricFieldNames(prev => 
                                   checked 
-                                    ? [...prev, metric.slug]
-                                    : prev.filter(s => s !== metric.slug)
+                                    ? [...prev, metric.fieldName]
+                                    : prev.filter(s => s !== metric.fieldName)
                                 )
                               }}
                             />
@@ -303,7 +303,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                           {metric.businessName}
                         </CardTitle>
                         <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-                          <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{metric.slug}</span>
+                          <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{metric.fieldName}</span>
                         </div>
                       </div>
                       <Badge 
@@ -364,7 +364,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                   <TableRow>
                     {hasBulkSelection && <TableHead className="w-12"></TableHead>}
                     <TableHead>Metric Name</TableHead>
-                    <TableHead>Slug</TableHead>
+                    <TableHead>Field Name</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Owner</TableHead>
                     <TableHead>Status</TableHead>
@@ -376,24 +376,24 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                     <TableRow 
                       key={m.id} 
                       className="cursor-pointer hover:bg-slate-50/80"
-                      onClick={() => onOpenMetric(m.slug)}
+                      onClick={() => onOpenMetric(m.fieldName)}
                     >
                       {hasBulkSelection && (
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
-                            checked={selectedMetricSlugs.includes(m.slug)}
+                            checked={selectedMetricFieldNames.includes(m.fieldName)}
                             onCheckedChange={(checked) => {
-                              setSelectedMetricSlugs(prev => 
+                              setSelectedMetricFieldNames(prev => 
                                 checked 
-                                  ? [...prev, m.slug]
-                                  : prev.filter(s => s !== m.slug)
+                                  ? [...prev, m.fieldName]
+                                  : prev.filter(s => s !== m.fieldName)
                               )
                             }}
                           />
                         </TableCell>
                       )}
                       <TableCell className="font-medium text-slate-900">{m.businessName}</TableCell>
-                      <TableCell className="font-mono text-xs text-slate-500">{m.slug}</TableCell>
+                      <TableCell className="font-mono text-xs text-slate-500">{m.fieldName}</TableCell>
                       <TableCell className="text-xs text-slate-600 max-w-[200px] truncate" title={m.categoryPath.join(" > ")}>
                         {m.categoryPath.join(" › ")}
                       </TableCell>

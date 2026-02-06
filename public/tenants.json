@@ -1,0 +1,16 @@
+{
+  "tenants": [
+    {
+      "id": "Strategy Data",
+      "name": "Strategy Data",
+      "description": "Strategy Data Tenant",
+      "permitted": true
+    },
+    {
+      "id": "Creative",
+      "name": "Creative",
+      "description": "Creative Tenant",
+      "permitted": true
+    }
+  ]
+}

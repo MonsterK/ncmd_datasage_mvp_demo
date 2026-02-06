@@ -9,13 +9,13 @@
           "id": "dim-entities-agency",
           "name": "Agency & Partners",
           "count": 1,
-          "dimensionSlugs": ["agency"]
+          "dimensionFieldNames": ["agency"]
         },
         {
           "id": "dim-entities-vertical",
           "name": "Business vertical",
           "count": 1,
-          "dimensionSlugs": ["vertical"]
+          "dimensionFieldNames": ["vertical"]
         }
       ]
     },
@@ -28,13 +28,13 @@
           "id": "dim-context-region",
           "name": "Region",
           "count": 1,
-          "dimensionSlugs": ["region"]
+          "dimensionFieldNames": ["region"]
         },
         {
           "id": "dim-context-platform",
           "name": "Platform",
           "count": 1,
-          "dimensionSlugs": ["platform"]
+          "dimensionFieldNames": ["platform"]
         }
       ]
     }
