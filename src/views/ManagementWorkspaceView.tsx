@@ -29,13 +29,14 @@ import {
   Dimension,
   CategoryNode,
   Tenant,
+  TenantCategory,
   NewMetricPayload,
   Album,
   Tag,
 } from "@/types"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
 
-export type ManagementSection = "metric" | "metricSet" | "dimension" | "category" | "tenant"
+export type ManagementSection = "metric" | "metricSet" | "dimension" | "tenant"
 
 export interface ManagementWorkspaceViewProps {
   activeSection: ManagementSection
@@ -58,6 +59,7 @@ export interface ManagementWorkspaceViewProps {
     sourceLink: string
   }) => void
   onCreateCategory: (payload: { id: string; name: string; description: string }) => void
+  onUpdateTenant: (tenant: Tenant) => void
   onCreateDimension: (payload: {
     id: string
     name: string
@@ -92,6 +94,7 @@ export function ManagementWorkspaceView({
   onDeleteMetric,
   onCreateTenant,
   onCreateCategory,
+  onUpdateTenant,
   onCreateDimension,
   onUpdateDimension,
   onDeleteDimension,
@@ -101,7 +104,8 @@ export function ManagementWorkspaceView({
   const [isNewMetricSheetOpen, setIsNewMetricSheetOpen] = useState(false)
   const [isNewMetricSetSheetOpen, setIsNewMetricSetSheetOpen] = useState(false)
   const [isNewTenantSheetOpen, setIsNewTenantSheetOpen] = useState(false)
-  const [isNewCategorySheetOpen, setIsNewCategorySheetOpen] = useState(false)
+  const [isTenantCategoriesSheetOpen, setIsTenantCategoriesSheetOpen] = useState(false)
+  const [tenantForCategories, setTenantForCategories] = useState<Tenant | null>(null)
   const [isNewDimensionSheetOpen, setIsNewDimensionSheetOpen] = useState(false)
   const [metricSheetMode, setMetricSheetMode] = useState<"create" | "edit">("create")
   const [metricToEdit, setMetricToEdit] = useState<Metric | null>(null)
@@ -120,6 +124,11 @@ export function ManagementWorkspaceView({
     })
     return map
   }, [tags])
+
+  const onManageTenantCategories = (tenant: Tenant) => {
+    setTenantForCategories(tenant)
+    setIsTenantCategoriesSheetOpen(true)
+  }
 
   const renderSectionContent = () => {
     switch (activeSection) {
@@ -362,16 +371,13 @@ export function ManagementWorkspaceView({
             </Table>
           </div>
         )
-      case "category":
-        return <CategoryManagementView categories={categories} metrics={metrics} />
       case "tenant":
         return (
           <Card className="border-slate-200 shadow-sm rounded-2xl">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-slate-900">Tenant management (mock)</CardTitle>
+              <CardTitle className="text-sm text-slate-900">Tenant management</CardTitle>
               <CardDescription className="text-xs text-slate-500">
-                Simple overview of tenants available in the demo. In a full product this would manage ownership and
-                permissions.
+                Configure business tenants, high-level permissions, and their category systems.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -382,9 +388,8 @@ export function ManagementWorkspaceView({
                       <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">ID</TableHead>
                       <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
                       <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data source type</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data source link</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Permitted</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Categories</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -393,22 +398,20 @@ export function ManagementWorkspaceView({
                          <TableCell className="text-[11px] font-mono text-slate-600">{d.id}</TableCell>
                         <TableCell className="text-xs font-medium text-slate-900">{d.name}</TableCell>
                         <TableCell className="text-xs text-slate-600">{d.description}</TableCell>
-                        <TableCell className="text-xs text-slate-600">{d.sourceType ?? "-"}</TableCell>
                         <TableCell className="text-xs text-slate-600">
-                          {d.sourceLink ? (
-                            <a
-                              href={d.sourceLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-[11px] text-blue-600 underline hover:text-blue-800"
-                            >
-                              {d.sourceLink}
-                            </a>
-                          ) : (
-                            "-"
-                          )}
+                          {d.categories?.map(c => c.name).join(", ") || "-"}
                         </TableCell>
-                        <TableCell className="text-xs text-slate-600">{d.permitted === false ? "No" : "Yes"}</TableCell>
+                        <TableCell className="text-xs">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
+                            onClick={() => onManageTenantCategories(d)}
+                          >
+                            Manage Categories
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -444,12 +447,6 @@ export function ManagementWorkspaceView({
           description: "Manage dimension terms, values dictionary and bindings.",
           addLabel: "New dimension",
         }
-      case "category":
-        return {
-          title: "Category management",
-          description: "Maintain the metric category tree for the registry.",
-          addLabel: "New category",
-        }
       case "tenant":
         return {
           title: "Tenant management",
@@ -478,8 +475,6 @@ export function ManagementWorkspaceView({
       setDimensionSheetMode("create")
       setDimensionToEdit(null)
       setIsNewDimensionSheetOpen(true)
-    } else if (activeSection === "category") {
-      setIsNewCategorySheetOpen(true)
     } else if (activeSection === "tenant") {
       setIsNewTenantSheetOpen(true)
     }
@@ -522,12 +517,6 @@ export function ManagementWorkspaceView({
               label="Dimensions"
               active={activeSection === "dimension"}
               onClick={() => onChangeSection("dimension")}
-            />
-            <SidebarItem
-              icon={ListTree}
-              label="Categories"
-              active={activeSection === "category"}
-              onClick={() => onChangeSection("category")}
             />
             <SidebarItem
               icon={Home}
@@ -610,11 +599,17 @@ export function ManagementWorkspaceView({
         onCreateTenant={onCreateTenant}
       />
 
-      <NewCategorySheet
-        open={isNewCategorySheetOpen}
-        onOpenChange={setIsNewCategorySheetOpen}
-        onCreateCategory={onCreateCategory}
-      />
+      {tenantForCategories && (
+        <TenantCategoriesSheet
+          open={isTenantCategoriesSheetOpen}
+          onOpenChange={(open) => {
+            setIsTenantCategoriesSheetOpen(open)
+            if (!open) setTenantForCategories(null)
+          }}
+          tenant={tenantForCategories}
+          onUpdateTenant={onUpdateTenant}
+        />
+      )}
 
       <NewDimensionSheet
         open={isNewDimensionSheetOpen}
@@ -1443,79 +1438,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
   )
 }
 
-interface NewCategorySheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onCreateCategory: (payload: { id: string; name: string; description: string }) => void
-}
 
-export function NewCategorySheet({ open, onOpenChange, onCreateCategory }: NewCategorySheetProps) {
-  const [id, setId] = useState("")
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [message, setMessage] = useState<string | null>(null)
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const trimmedId = id.trim()
-    const trimmedName = name.trim()
-    if (!trimmedId || !trimmedName) {
-      setMessage("ID and name are required.")
-      return
-    }
-    onCreateCategory({ id: trimmedId, name: trimmedName, description: description.trim() })
-    setMessage(null)
-    onOpenChange(false)
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="text-sm font-semibold">New category</SheetTitle>
-        </SheetHeader>
-        <div className="mt-4 pb-6">
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Category ID</label>
-              <Input
-                className="h-8 text-xs"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
-                placeholder="e.g. c2"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Name</label>
-              <Input
-                className="h-8 text-xs"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="New category name"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Description</label>
-              <Textarea
-                rows={3}
-                className="text-xs"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional description for this category node."
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Button type="submit" size="sm" className="text-xs">
-                Create category (mock)
-              </Button>
-              {message && <p className="text-[11px] text-zinc-600">{message}</p>}
-            </div>
-          </form>
-        </div>
-      </SheetContent>
-    </Sheet>
-  )
-}
 
 interface NewDimensionSheetProps {
   open: boolean
@@ -1878,189 +1801,153 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensio
 }
 
 
-interface CategoryManagementViewProps {
-  categories: CategoryNode[]
-  metrics: Metric[]
+interface TenantCategoriesSheetProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  tenant: Tenant
+  onUpdateTenant: (tenant: Tenant) => void
 }
 
-function CategoryManagementView({ categories, metrics }: CategoryManagementViewProps) {
-  const [sourceId, setSourceId] = useState("")
-  const [targetId, setTargetId] = useState("")
-  const [message, setMessage] = useState<string | null>(null)
+function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: TenantCategoriesSheetProps) {
+  const [categories, setCategories] = useState<TenantCategory[]>([])
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingIndex, setEditingIndex] = useState(-1)
 
-  const countMetricsInCategory = (nodes: CategoryNode[], id: string): number => {
-    const root = findCategoryById(nodes, id)
-    if (!root) return 0
+  // Form state
+  const [name, setName] = useState("")
+  const [dataSourceType, setDataSourceType] = useState("")
+  const [dataSourceLink, setDataSourceLink] = useState("")
+  const [error, setError] = useState<string | null>(null)
 
-    const countNode = (node: CategoryNode): number => {
-      let total = node.metricFieldNames?.length ?? 0
-      if (node.children) {
-        for (const child of node.children) {
-          total += countNode(child)
-        }
+  useEffect(() => {
+    if (open && tenant) {
+      setCategories(tenant.categories || [])
+      resetForm()
+    }
+  }, [open, tenant])
+
+  const resetForm = () => {
+    setName("")
+    setDataSourceType("")
+    setDataSourceLink("")
+    setIsEditing(false)
+    setEditingIndex(-1)
+    setError(null)
+  }
+
+  const handleEdit = (index: number) => {
+    const cat = categories[index]
+    setName(cat.name)
+    setDataSourceType(cat.dataSource?.type || "")
+    setDataSourceLink(cat.dataSource?.link || "")
+    setIsEditing(true)
+    setEditingIndex(index)
+    setError(null)
+  }
+
+  const handleDelete = (index: number) => {
+    const newCategories = [...categories]
+    newCategories.splice(index, 1)
+    setCategories(newCategories)
+    onUpdateTenant({ ...tenant, categories: newCategories })
+  }
+
+  const handleSave = () => {
+    if (!name.trim()) {
+      setError("Category name is required")
+      return
+    }
+
+    const newCategory: TenantCategory = {
+      name: name.trim(),
+      dataSource: dataSourceType || dataSourceLink ? {
+        type: dataSourceType.trim(),
+        link: dataSourceLink.trim()
+      } : undefined
+    }
+
+    let newCategories = [...categories]
+    if (isEditing && editingIndex >= 0) {
+      newCategories[editingIndex] = newCategory
+    } else {
+      // Check for duplicate names
+      if (categories.some(c => c.name === newCategory.name)) {
+        setError("Category name already exists")
+        return
       }
-      return total
+      newCategories.push(newCategory)
     }
 
-    return countNode(root)
-  }
-
-  const handleBulkMove = () => {
-    if (!sourceId || !targetId) return
-    if (sourceId === targetId) {
-      setMessage("Source and target categories are the same. Nothing to move.")
-      return
-    }
-    const movedCount = countMetricsInCategory(categories, sourceId)
-    if (movedCount === 0) {
-      setMessage("No metrics found under the given source category in the mock tree.")
-      return
-    }
-    const sourceNode = findCategoryById(categories, sourceId)
-    const targetNode = findCategoryById(categories, targetId)
-    setMessage(
-      `Mock: would move ${movedCount} metrics from "${sourceNode?.name ?? sourceId}" to "${
-        targetNode?.name ?? targetId
-      }". The actual tree is not mutated in this demo.`,
-    )
+    setCategories(newCategories)
+    onUpdateTenant({ ...tenant, categories: newCategories })
+    resetForm()
   }
 
   return (
-    <div className="space-y-4">
-      <Card className="border-slate-200 shadow-sm rounded-2xl">
-        <CardHeader>
-          <CardTitle className="text-slate-900">Category management</CardTitle>
-          <CardDescription className="text-slate-500">
-            Tree-based management of metric categories. Drag and drop to reorder.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
+        <SheetHeader>
+          <SheetTitle className="text-sm font-semibold">Manage Categories for {tenant.name}</SheetTitle>
+        </SheetHeader>
+        <div className="mt-6 space-y-6">
+           {/* List of existing categories */}
+           <div className="space-y-3">
+             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Existing Categories</h3>
+             {categories.length > 0 ? (
+               <div className="rounded-lg border border-slate-200 divide-y divide-slate-100">
+                 {categories.map((cat, idx) => (
+                   <div key={idx} className="p-3 flex items-center justify-between hover:bg-slate-50">
+                     <div>
+                       <div className="text-sm font-medium text-slate-900">{cat.name}</div>
+                       {cat.dataSource && (
+                         <div className="text-xs text-slate-500 mt-0.5">
+                           Bound to {cat.dataSource.type} (<a href={cat.dataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{cat.dataSource.link}</a>)
+                         </div>
+                       )}
+                     </div>
+                     <div className="flex gap-2">
+                       <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => handleEdit(idx)}>Edit</Button>
+                       <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-red-600 hover:bg-red-50" onClick={() => handleDelete(idx)}>Delete</Button>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             ) : (
+               <p className="text-xs text-slate-400 italic">No categories defined for this tenant.</p>
+             )}
+           </div>
 
-      <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <Card className="border-slate-200 shadow-sm rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-900">Category tree</CardTitle>
-            <CardDescription className="text-xs text-slate-500">
-              Interactive category tree (max depth: 4 levels).
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-             <CategoryTree nodes={categories} metrics={metrics} depth={0} />
-          </CardContent>
-        </Card>
+           <div className="h-px bg-slate-100" />
 
-        <Card className="border-slate-200 shadow-sm rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-900">Batch Operations</CardTitle>
-            <CardDescription className="text-xs text-slate-500">
-              Bulk classify metrics or modify category info.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700">Source category id</label>
-              <Input
-                className="h-8 text-xs"
-                placeholder="e.g. c1-1-1 for SGI"
-                value={sourceId}
-                onChange={(e) => setSourceId(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700">Target category id</label>
-              <Input
-                className="h-8 text-xs"
-                placeholder="e.g. c1-1-2 for QBR"
-                value={targetId}
-                onChange={(e) => setTargetId(e.target.value)}
-              />
-            </div>
-            <Button type="button" size="sm" className="text-xs" onClick={handleBulkMove}>
-              Simulate bulk move
-            </Button>
-            {message && <p className="text-[11px] text-slate-600">{message}</p>}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+           {/* Add/Edit Form */}
+           <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+             <h3 className="text-xs font-semibold text-slate-900">{isEditing ? "Edit Category" : "Add New Category"}</h3>
+             <div className="space-y-3">
+               <div className="space-y-1">
+                 <label className="text-xs font-medium text-slate-700">Name</label>
+                 <Input className="h-8 text-xs" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Delivery" />
+               </div>
+               <div className="grid grid-cols-2 gap-3">
+                 <div className="space-y-1">
+                   <label className="text-xs font-medium text-slate-700">Data Source Type</label>
+                   <Input className="h-8 text-xs" value={dataSourceType} onChange={e => setDataSourceType(e.target.value)} placeholder="e.g. Hive" />
+                 </div>
+                 <div className="space-y-1">
+                   <label className="text-xs font-medium text-slate-700">Data Source Link</label>
+                   <Input className="h-8 text-xs" value={dataSourceLink} onChange={e => setDataSourceLink(e.target.value)} placeholder="https://..." />
+                 </div>
+               </div>
+             </div>
+             <div className="flex justify-between items-center pt-2">
+               {error ? <p className="text-xs text-red-600">{error}</p> : <div></div>}
+               <div className="flex gap-2">
+                 {isEditing && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={resetForm}>Cancel</Button>}
+                 <Button size="sm" className="h-7 text-xs" onClick={handleSave}>{isEditing ? "Update" : "Add"}</Button>
+               </div>
+             </div>
+           </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
-}
-
-interface CategoryTreeProps {
-  nodes: CategoryNode[]
-  metrics: Metric[]
-  depth: number
-}
-
-function CategoryTree({ nodes, metrics, depth }: CategoryTreeProps) {
-  const handleDragStart = (e: React.DragEvent, nodeId: string) => {
-    e.dataTransfer.setData("text/plain", nodeId)
-  }
-
-  const handleDrop = (e: React.DragEvent, targetId: string) => {
-    e.preventDefault()
-    const sourceId = e.dataTransfer.getData("text/plain")
-    console.log(`Dropped ${sourceId} onto ${targetId}`)
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-  }
-
-  return (
-    <ul className="space-y-1 text-xs">
-      {nodes.map((node) => {
-        const metricNames = (node.metricFieldNames ?? []).map(
-          (fieldName) => metrics.find((m) => m.fieldName === fieldName)?.businessName ?? fieldName,
-        )
-        return (
-          <li 
-            key={node.id} 
-            draggable 
-            onDragStart={(e) => handleDragStart(e, node.id)}
-            onDrop={(e) => handleDrop(e, node.id)}
-            onDragOver={handleDragOver}
-            className="group"
-          >
-            <div className="flex items-center gap-2 p-1 hover:bg-slate-50 rounded cursor-move border border-transparent hover:border-slate-200 transition-all">
-              <div className="text-slate-300 group-hover:text-slate-500">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
-              </div>
-              <span className="font-mono text-[10px] text-slate-400">{node.id}</span>
-              <span className="font-semibold text-slate-800">
-                {node.name}
-              </span>
-              <div className="ml-auto opacity-0 group-hover:opacity-100 flex gap-1">
-                 <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-slate-400 hover:text-blue-600">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                 </Button>
-                 <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-slate-400 hover:text-red-600">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                 </Button>
-              </div>
-            </div>
-            {metricNames.length > 0 && (
-              <div className="ml-8 text-[11px] text-slate-500">{metricNames.join(", ")}</div>
-            )}
-            {node.children && node.children.length > 0 && depth < 3 && (
-              <div className="ml-4 pl-2 border-l border-slate-100">
-                <CategoryTree nodes={node.children} metrics={metrics} depth={depth + 1} />
-              </div>
-            )}
-          </li>
-        )
-      })}
-    </ul>
-  )
-}
-
-function findCategoryById(nodes: CategoryNode[], id: string): CategoryNode | undefined {
-  for (const node of nodes) {
-    if (node.id === id) return node
-    if (node.children) {
-      const found = findCategoryById(node.children, id)
-      if (found) return found
-    }
-  }
-  return undefined
 }

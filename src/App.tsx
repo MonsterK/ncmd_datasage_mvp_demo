@@ -385,6 +385,13 @@ function App() {
     }))
   }
 
+  const handleUpdateTenant = (tenant: Tenant) => {
+    setData((prev) => ({
+      ...prev,
+      tenants: prev.tenants.map((t) => (t.id === tenant.id ? tenant : t)),
+    }))
+  }
+
   const handleCreateCategory = (payload: { id: string; name: string; description: string }) => {
     const newCategory: CategoryNode = {
       id: payload.id,
@@ -691,6 +698,7 @@ function App() {
                 onOpenMetricProfile={handleOpenMetricProfile}
                 onRegisterMetric={handleRegisterMetric}
                 onCreateTenant={handleCreateTenant}
+                onUpdateTenant={handleUpdateTenant}
                 onCreateCategory={handleCreateCategory}
                 onCreateDimension={handleCreateDimension}
                 onUpdateMetric={handleUpdateMetric}

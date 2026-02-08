@@ -111,6 +111,14 @@ export interface CategoryNode {
   metricFieldNames?: string[]
 }
 
+export interface TenantCategory {
+  name: string
+  dataSource?: {
+    type: string
+    link: string
+  }
+}
+
 export interface Tenant {
   id: string
   name: string
@@ -118,6 +126,7 @@ export interface Tenant {
   permitted?: boolean
   sourceType?: string
   sourceLink?: string
+  categories?: TenantCategory[]
 }
 
 export interface DimensionTreeNode {

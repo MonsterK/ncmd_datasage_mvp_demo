@@ -4,13 +4,38 @@
       "id": "Strategy Data",
       "name": "Strategy Data",
       "description": "Strategy Data Tenant",
-      "permitted": true
+      "permitted": true,
+      "categories": [
+        {
+          "name": "Delivery",
+          "dataSource": {
+            "type": "Hive",
+            "link": "https://hive.example.com/delivery"
+          }
+        },
+        {
+          "name": "Supply",
+          "dataSource": {
+            "type": "MySQL",
+            "link": "mysql://db.example.com/supply"
+          }
+        }
+      ]
     },
     {
       "id": "Creative",
       "name": "Creative",
       "description": "Creative Tenant",
-      "permitted": true
+      "permitted": true,
+      "categories": [
+        {
+          "name": "Growth",
+          "dataSource": {
+            "type": "ClickHouse",
+            "link": "clickhouse://ch.example.com/growth"
+          }
+        }
+      ]
     }
   ]
 }
