@@ -10,14 +10,14 @@
           "name": "Delivery",
           "dataSource": {
             "type": "Hive",
-            "link": "https://hive.example.com/delivery"
+            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
           }
         },
         {
           "name": "Supply",
           "dataSource": {
             "type": "MySQL",
-            "link": "mysql://db.example.com/supply"
+            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
           }
         }
       ]
@@ -32,7 +32,7 @@
           "name": "Growth",
           "dataSource": {
             "type": "ClickHouse",
-            "link": "clickhouse://ch.example.com/growth"
+            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
           }
         }
       ]

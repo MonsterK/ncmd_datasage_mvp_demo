@@ -366,6 +366,7 @@ function App() {
     id: string
     name: string
     description: string
+    categoryName: string
     sourceType: string
     sourceLink: string
   }) => {
@@ -377,11 +378,27 @@ function App() {
           id: payload.id,
           name: payload.name,
           description: payload.description,
-          sourceType: payload.sourceType,
-          sourceLink: payload.sourceLink,
           permitted: true,
+          categories: [
+            {
+              name: payload.categoryName,
+              dataSource: {
+                type: payload.sourceType,
+                link: payload.sourceLink,
+              }
+            }
+          ]
         },
       ],
+    }))
+  }
+
+  const handleCertifyMetric = (fieldName: string) => {
+    setData((prev) => ({
+      ...prev,
+      metrics: prev.metrics.map((m) =>
+        m.fieldName === fieldName ? { ...m, certified: !m.certified } : m
+      ),
     }))
   }
 
@@ -703,6 +720,7 @@ function App() {
                 onCreateDimension={handleCreateDimension}
                 onUpdateMetric={handleUpdateMetric}
                 onDeleteMetric={handleDeleteMetric}
+                onCertifyMetric={handleCertifyMetric}
                 onUpdateDimension={handleUpdateDimension}
                 onDeleteDimension={handleDeleteDimension}
                 setTags={setTags}

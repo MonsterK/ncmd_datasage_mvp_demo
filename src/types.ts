@@ -43,6 +43,7 @@ export interface Metric {
   heat?: number
   larkSheetLink?: string
   history?: ChangeLog[]
+  certified?: boolean
 }
 
 export interface ChangeLog {

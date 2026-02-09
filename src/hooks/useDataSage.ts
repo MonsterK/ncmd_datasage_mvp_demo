@@ -22,12 +22,12 @@ export function useDataSage() {
       try {
         const [metricsRes, dimensionsRes, metricSetsRes, categoriesRes, tenantsRes, dimensionTreeRes] =
           await Promise.all([
-            fetch("./metrics.json"),
-            fetch("./dimensions.json"),
-            fetch("./metricSets.json"),
-            fetch("./categories.json"),
-            fetch("./tenants.json"),
-            fetch("./dimensionsTree.json"),
+            fetch("/metrics.json"),
+            fetch("/dimensions.json"),
+            fetch("/metricSets.json"),
+            fetch("/categories.json"),
+            fetch("/tenants.json"),
+            fetch("/dimensionsTree.json"),
           ])
 
         if (

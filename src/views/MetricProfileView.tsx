@@ -41,6 +41,11 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
               <Badge variant="outline" className={`text-[10px] px-2 py-0.5 rounded-full border-slate-200 ${metric.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                 {metric.status}
               </Badge>
+              {metric.certified && (
+                <Badge variant="outline" className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border-blue-200">
+                  Certified
+                </Badge>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
               <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">{metric.fieldName}</span>

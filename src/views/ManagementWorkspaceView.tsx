@@ -51,10 +51,12 @@ export interface ManagementWorkspaceViewProps {
   onRegisterMetric: (payload: NewMetricPayload) => void
   onUpdateMetric: (fieldName: string, payload: NewMetricPayload) => void
   onDeleteMetric: (fieldName: string) => void
+  onCertifyMetric: (fieldName: string) => void
   onCreateTenant: (payload: {
     id: string
     name: string
     description: string
+    categoryName: string
     sourceType: string
     sourceLink: string
   }) => void
@@ -92,6 +94,7 @@ export function ManagementWorkspaceView({
   onRegisterMetric,
   onUpdateMetric,
   onDeleteMetric,
+  onCertifyMetric,
   onCreateTenant,
   onCreateCategory,
   onUpdateTenant,
@@ -142,6 +145,7 @@ export function ManagementWorkspaceView({
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cert</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
                   <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
@@ -159,6 +163,15 @@ export function ManagementWorkspaceView({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs">
+                       {m.certified ? (
+                         <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
+                           Certified
+                         </Badge>
+                       ) : (
+                         <span className="text-[10px] text-slate-400">-</span>
+                       )}
+                    </TableCell>
+                    <TableCell className="text-xs">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-slate-900">{m.owners.businessOwner}</span>
                         <span className="text-[11px] text-slate-500">{m.owners.techOwner}</span>
@@ -167,6 +180,15 @@ export function ManagementWorkspaceView({
                     <TableCell className="text-[11px] text-slate-500">{formatDate(m.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
+                          onClick={() => onCertifyMetric(m.fieldName)}
+                        >
+                          {m.certified ? "Decertify" : "Certify"}
+                        </Button>
                         <Button
                           type="button"
                           variant="outline"
@@ -487,9 +509,6 @@ export function ManagementWorkspaceView({
       <Card className="border-none shadow-none bg-transparent">
         <CardHeader className="px-0 pt-0">
           <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">Management</CardTitle>
-          <CardDescription className="text-lg text-slate-500 mt-1">
-            Centralized administration for all your data assets.
-          </CardDescription>
         </CardHeader>
       </Card>
 
@@ -1326,15 +1345,23 @@ function TagManagementSheet({
 interface NewTenantSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateTenant: (payload: { id: string; name: string; description: string; sourceType: string; sourceLink: string }) => void
+  onCreateTenant: (payload: {
+    id: string
+    name: string
+    description: string
+    categoryName: string
+    sourceType: string
+    sourceLink: string
+  }) => void
 }
 
 export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenantSheetProps) {
   const [id, setId] = useState("")
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
+  const [categoryName, setCategoryName] = useState("")
   const [sourceType, setSourceType] = useState("Fabric table")
-  const [sourceLink, setSourceLink] = useState("")
+  const [sourceLink, setSourceLink] = useState("https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138")
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -1342,8 +1369,9 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
       setId("")
       setName("")
       setDescription("")
+      setCategoryName("")
       setSourceType("Fabric table")
-      setSourceLink("")
+      setSourceLink("https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138")
       setMessage(null)
     }
   }, [open])
@@ -1352,10 +1380,11 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
     e.preventDefault()
     const trimmedId = id.trim()
     const trimmedName = name.trim()
+    const trimmedCategoryName = categoryName.trim()
     const trimmedSourceType = sourceType.trim()
     const trimmedSourceLink = sourceLink.trim()
-    if (!trimmedId || !trimmedName || !trimmedSourceType || !trimmedSourceLink) {
-      setMessage("ID, name, data source type and data source link are required.")
+    if (!trimmedId || !trimmedName || !trimmedCategoryName || !trimmedSourceType || !trimmedSourceLink) {
+      setMessage("All fields including Category and Data Source are required.")
       return
     }
     
@@ -1363,6 +1392,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
       id: trimmedId,
       name: trimmedName,
       description: description.trim(),
+      categoryName: trimmedCategoryName,
       sourceType: trimmedSourceType,
       sourceLink: trimmedSourceLink,
     })
@@ -1406,6 +1436,15 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
                 placeholder="High-level description of this business tenant."
               />
             </div>
+            <div className="space-y-2">
+               <label className="text-xs font-medium text-zinc-700">Initial Category Name</label>
+               <Input
+                 className="h-8 text-xs"
+                 value={categoryName}
+                 onChange={(e) => setCategoryName(e.target.value)}
+                 placeholder="e.g. Core Metrics"
+               />
+             </div>
             <div className="space-y-2">
               <label className="text-xs font-medium text-zinc-700">Data source type</label>
               <Input

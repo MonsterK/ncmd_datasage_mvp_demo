@@ -622,6 +622,11 @@ export function MetricsWorkspaceView({
                         <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                           {m.status}
                         </Badge>
+                        {m.certified && (
+                          <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
+                            Certified
+                          </Badge>
+                        )}
                         {(m as any)._refVersion && (m as any)._refVersion !== "latest" && (
                           <span className="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
                             {(m as any)._refVersion}
