@@ -148,6 +148,8 @@ function App() {
       technicalDefinition: payload.technicalDefinition,
       status: "Draft",
       tenant: payload.categoryPath[0] ?? "Strategy Data", // Default tenant
+      dataType: payload.dataType,
+      unit: payload.unit,
       owners: {
         businessOwner: "TBD",
         techOwner: "TBD",
@@ -366,9 +368,11 @@ function App() {
     id: string
     name: string
     description: string
-    categoryName: string
-    sourceType: string
-    sourceLink: string
+    categories: {
+      name: string
+      sourceType: string
+      sourceLink: string
+    }[]
   }) => {
     setData((prev) => ({
       ...prev,
@@ -379,15 +383,13 @@ function App() {
           name: payload.name,
           description: payload.description,
           permitted: true,
-          categories: [
-            {
-              name: payload.categoryName,
-              dataSource: {
-                type: payload.sourceType,
-                link: payload.sourceLink,
-              }
+          categories: payload.categories.map(c => ({
+            name: c.name,
+            dataSource: {
+              type: c.sourceType,
+              link: c.sourceLink,
             }
-          ]
+          }))
         },
       ],
     }))
@@ -481,6 +483,8 @@ function App() {
           technicalDefinition: payload.technicalDefinition,
           tenant: payload.categoryPath[0] ?? m.tenant,
           larkSheetLink: payload.larkSheetLink?.trim() || undefined,
+          dataType: payload.dataType,
+          unit: payload.unit,
           queryDefinitions: [
             {
               id: m.queryDefinitions[0]?.id ?? `q-${now}`,

@@ -46,6 +46,8 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
   const [fieldName, setFieldName] = useState(initialMetric?.fieldName ?? "")
+  const [dataType, setDataType] = useState(initialMetric?.dataType ?? "decimal")
+  const [unit, setUnit] = useState(initialMetric?.unit ?? "")
   const [technicalDefinition, setTechnicalDefinition] = useState(initialMetric?.technicalDefinition ?? "")
   const [larkSheetLink, setLarkSheetLink] = useState(initialMetric?.larkSheetLink ?? "")
   const [importMessage, setImportMessage] = useState<string | null>(null)
@@ -101,6 +103,8 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
       businessName,
       businessDefinition,
       fieldName,
+      dataType,
+      unit,
       technicalDefinition,
       categoryPath: categoryPathStr ? categoryPathStr.split(" > ") : [],
       larkSheetLink: larkSheetLink.trim() || undefined,
@@ -201,6 +205,33 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
               onChange={(e) => setBusinessDefinition(e.target.value)}
               className="text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 min-h-[80px]"
             />
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700">Data Type</label>
+              <Select value={dataType} onValueChange={setDataType}>
+                <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="decimal">Decimal</SelectItem>
+                  <SelectItem value="percentage">Percentage</SelectItem>
+                  <SelectItem value="integer">Integer</SelectItem>
+                  <SelectItem value="currency">Currency</SelectItem>
+                  <SelectItem value="string">String</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700">Unit</label>
+              <Input
+                placeholder="USD, %, etc."
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
+              />
+            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">

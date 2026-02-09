@@ -44,6 +44,8 @@ export interface Metric {
   larkSheetLink?: string
   history?: ChangeLog[]
   certified?: boolean
+  dataType?: string
+  unit?: string
 }
 
 export interface ChangeLog {
@@ -154,6 +156,8 @@ export interface NewMetricPayload {
   technicalDefinition: string
   categoryPath: string[]
   larkSheetLink?: string
+  dataType?: string
+  unit?: string
   query: {
     type: string
     source: string

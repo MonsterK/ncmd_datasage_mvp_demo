@@ -643,6 +643,10 @@ export function MetricsWorkspaceView({
                           <Flame className="h-3 w-3 text-orange-500 fill-orange-500" />
                           <span className="font-semibold text-slate-700">{m.heat ?? 0}</span>
                         </div>
+                        <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                           <span className="capitalize">{m.dataType || 'decimal'}</span>
+                           {m.unit && <span>({m.unit})</span>}
+                        </div>
                         {m.trend30d && m.trend30d.length > 0 && (
                           <div className="h-8 w-20 opacity-70 group-hover:opacity-100 transition-opacity">
                             <ResponsiveContainer width="100%" height="100%">

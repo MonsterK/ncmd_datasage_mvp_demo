@@ -56,9 +56,11 @@ export interface ManagementWorkspaceViewProps {
     id: string
     name: string
     description: string
-    categoryName: string
-    sourceType: string
-    sourceLink: string
+    categories: {
+      name: string
+      sourceType: string
+      sourceLink: string
+    }[]
   }) => void
   onCreateCategory: (payload: { id: string; name: string; description: string }) => void
   onUpdateTenant: (tenant: Tenant) => void
@@ -1349,9 +1351,11 @@ interface NewTenantSheetProps {
     id: string
     name: string
     description: string
-    categoryName: string
-    sourceType: string
-    sourceLink: string
+    categories: {
+      name: string
+      sourceType: string
+      sourceLink: string
+    }[]
   }) => void
 }
 
@@ -1359,9 +1363,19 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
   const [id, setId] = useState("")
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [categoryName, setCategoryName] = useState("")
-  const [sourceType, setSourceType] = useState("Fabric table")
-  const [sourceLink, setSourceLink] = useState("https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138")
+  
+  const [categories, setCategories] = useState<{
+    name: string
+    sourceType: string
+    sourceLink: string
+  }[]>([
+    {
+      name: "",
+      sourceType: "Fabric table",
+      sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
+    }
+  ])
+
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -1369,22 +1383,50 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
       setId("")
       setName("")
       setDescription("")
-      setCategoryName("")
-      setSourceType("Fabric table")
-      setSourceLink("https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138")
+      setCategories([{
+        name: "",
+        sourceType: "Fabric table",
+        sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
+      }])
       setMessage(null)
     }
   }, [open])
+
+  const handleCategoryChange = (index: number, field: string, value: string) => {
+    const newCategories = [...categories]
+    newCategories[index] = { ...newCategories[index], [field]: value }
+    setCategories(newCategories)
+  }
+
+  const handleAddCategory = () => {
+    setCategories([...categories, {
+      name: "",
+      sourceType: "Fabric table",
+      sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
+    }])
+  }
+
+  const handleRemoveCategory = (index: number) => {
+    if (categories.length === 1) return
+    const newCategories = [...categories]
+    newCategories.splice(index, 1)
+    setCategories(newCategories)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const trimmedId = id.trim()
     const trimmedName = name.trim()
-    const trimmedCategoryName = categoryName.trim()
-    const trimmedSourceType = sourceType.trim()
-    const trimmedSourceLink = sourceLink.trim()
-    if (!trimmedId || !trimmedName || !trimmedCategoryName || !trimmedSourceType || !trimmedSourceLink) {
-      setMessage("All fields including Category and Data Source are required.")
+    
+    if (!trimmedId || !trimmedName) {
+      setMessage("Tenant ID and Name are required.")
+      return
+    }
+
+    const validCategories = categories.filter(c => c.name.trim() && c.sourceType.trim() && c.sourceLink.trim())
+    
+    if (validCategories.length === 0) {
+      setMessage("At least one valid category (with Name, Type and Link) is required.")
       return
     }
     
@@ -1392,9 +1434,11 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
       id: trimmedId,
       name: trimmedName,
       description: description.trim(),
-      categoryName: trimmedCategoryName,
-      sourceType: trimmedSourceType,
-      sourceLink: trimmedSourceLink,
+      categories: validCategories.map(c => ({
+        name: c.name.trim(),
+        sourceType: c.sourceType.trim(),
+        sourceLink: c.sourceLink.trim()
+      }))
     })
     setMessage(null)
     onOpenChange(false)
@@ -1436,39 +1480,67 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
                 placeholder="High-level description of this business tenant."
               />
             </div>
-            <div className="space-y-2">
-               <label className="text-xs font-medium text-zinc-700">Initial Category Name</label>
-               <Input
-                 className="h-8 text-xs"
-                 value={categoryName}
-                 onChange={(e) => setCategoryName(e.target.value)}
-                 placeholder="e.g. Core Metrics"
-               />
+
+            <div className="space-y-3 pt-2 border-t border-slate-100">
+               <div className="flex items-center justify-between">
+                 <label className="text-xs font-medium text-zinc-700">Categories</label>
+                 <Button type="button" size="sm" variant="ghost" className="h-6 text-xs text-blue-600" onClick={handleAddCategory}>
+                   + Add Category
+                 </Button>
+               </div>
+               
+               <div className="space-y-4">
+                 {categories.map((cat, index) => (
+                   <div key={index} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-3 relative group">
+                     {categories.length > 1 && (
+                       <button 
+                         type="button"
+                         className="absolute top-2 right-2 text-slate-400 hover:text-red-500"
+                         onClick={() => handleRemoveCategory(index)}
+                       >
+                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                       </button>
+                     )}
+                     
+                     <div className="space-y-1">
+                       <label className="text-[10px] font-medium text-zinc-500">Category Name</label>
+                       <Input
+                         className="h-7 text-xs bg-white"
+                         value={cat.name}
+                         onChange={(e) => handleCategoryChange(index, "name", e.target.value)}
+                         placeholder="e.g. Core Metrics"
+                       />
+                     </div>
+                     <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-medium text-zinc-500">Source Type</label>
+                          <Input
+                            className="h-7 text-xs bg-white"
+                            value={cat.sourceType}
+                            onChange={(e) => handleCategoryChange(index, "sourceType", e.target.value)}
+                            placeholder="e.g. Hive"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-medium text-zinc-500">Source Link</label>
+                          <Input
+                            className="h-7 text-xs bg-white"
+                            value={cat.sourceLink}
+                            onChange={(e) => handleCategoryChange(index, "sourceLink", e.target.value)}
+                            placeholder="https://..."
+                          />
+                        </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
              </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Data source type</label>
-              <Input
-                className="h-8 text-xs"
-                value={sourceType}
-                onChange={(e) => setSourceType(e.target.value)}
-                placeholder="e.g. Hive table / Aeolus dataset"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-zinc-700">Data source link</label>
-              <Input
-                type="url"
-                className="h-8 text-xs"
-                value={sourceLink}
-                onChange={(e) => setSourceLink(e.target.value)}
-                placeholder="https://..."
-              />
-            </div>
-            <div className="flex items-center justify-between">
+
+            <div className="flex items-center justify-between pt-2">
               <Button type="submit" size="sm" className="text-xs">
                 Create tenant (mock)
               </Button>
-              {message && <p className="text-[11px] text-zinc-600">{message}</p>}
+              {message && <p className="text-[11px] text-red-600">{message}</p>}
             </div>
           </form>
         </div>

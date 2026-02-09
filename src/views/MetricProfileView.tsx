@@ -53,6 +53,14 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
               <span className="text-slate-600">{metric.categoryPath.join(" › ")}</span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-600">Tenant: {metric.tenant}</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-600 capitalize">{metric.dataType || "decimal"}</span>
+              {metric.unit && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-600">Unit: {metric.unit}</span>
+                </>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
@@ -98,6 +106,16 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
             <div className="space-y-1.5">
               <p className="font-semibold text-slate-800">Business definition</p>
               <p className="text-slate-600 leading-relaxed">{metric.businessDefinition}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <p className="font-semibold text-slate-800">Data Type</p>
+                <p className="text-slate-600 capitalize">{metric.dataType || "decimal"}</p>
+              </div>
+              <div className="space-y-1.5">
+                <p className="font-semibold text-slate-800">Unit</p>
+                <p className="text-slate-600">{metric.unit || "-"}</p>
+              </div>
             </div>
             <div className="space-y-1.5">
               <p className="font-semibold text-slate-800">Technical definition (pseudo SQL)</p>
