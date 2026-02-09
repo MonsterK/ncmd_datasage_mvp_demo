@@ -342,6 +342,39 @@
           "comment": "Derived from S++ Revenue Penetration for NA market"
         }
       ]
+    },
+    {
+      "id": "m7",
+      "businessName": "Auto Ads Revenue",
+      "fieldName": "auto_ads_revenue",
+      "categoryPath": ["Monetization", "Revenue", "Ads"],
+      "businessDefinition": "Revenue from Auto Ads.",
+      "technicalDefinition": "CASE WHEN l3_product_tag='Auto Ads' THEN dollar_revenue_real ELSE 0 END",
+      "status": "Active",
+      "tenant": "Strategy Data",
+      "owners": {
+        "businessOwner": "sarah.guo",
+        "techOwner": "xxx"
+      },
+      "createdAt": "2026-02-09T00:00:00Z",
+      "updatedAt": "2026-02-09T00:00:00Z",
+      "heat": 0,
+      "queryDefinitions": [
+        {
+          "id": "q7",
+          "type": "Aeolus Visual Query",
+          "source": "fabric_sgi_payout_daily",
+          "originField": "dollar_revenue_real",
+          "aggregate": "SUM",
+          "businessDate": "biz_date",
+          "filters": [],
+          "analysisDimensions": []
+        }
+      ],
+      "trend30d": [],
+      "topDimensions": [],
+      "boundDimensionFieldNames": [],
+      "history": []
     }
   ]
 }

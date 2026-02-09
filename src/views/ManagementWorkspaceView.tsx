@@ -1371,7 +1371,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
   }[]>([
     {
       name: "",
-      sourceType: "Fabric table",
+      sourceType: "Fabric model",
       sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
     }
   ])
@@ -1385,7 +1385,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
       setDescription("")
       setCategories([{
         name: "",
-        sourceType: "Fabric table",
+        sourceType: "Fabric model",
         sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
       }])
       setMessage(null)
@@ -1401,7 +1401,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
   const handleAddCategory = () => {
     setCategories([...categories, {
       name: "",
-      sourceType: "Fabric table",
+      sourceType: "Fabric model",
       sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
     }])
   }

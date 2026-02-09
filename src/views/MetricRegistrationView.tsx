@@ -247,13 +247,21 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700">Technical definition (pseudo SQL)</label>
-              <Textarea
-                rows={3}
-                placeholder="SELECT biz_date, SUM(payout_amount) AS sgi_payout FROM …"
-                value={technicalDefinition}
-                onChange={(e) => setTechnicalDefinition(e.target.value)}
-                className="text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono min-h-[80px]"
-              />
+              <div className="relative">
+                <Textarea
+                  rows={5}
+                  placeholder="e.g. CASE WHEN l3_product_tag='Auto Ads' THEN dollar_revenue_real ELSE 0 END"
+                  value={technicalDefinition}
+                  onChange={(e) => setTechnicalDefinition(e.target.value)}
+                  className="text-xs font-mono bg-slate-900 text-slate-50 border-slate-800 focus:border-blue-500 focus:ring-blue-900 min-h-[120px]"
+                />
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <Badge variant="outline" className="bg-slate-800 text-slate-400 border-slate-700 text-[10px]">SQL</Badge>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-500">
+                Define calculation logic using standard SQL syntax. Support parameters like :start_date, :end_date.
+              </p>
             </div>
           </div>
 

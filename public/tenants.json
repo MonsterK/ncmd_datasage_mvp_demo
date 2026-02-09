@@ -19,6 +19,13 @@
             "type": "MySQL",
             "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
           }
+        },
+        {
+          "name": "Monetization > Revenue > SGI",
+          "dataSource": {
+            "type": "Fabric model",
+            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
+          }
         }
       ]
     },
@@ -36,6 +43,15 @@
           }
         }
       ]
+    },
+    {
+      "id": "t5",
+      "name": "Business Integrity",
+      "type": "team",
+      "description": "Metrics related to business integrity and safety.",
+      "admins": [],
+      "categories": [],
+      "createdAt": "2026-02-09T00:00:00Z"
     }
   ]
 }
