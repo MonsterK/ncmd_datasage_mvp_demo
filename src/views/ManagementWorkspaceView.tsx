@@ -590,6 +590,7 @@ export function ManagementWorkspaceView({
           setIsNewMetricSheetOpen(open)
         }}
         categories={categories}
+        tenants={tenants}
         onRegisterMetric={onRegisterMetric}
         initialMetric={metricToEdit}
         mode={metricSheetMode}
@@ -712,6 +713,7 @@ interface NewMetricSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   categories: CategoryNode[]
+  tenants: Tenant[]
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric | null
   mode?: "create" | "edit"
@@ -722,6 +724,7 @@ export function NewMetricSheet({
   open,
   onOpenChange,
   categories,
+  tenants,
   onRegisterMetric,
   initialMetric,
   mode = "create",
@@ -745,6 +748,7 @@ export function NewMetricSheet({
             <MetricRegistrationView
               key={isEditMode && initialMetric ? initialMetric.id : "new"}
               categories={categories}
+              tenants={tenants}
               initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
               disableFieldNameEditing={Boolean(isEditMode)}
               onRegisterMetric={(payload) => {

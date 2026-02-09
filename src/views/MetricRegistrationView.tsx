@@ -12,13 +12,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 
-import { NewMetricPayload, CategoryNode, Metric } from "@/types"
+import { NewMetricPayload, CategoryNode, Metric, Tenant } from "@/types"
 import { normalizeFilters, normalizeDimensions } from "@/lib/utils"
 
 export interface MetricRegistrationViewProps {
   categories: CategoryNode[]
+  tenants: Tenant[]
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric
   disableFieldNameEditing?: boolean
@@ -37,12 +39,33 @@ function flattenCategoryPaths(nodes: CategoryNode[], prefix: string[] = []): str
   return paths
 }
 
-export function MetricRegistrationView({ categories, onRegisterMetric, initialMetric, disableFieldNameEditing }: MetricRegistrationViewProps) {
+export function MetricRegistrationView({ categories, tenants, onRegisterMetric, initialMetric, disableFieldNameEditing }: MetricRegistrationViewProps) {
   const baseQuery = initialMetric?.queryDefinitions?.[0]
 
   const [categoryPathStr, setCategoryPathStr] = useState<string | undefined>(
     initialMetric?.categoryPath.length ? initialMetric.categoryPath.join(" > ") : undefined,
   )
+  const [linkedDataSource, setLinkedDataSource] = useState<{ type: string; link: string } | null>(null)
+
+  useEffect(() => {
+    if (!categoryPathStr || !tenants) {
+      setLinkedDataSource(null)
+      return
+    }
+    // Find the tenant category that matches the path
+    let foundSource = null
+    for (const tenant of tenants) {
+      if (tenant.categories) {
+        const cat = tenant.categories.find((c) => c.name === categoryPathStr)
+        if (cat && cat.dataSource) {
+          foundSource = cat.dataSource
+          break
+        }
+      }
+    }
+    setLinkedDataSource(foundSource)
+  }, [categoryPathStr, tenants])
+
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
   const [fieldName, setFieldName] = useState(initialMetric?.fieldName ?? "")
@@ -177,15 +200,6 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Category</label>
-              <CategoryTreeSelect
-                categories={categories}
-                value={categoryPathStr ? categoryPathStr.split(" > ") : []}
-                onChange={(path: string[]) => setCategoryPathStr(path.join(" > "))}
-                placeholder="Select a category path"
-              />
-            </div>
-            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700">Business name</label>
               <Input
                 placeholder="SGI Payout"
@@ -266,6 +280,28 @@ export function MetricRegistrationView({ categories, onRegisterMetric, initialMe
           </div>
 
           <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-700">Category (Determines Data Source)</label>
+                {linkedDataSource && (
+                  <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
+                    Bound to {linkedDataSource.type}
+                  </Badge>
+                )}
+              </div>
+              <CategoryTreeSelect
+                categories={categories}
+                value={categoryPathStr ? categoryPathStr.split(" > ") : []}
+                onChange={(path: string[]) => setCategoryPathStr(path.join(" > "))}
+                placeholder="Select a category path"
+              />
+              {linkedDataSource && (
+                <p className="text-[10px] text-slate-500">
+                  Source Link: <a href={linkedDataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{linkedDataSource.link}</a>
+                </p>
+              )}
+            </div>
+
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Query type</label>
