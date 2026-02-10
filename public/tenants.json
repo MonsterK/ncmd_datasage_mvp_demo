@@ -21,7 +21,14 @@
           }
         },
         {
-          "name": "Monetization > Revenue > SGI",
+          "name": "QBR",
+          "dataSource": {
+            "type": "Fabric model",
+            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
+          }
+        },
+        {
+          "name": "Ads",
           "dataSource": {
             "type": "Fabric model",
             "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
@@ -37,6 +44,13 @@
       "categories": [
         {
           "name": "Growth",
+          "dataSource": {
+            "type": "ClickHouse",
+            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
+          }
+        },
+        {
+          "name": "Creators",
           "dataSource": {
             "type": "ClickHouse",
             "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"

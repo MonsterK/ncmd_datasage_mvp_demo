@@ -9,11 +9,6 @@
           "name": "Revenue",
           "children": [
             {
-              "id": "c1-1-1",
-              "name": "SGI",
-              "metricFieldNames": ["spp_revenue"]
-            },
-            {
               "id": "c1-1-2",
               "name": "QBR",
               "metricFieldNames": ["qbr_revenue"]
