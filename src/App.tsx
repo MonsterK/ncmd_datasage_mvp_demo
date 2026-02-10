@@ -219,8 +219,7 @@ function App() {
         })
         .filter((clause): clause is string => clause !== null)
 
-      const mergedFilters = [...(baseQuery?.filters ?? []), ...filterClauses]
-
+      const mergedFilters = [...filterClauses]
       let technicalDefinition = base.technicalDefinition
       if (filterClauses.length) {
         const hasWhere = /where/i.test(base.technicalDefinition)
