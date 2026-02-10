@@ -70,6 +70,7 @@ export interface ManagementWorkspaceViewProps {
     description: string
     category: string
     sourceLink: string
+    sourceDimensionField: string
   }) => void
   onUpdateDimension: (payload: {
     id: string
@@ -77,6 +78,7 @@ export interface ManagementWorkspaceViewProps {
     description: string
     category: string
     sourceLink: string
+    sourceDimensionField: string
   }) => void
   onDeleteDimension: (id: string) => void
   tags: Tag[]
@@ -591,6 +593,7 @@ export function ManagementWorkspaceView({
         }}
         categories={categories}
         tenants={tenants}
+        dimensions={dimensions}
         onRegisterMetric={onRegisterMetric}
         initialMetric={metricToEdit}
         mode={metricSheetMode}
@@ -714,6 +717,7 @@ interface NewMetricSheetProps {
   onOpenChange: (open: boolean) => void
   categories: CategoryNode[]
   tenants: Tenant[]
+  dimensions: Dimension[]
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric | null
   mode?: "create" | "edit"
@@ -725,6 +729,7 @@ export function NewMetricSheet({
   onOpenChange,
   categories,
   tenants,
+  dimensions,
   onRegisterMetric,
   initialMetric,
   mode = "create",
@@ -749,6 +754,7 @@ export function NewMetricSheet({
               key={isEditMode && initialMetric ? initialMetric.id : "new"}
               categories={categories}
               tenants={tenants}
+              dimensions={dimensions}
               initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
               disableFieldNameEditing={Boolean(isEditMode)}
               onRegisterMetric={(payload) => {
@@ -1564,6 +1570,7 @@ interface NewDimensionSheetProps {
     description: string
     category: string
     sourceLink: string
+    sourceDimensionField: string
   }) => void
   initialDimension?: Dimension | null
   mode?: "create" | "edit"
@@ -1573,6 +1580,7 @@ interface NewDimensionSheetProps {
     description: string
     category: string
     sourceLink: string
+    sourceDimensionField: string
   }) => void
 }
 
@@ -1589,6 +1597,7 @@ export function NewDimensionSheet({
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState("")
   const [sourceLink, setSourceLink] = useState("")
+  const [sourceDimensionField, setSourceDimensionField] = useState("")
   const [message, setMessage] = useState<string | null>(null)
 
   const isEditMode = mode === "edit" && initialDimension && onUpdateDimension
@@ -1602,12 +1611,14 @@ export function NewDimensionSheet({
       setDescription(initialDimension.description)
       setCategory(initialDimension.category ?? "")
       setSourceLink(initialDimension.sourceLink ?? "")
+      setSourceDimensionField(initialDimension.sourceDimensionField ?? "")
     } else {
       setId("")
       setName("")
       setDescription("")
       setCategory("")
       setSourceLink("")
+      setSourceDimensionField("")
     }
     setMessage(null)
   }, [open, isEditMode, initialDimension])
@@ -1627,6 +1638,7 @@ export function NewDimensionSheet({
       description: description.trim(),
       category: category.trim(),
       sourceLink: sourceLink.trim(),
+      sourceDimensionField: sourceDimensionField.trim(),
     }
 
     if (isEditMode && onUpdateDimension && initialDimension) {
@@ -1714,7 +1726,7 @@ export function NewDimensionSheet({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Source link</label>
+                    <label className="text-xs font-semibold text-slate-700">Source dataset link</label>
                     <div className="relative">
                       <Input
                         type="url"
@@ -1727,6 +1739,15 @@ export function NewDimensionSheet({
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                       </div>
                     </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Source Dimension Field</label>
+                    <Input
+                      className="h-9 text-sm font-mono"
+                      value={sourceDimensionField}
+                      onChange={(e) => setSourceDimensionField(e.target.value)}
+                      placeholder="e.g. dim_agency_tier"
+                    />
                   </div>
                 </div>
               </div>

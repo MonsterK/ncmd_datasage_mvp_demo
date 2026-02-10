@@ -3,12 +3,10 @@ export interface MetricQueryDefinition {
   id: string
   type: string
   source: string
-  originField: string
-  aggregate: string
+  expression?: string
   businessDate: string
-  filters: string[]
   analysisDimensions: string[]
-  link?: string
+  createInDownstream?: string[]
 }
 
 export interface TrendPoint {
@@ -75,6 +73,7 @@ export interface Dimension {
   boundMetricFieldNames: string[]
   category?: string
   sourceLink?: string
+  sourceDimensionField?: string
   createdAt?: string
   updatedAt?: string
   history?: ChangeLog[]
@@ -156,17 +155,15 @@ export interface NewMetricPayload {
   technicalDefinition: string
   categoryPath: string[]
   larkSheetLink?: string
-  dataType?: string
-  unit?: string
   query: {
     type: string
     source: string
-    originField: string
-    aggregate: string
+    expression: string
     businessDate: string
-    filters: string[]
     analysisDimensions: string[]
-    link?: string
+    dataType?: string
+    unit?: string
+    createInDownstream?: string[]
   }
 }
 

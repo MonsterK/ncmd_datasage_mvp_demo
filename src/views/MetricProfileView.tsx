@@ -137,34 +137,37 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
                       </Badge>
                       <span className="font-mono text-[11px] text-slate-500">{q.source}</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-slate-600 mb-2">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">Origin Field</span>
-                        <span className="font-mono font-medium text-slate-700">{q.originField}</span>
+                    {q.expression ? (
+                      <div className="mb-3">
+                         <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Expression</span>
+                         <code className="block text-slate-700 bg-slate-100 px-2 py-1.5 rounded border border-slate-200 font-mono text-[10px] whitespace-pre-wrap">{q.expression}</code>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">Aggregate</span>
-                        <span className="font-mono font-medium text-slate-700">{q.aggregate}</span>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 text-slate-600 mb-2">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider">Origin Field</span>
+                          <span className="font-mono font-medium text-slate-700">{q.originField}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider">Aggregate</span>
+                          <span className="font-mono font-medium text-slate-700">{q.aggregate}</span>
+                        </div>
                       </div>
+                    )}
+
+                    <div className="flex flex-col gap-1 mt-3 pt-3 border-t border-slate-200/50">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">Related Datasets</span>
+                        <div className="flex flex-wrap gap-3">
+                            <a href={`https://aeolus-sg.tiktok-row.net/dataset/${q.source}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-[10px] flex items-center gap-1 font-medium">
+                                Source: {q.source}
+                            </a>
+                            {q.createInDownstream?.map(topic => (
+                                 <a key={topic} href={`https://aeolus-sg.tiktok-row.net/dataset/${topic.replace(/\s+/g, '_')}`} target="_blank" rel="noreferrer" className="text-purple-600 hover:underline text-[10px] flex items-center gap-1 font-medium">
+                                    Downstream: {topic}
+                                </a>
+                            ))}
+                        </div>
                     </div>
-                    {q.filters.length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-slate-200/50">
-                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Filters</span>
-                        <code className="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{q.filters.join(" AND ")}</code>
-                      </div>
-                    )}
-                    {q.link && (
-                      <div className="mt-3 pt-2 border-t border-slate-200/50">
-                        <a
-                          href={q.link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 underline hover:text-blue-800 font-medium flex items-center gap-1"
-                        >
-                          Open in Query Tool →
-                        </a>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>

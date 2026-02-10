@@ -15,12 +15,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 
-import { NewMetricPayload, CategoryNode, Metric, Tenant } from "@/types"
-import { normalizeFilters, normalizeDimensions } from "@/lib/utils"
+import { NewMetricPayload, CategoryNode, Metric, Tenant, Dimension } from "@/types"
+import { normalizeDimensions } from "@/lib/utils"
 
 export interface MetricRegistrationViewProps {
   categories: CategoryNode[]
   tenants: Tenant[]
+  dimensions: Dimension[]
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric
   disableFieldNameEditing?: boolean
@@ -39,7 +40,7 @@ function flattenCategoryPaths(nodes: CategoryNode[], prefix: string[] = []): str
   return paths
 }
 
-export function MetricRegistrationView({ categories, tenants, onRegisterMetric, initialMetric, disableFieldNameEditing }: MetricRegistrationViewProps) {
+export function MetricRegistrationView({ categories, tenants, dimensions, onRegisterMetric, initialMetric, disableFieldNameEditing }: MetricRegistrationViewProps) {
   const baseQuery = initialMetric?.queryDefinitions?.[0]
 
   const [categoryPathStr, setCategoryPathStr] = useState<string | undefined>(
@@ -78,43 +79,20 @@ export function MetricRegistrationView({ categories, tenants, onRegisterMetric, 
   // 3. Query Type defaults to Aeolus Visual Query, not allowed to change
   const [queryType] = useState("Aeolus Visual Query")
   const [querySource, setQuerySource] = useState(baseQuery?.source ?? "")
-  const [originField, setOriginField] = useState(baseQuery?.originField ?? "")
-  const [aggregate, setAggregate] = useState(baseQuery?.aggregate ?? "SUM")
+  const [expression, setExpression] = useState(baseQuery?.expression ?? "")
   
   // 4. Business date field defaults to partition, user doesn't fill
   const [businessDate] = useState("partition")
   
-  const [filtersRaw, setFiltersRaw] = useState(
-    baseQuery?.filters && baseQuery.filters.length ? baseQuery.filters.join(", ") : "",
+  const [selectedDimensionFieldNames, setSelectedDimensionFieldNames] = useState<string[]>(
+    baseQuery?.analysisDimensions ?? []
   )
   
-  // 5. Analysis dimensions parsed from Aeolus query (link)
-  // We'll calculate this dynamically or update state when link changes
-  const [analysisDimsRaw, setAnalysisDimsRaw] = useState(
-    baseQuery?.analysisDimensions && baseQuery.analysisDimensions.length
-      ? baseQuery.analysisDimensions.join(", ")
-      : "",
+  const [createInDownstream, setCreateInDownstream] = useState<string[]>(
+    baseQuery?.createInDownstream ?? []
   )
-  
-  const [queryLink, setQueryLink] = useState(baseQuery?.link ?? "")
 
   const [submittedFieldName, setSubmittedFieldName] = useState<string | null>(null)
-
-  // Effect to parse dims from query link (Mock implementation)
-  useEffect(() => {
-    if (!queryLink) return
-    try {
-        // Mock parsing logic: look for "dims=a,b,c" or similar
-        // Or just extract some mock data if it matches a pattern
-        const url = new URL(queryLink)
-        const dimsParam = url.searchParams.get("dims") || url.searchParams.get("dimensions")
-        if (dimsParam) {
-            setAnalysisDimsRaw(dimsParam.split(",").join(", "))
-        }
-    } catch (e) {
-        // ignore invalid url
-    }
-  }, [queryLink])
 
   const categoryOptions = useMemo(() => flattenCategoryPaths(categories), [categories])
 
@@ -126,20 +104,18 @@ export function MetricRegistrationView({ categories, tenants, onRegisterMetric, 
       businessName,
       businessDefinition,
       fieldName,
-      dataType,
-      unit,
       technicalDefinition,
       categoryPath: categoryPathStr ? categoryPathStr.split(" > ") : [],
       larkSheetLink: larkSheetLink.trim() || undefined,
       query: {
         type: queryType,
         source: querySource,
-        originField,
-        aggregate,
+        expression,
         businessDate,
-        filters: normalizeFilters(filtersRaw),
-        analysisDimensions: normalizeDimensions(analysisDimsRaw),
-        link: queryLink.trim() || undefined,
+        analysisDimensions: selectedDimensionFieldNames,
+        dataType,
+        unit,
+        createInDownstream,
       },
     }
 
@@ -223,33 +199,6 @@ export function MetricRegistrationView({ categories, tenants, onRegisterMetric, 
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Data Type</label>
-              <Select value={dataType} onValueChange={setDataType}>
-                <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="decimal">Decimal</SelectItem>
-                  <SelectItem value="percentage">Percentage</SelectItem>
-                  <SelectItem value="integer">Integer</SelectItem>
-                  <SelectItem value="currency">Currency</SelectItem>
-                  <SelectItem value="string">String</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Unit</label>
-              <Input
-                placeholder="USD, %, etc."
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700">Field Name</label>
               <Input
                 placeholder="sgi_payout"
@@ -316,73 +265,119 @@ export function MetricRegistrationView({ categories, tenants, onRegisterMetric, 
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Source dataset</label>
-                <Input
-                  placeholder="fabric_sgi_payout_daily"
-                  value={querySource}
-                  onChange={(e) => setQuerySource(e.target.value)}
-                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="fabric_sgi_payout_daily"
+                    value={querySource}
+                    onChange={(e) => setQuerySource(e.target.value)}
+                    className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-9 px-3 text-xs border-slate-200 hover:bg-slate-50"
+                    onClick={() => alert("Reference existing fields in dataset (Mock)")}
+                  >
+                    Fields
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700">Expression (SQL)</label>
+              <div className="relative">
+                <Textarea
+                  rows={4}
+                  placeholder="e.g. SUM(payout_amount) WHERE market = 'US'"
+                  value={expression}
+                  onChange={(e) => setExpression(e.target.value)}
+                  className="text-xs font-mono bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 min-h-[100px]"
                 />
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <Badge variant="outline" className="bg-slate-50 text-slate-400 border-slate-200 text-[10px]">SQL</Badge>
+                </div>
               </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Origin field</label>
-                <Input
-                  placeholder="payout_amount"
-                  value={originField}
-                  onChange={(e) => setOriginField(e.target.value)}
-                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Aggregate</label>
-                <Select value={aggregate} onValueChange={setAggregate}>
+                <label className="text-xs font-semibold text-slate-700">Data Type</label>
+                <Select value={dataType} onValueChange={setDataType}>
                   <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="SUM">SUM</SelectItem>
-                    <SelectItem value="COUNT">COUNT</SelectItem>
-                    <SelectItem value="DISTINCT_COUNT">DISTINCT_COUNT</SelectItem>
-                    <SelectItem value="AVG">AVG</SelectItem>
+                    <SelectItem value="decimal">Decimal</SelectItem>
+                    <SelectItem value="percentage">Percentage</SelectItem>
+                    <SelectItem value="integer">Integer</SelectItem>
+                    <SelectItem value="currency">Currency</SelectItem>
+                    <SelectItem value="string">String</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {/* Business date field is hidden/removed as per requirement */}
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-1">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Aeolus query link</label>
+                <label className="text-xs font-semibold text-slate-700">Unit</label>
                 <Input
-                  type="url"
-                  placeholder="https://... (Analysis dimensions parsed from here)"
-                  value={queryLink}
-                  onChange={(e) => setQueryLink(e.target.value)}
+                  placeholder="USD, %, etc."
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
                   className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
                 />
               </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Filters (comma or new line)</label>
-                <Textarea
-                  rows={3}
-                  placeholder="market = 'US', product_line = 'Ads'"
-                  value={filtersRaw}
-                  onChange={(e) => setFiltersRaw(e.target.value)}
-                  className="text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono min-h-[80px]"
-                />
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700">Analysis dimensions</label>
+              <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 max-h-[150px] overflow-y-auto">
+                {dimensions.map((dim) => (
+                  <div key={dim.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={`dim-${dim.id}`}
+                      className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      checked={selectedDimensionFieldNames.includes(dim.fieldName)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedDimensionFieldNames([...selectedDimensionFieldNames, dim.fieldName])
+                        } else {
+                          setSelectedDimensionFieldNames(selectedDimensionFieldNames.filter(d => d !== dim.fieldName))
+                        }
+                      }}
+                    />
+                    <label htmlFor={`dim-${dim.id}`} className="text-xs text-slate-700 select-none cursor-pointer">
+                      {dim.name} <span className="text-slate-400 text-[10px]">({dim.fieldName})</span>
+                    </label>
+                  </div>
+                ))}
+                {dimensions.length === 0 && <p className="text-xs text-slate-400 col-span-2">No dimensions available.</p>}
               </div>
-              {/* Analysis dimensions hidden/read-only */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Analysis dimensions (Parsed from query)</label>
-                <div className="text-xs bg-slate-100 p-2 rounded min-h-[80px] text-slate-600 font-mono">
-                  {analysisDimsRaw || "(No dimensions parsed)"}
-                </div>
-              </div>
+            </div>
+
+            <div className="space-y-1.5 pt-2 border-t border-slate-200/50">
+               <label className="text-xs font-semibold text-slate-700">Auto-create in downstream topics</label>
+               <div className="flex flex-wrap gap-4">
+                 {["downstream topic 1", "downstream topic 2"].map((topic) => (
+                   <div key={topic} className="flex items-center gap-2">
+                     <input
+                       type="checkbox"
+                       id={`topic-${topic}`}
+                       className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                       checked={createInDownstream.includes(topic)}
+                       onChange={(e) => {
+                         if (e.target.checked) {
+                           setCreateInDownstream([...createInDownstream, topic])
+                         } else {
+                           setCreateInDownstream(createInDownstream.filter(t => t !== topic))
+                         }
+                       }}
+                     />
+                     <label htmlFor={`topic-${topic}`} className="text-xs text-slate-700 select-none cursor-pointer capitalize">
+                       {topic}
+                     </label>
+                   </div>
+                 ))}
+               </div>
             </div>
           </div>
 

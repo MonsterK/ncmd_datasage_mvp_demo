@@ -705,6 +705,7 @@ export function MetricsWorkspaceView({
         onOpenChange={setIsNewMetricSheetOpen}
         categories={categories}
         tenants={tenants}
+        dimensions={dimensions}
         onRegisterMetric={onRegisterMetric}
       />
 
