@@ -148,8 +148,8 @@ function App() {
       technicalDefinition: payload.technicalDefinition,
       status: "Draft",
       tenant: payload.categoryPath[0] ?? "Strategy Data", // Default tenant
-      dataType: payload.dataType,
-      unit: payload.unit,
+      dataType: payload.query.dataType,
+      unit: payload.query.unit,
       owners: {
         businessOwner: "TBD",
         techOwner: "TBD",
@@ -160,12 +160,10 @@ function App() {
           id: `q-${now}`,
           type: payload.query.type,
           source: payload.query.source,
-          originField: payload.query.originField,
-          aggregate: payload.query.aggregate,
+          expression: payload.query.expression,
           businessDate: payload.query.businessDate,
-          filters: payload.query.filters,
           analysisDimensions: payload.query.analysisDimensions,
-          link: payload.query.link ?? undefined,
+          createInDownstream: payload.query.createInDownstream,
         },
       ],
       trend30d: createFlatTrend(),
@@ -242,10 +240,8 @@ function App() {
               id: `q-${now}`,
               type: "Computed expression",
               source: base.fieldName,
-              originField: base.queryDefinitions[0]?.originField ?? "",
-              aggregate: base.queryDefinitions[0]?.aggregate ?? "SUM",
+              expression: `SUM(${base.queryDefinitions[0]?.expression ?? ""})`, // Basic fallback
               businessDate: base.queryDefinitions[0]?.businessDate ?? "",
-              filters: mergedFilters,
               analysisDimensions: [],
             }
 
@@ -311,10 +307,8 @@ function App() {
         id: `q-${now}`,
         type: "Computed expression",
         source: `${base.fieldName},${other.fieldName}`,
-        originField: "derived_expression",
-        aggregate: "NONE",
+        expression: "derived_expression",
         businessDate: base.queryDefinitions[0]?.businessDate ?? "",
-        filters: [],
         analysisDimensions: [],
       }
 
@@ -483,19 +477,17 @@ function App() {
           technicalDefinition: payload.technicalDefinition,
           tenant: payload.categoryPath[0] ?? m.tenant,
           larkSheetLink: payload.larkSheetLink?.trim() || undefined,
-          dataType: payload.dataType,
-          unit: payload.unit,
+          dataType: payload.query.dataType,
+          unit: payload.query.unit,
           queryDefinitions: [
             {
               id: m.queryDefinitions[0]?.id ?? `q-${now}`,
               type: payload.query.type,
               source: payload.query.source,
-              originField: payload.query.originField,
-              aggregate: payload.query.aggregate,
+              expression: payload.query.expression,
               businessDate: payload.query.businessDate,
-              filters: payload.query.filters,
               analysisDimensions: payload.query.analysisDimensions,
-              link: payload.query.link ?? undefined,
+              createInDownstream: payload.query.createInDownstream,
             },
           ],
           boundDimensionFieldNames: payload.query.analysisDimensions,
