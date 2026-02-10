@@ -213,8 +213,7 @@ export function ManagementWorkspaceView({
             </Table>
           </div>
         )
-      case "metricSet":
-        return null // Removed
+
       case "dimension":
         return (
           <div className="space-y-3">
