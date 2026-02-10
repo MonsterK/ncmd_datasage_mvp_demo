@@ -146,7 +146,7 @@ function App() {
       categoryPath: payload.categoryPath.length ? payload.categoryPath : ["Monetization"],
       businessDefinition: payload.businessDefinition,
       technicalDefinition: payload.technicalDefinition,
-      status: "Draft",
+      status: "Offline",
       tenant: payload.categoryPath[0] ?? "Strategy Data", // Default tenant
       dataType: payload.query.dataType,
       unit: payload.query.unit,
@@ -264,7 +264,7 @@ function App() {
         categoryPath: base.categoryPath,
         businessDefinition,
         technicalDefinition,
-        status: "Draft",
+        status: "Offline",
         tenant: base.tenant,
         owners: base.owners,
         queryDefinitions: [newQuery],
@@ -329,7 +329,7 @@ function App() {
         categoryPath: base.categoryPath,
         businessDefinition,
         technicalDefinition,
-        status: "Draft",
+        status: "Offline",
         tenant: base.tenant,
         owners: base.owners,
         queryDefinitions: [query],
@@ -388,15 +388,6 @@ function App() {
           }))
         },
       ],
-    }))
-  }
-
-  const handleCertifyMetric = (fieldName: string) => {
-    setData((prev) => ({
-      ...prev,
-      metrics: prev.metrics.map((m) =>
-        m.fieldName === fieldName ? { ...m, certified: !m.certified } : m
-      ),
     }))
   }
 
@@ -710,6 +701,7 @@ function App() {
                 dimensions={data.dimensions}
                 categories={data.categories}
                 tenants={data.tenants}
+                activeTenantId={activeGlobalTenantId}
                 onOpenMetricProfile={handleOpenMetricProfile}
                 onRegisterMetric={handleRegisterMetric}
                 onCreateTenant={handleCreateTenant}
@@ -718,7 +710,6 @@ function App() {
                 onCreateDimension={handleCreateDimension}
                 onUpdateMetric={handleUpdateMetric}
                 onDeleteMetric={handleDeleteMetric}
-                onCertifyMetric={handleCertifyMetric}
                 onUpdateDimension={handleUpdateDimension}
                 onDeleteDimension={handleDeleteDimension}
                 setTags={setTags}

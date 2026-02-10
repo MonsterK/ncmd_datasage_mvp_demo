@@ -36,7 +36,7 @@ import {
 } from "@/types"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
 
-export type ManagementSection = "metric" | "metricSet" | "dimension" | "tenant"
+export type ManagementSection = "metric" | "dimension" | "datasource"
 
 export interface ManagementWorkspaceViewProps {
   activeSection: ManagementSection
@@ -47,12 +47,12 @@ export interface ManagementWorkspaceViewProps {
   dimensions: Dimension[]
   categories: CategoryNode[]
   tenants: Tenant[]
+  activeTenantId: string | null
   onOpenMetricProfile: (fieldName: string) => void
   onRegisterMetric: (payload: NewMetricPayload) => void
   onUpdateMetric: (fieldName: string, payload: NewMetricPayload) => void
   onDeleteMetric: (fieldName: string) => void
-  onCertifyMetric: (fieldName: string) => void
-  onCreateTenant: (payload: {
+  onCreateTenant?: (payload: {
     id: string
     name: string
     description: string
@@ -94,11 +94,11 @@ export function ManagementWorkspaceView({
   dimensions,
   categories,
   tenants,
+  activeTenantId,
   onOpenMetricProfile,
   onRegisterMetric,
   onUpdateMetric,
   onDeleteMetric,
-  onCertifyMetric,
   onCreateTenant,
   onCreateCategory,
   onUpdateTenant,
@@ -109,20 +109,13 @@ export function ManagementWorkspaceView({
   setTags,
 }: ManagementWorkspaceViewProps) {
   const [isNewMetricSheetOpen, setIsNewMetricSheetOpen] = useState(false)
-  const [isNewMetricSetSheetOpen, setIsNewMetricSetSheetOpen] = useState(false)
-  const [isNewTenantSheetOpen, setIsNewTenantSheetOpen] = useState(false)
   const [isTenantCategoriesSheetOpen, setIsTenantCategoriesSheetOpen] = useState(false)
   const [tenantForCategories, setTenantForCategories] = useState<Tenant | null>(null)
   const [isNewDimensionSheetOpen, setIsNewDimensionSheetOpen] = useState(false)
   const [metricSheetMode, setMetricSheetMode] = useState<"create" | "edit">("create")
   const [metricToEdit, setMetricToEdit] = useState<Metric | null>(null)
-  const [metricSetSheetMode, setMetricSetSheetMode] = useState<"create" | "edit">("create")
-  const [metricSetToEdit, setMetricSetToEdit] = useState<Album | null>(null)
   const [dimensionSheetMode, setDimensionSheetMode] = useState<"create" | "edit">("create")
   const [dimensionToEdit, setDimensionToEdit] = useState<Dimension | null>(null)
-  const [metricSetToView, setMetricSetToView] = useState<Album | null>(null)
-  const [isMetricSetDetailSheetOpen, setIsMetricSetDetailSheetOpen] = useState(false)
-  const [isTagManagementSheetOpen, setIsTagManagementSheetOpen] = useState(false)
 
   const tagNameById = useMemo(() => {
     const map = new Map<string, string>()
@@ -149,7 +142,6 @@ export function ManagementWorkspaceView({
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cert</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
                   <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
@@ -167,15 +159,6 @@ export function ManagementWorkspaceView({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs">
-                       {m.certified ? (
-                         <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
-                           Certified
-                         </Badge>
-                       ) : (
-                         <span className="text-[10px] text-slate-400">-</span>
-                       )}
-                    </TableCell>
-                    <TableCell className="text-xs">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-slate-900">{m.owners.businessOwner}</span>
                         <span className="text-[11px] text-slate-500">{m.owners.techOwner}</span>
@@ -184,15 +167,6 @@ export function ManagementWorkspaceView({
                     <TableCell className="text-[11px] text-slate-500">{formatDate(m.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                          onClick={() => onCertifyMetric(m.fieldName)}
-                        >
-                          {m.certified ? "Decertify" : "Certify"}
-                        </Button>
                         <Button
                           type="button"
                           variant="outline"
@@ -240,96 +214,7 @@ export function ManagementWorkspaceView({
           </div>
         )
       case "metricSet":
-        return (
-          <div className="space-y-3">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-slate-50 border-slate-100">
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Visibility</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tags</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Metric count</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
-                  <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {metricSets.map((set) => (
-                  <TableRow key={set.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
-                    <TableCell className="text-sm font-medium text-slate-900">{set.name}</TableCell>
-                    <TableCell className="text-xs text-slate-700">{set.tenant}</TableCell>
-                    <TableCell className="text-xs">
-                      <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
-                        {set.visibility}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      {set.tags && set.tags.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {set.tags.map((tagId) => (
-                            <Badge key={tagId} variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-100">
-                              {tagNameById.get(tagId) ?? tagId}
-                            </Badge>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-[11px] text-slate-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-xs text-slate-700">{set.metricFieldNames?.length ?? 0}</TableCell>
-                    <TableCell className="text-[11px] text-slate-500">{formatDate(set.updatedAt)}</TableCell>
-                    <TableCell className="text-xs">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                          onClick={() => {
-                            setMetricSetSheetMode("edit")
-                            setMetricSetToEdit(set)
-                            setIsNewMetricSetSheetOpen(true)
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
-                          onClick={() => setMetricSets(metricSets.filter((s) => s.id !== set.id))}
-                        >
-                          Delete
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                          onClick={() => {
-                            setMetricSetToView(set)
-                            setIsMetricSetDetailSheetOpen(true)
-                          }}
-                        >
-                          Open
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {metricSets.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-xs text-slate-400 italic">
-                      No metric sets in the registry yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )
+        return null // Removed
       case "dimension":
         return (
           <div className="space-y-3">
@@ -397,53 +282,71 @@ export function ManagementWorkspaceView({
             </Table>
           </div>
         )
-      case "tenant":
+      case "datasource":
+        const activeTenant = tenants.find((t) => t.id === activeTenantId)
         return (
           <Card className="border-slate-200 shadow-sm rounded-2xl">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-slate-900">Tenant management</CardTitle>
+              <CardTitle className="text-sm text-slate-900">Datasource Management</CardTitle>
               <CardDescription className="text-xs text-slate-500">
-                Configure business tenants, high-level permissions, and their category systems.
+                Manage categories and data sources for the current tenant ({activeTenant?.name ?? "Unknown"}).
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {tenants.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-slate-100 hover:bg-slate-50">
-                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">ID</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Categories</TableHead>
-                      <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tenants.map((d) => (
-                      <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
-                         <TableCell className="text-[11px] font-mono text-slate-600">{d.id}</TableCell>
-                        <TableCell className="text-xs font-medium text-slate-900">{d.name}</TableCell>
-                        <TableCell className="text-xs text-slate-600">{d.description}</TableCell>
-                        <TableCell className="text-xs text-slate-600">
-                          {d.categories?.map(c => c.name).join(", ") || "-"}
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                            onClick={() => onManageTenantCategories(d)}
-                          >
-                            Manage Categories
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              {activeTenant ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
+                     <div>
+                       <h3 className="text-sm font-semibold text-slate-900">{activeTenant.name}</h3>
+                       <p className="text-xs text-slate-500 mt-1">{activeTenant.description}</p>
+                     </div>
+                     <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-4 text-xs font-medium bg-white border-slate-200 shadow-sm hover:border-blue-200 hover:text-blue-600"
+                        onClick={() => {
+                          setTenantForCategories(activeTenant)
+                          setIsTenantCategoriesSheetOpen(true)
+                        }}
+                      >
+                        Manage Categories & Datasources
+                      </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Current Categories</h4>
+                    {activeTenant.categories && activeTenant.categories.length > 0 ? (
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                         {activeTenant.categories.map((cat, i) => (
+                           <div key={i} className="p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
+                             <div className="font-medium text-slate-900 text-sm">{cat.name}</div>
+                             {cat.dataSource ? (
+                               <div className="mt-2 text-xs text-slate-500">
+                                 <div className="flex items-center gap-1.5">
+                                   <span className="font-semibold text-slate-600">Type:</span>
+                                   <span>{cat.dataSource.type}</span>
+                                 </div>
+                                 <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span className="font-semibold text-slate-600">Link:</span>
+                                    <a href={cat.dataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate max-w-[150px] inline-block align-bottom">
+                                      {cat.dataSource.link}
+                                    </a>
+                                 </div>
+                               </div>
+                             ) : (
+                               <p className="mt-2 text-xs text-slate-400 italic">No datasource bound</p>
+                             )}
+                           </div>
+                         ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No categories defined yet.</p>
+                    )}
+                  </div>
+                </div>
               ) : (
-                <p className="text-xs text-slate-500">No tenants configured in the mock data.</p>
+                <p className="text-xs text-slate-500">No active tenant selected.</p>
               )}
             </CardContent>
           </Card>
@@ -461,28 +364,22 @@ export function ManagementWorkspaceView({
           description: "Search existing metrics and register new ones.",
           addLabel: "New metric",
         }
-      case "metricSet":
-        return {
-          title: "Metric set management",
-          description: "Maintain metric sets used for SGI, QBR and creator monitoring.",
-          addLabel: "New metric set",
-        }
       case "dimension":
         return {
           title: "Dimension management",
           description: "Manage dimension terms, values dictionary and bindings.",
           addLabel: "New dimension",
         }
-      case "tenant":
+      case "datasource":
         return {
-          title: "Tenant management",
-          description: "Configure business tenants and high-level permissions.",
-          addLabel: "New tenant",
+          title: "Datasource management",
+          description: "Manage categories and data sources for the current tenant.",
+          addLabel: "Add Category",
         }
       default:
         return {
           title: "Management",
-          description: "Administer metrics, metric sets, dimensions, categories and tenants.",
+          description: "Administer metrics, dimensions, and datasources.",
           addLabel: "New",
         }
     }
@@ -493,16 +390,18 @@ export function ManagementWorkspaceView({
       setMetricSheetMode("create")
       setMetricToEdit(null)
       setIsNewMetricSheetOpen(true)
-    } else if (activeSection === "metricSet") {
-      setMetricSetSheetMode("create")
-      setMetricSetToEdit(null)
-      setIsNewMetricSetSheetOpen(true)
     } else if (activeSection === "dimension") {
       setDimensionSheetMode("create")
       setDimensionToEdit(null)
       setIsNewDimensionSheetOpen(true)
-    } else if (activeSection === "tenant") {
-      setIsNewTenantSheetOpen(true)
+    } else if (activeSection === "datasource") {
+      if (activeTenantId) {
+        const tenant = tenants.find(t => t.id === activeTenantId)
+        if (tenant) {
+          setTenantForCategories(tenant)
+          setIsTenantCategoriesSheetOpen(true)
+        }
+      }
     }
   }
 
@@ -530,12 +429,6 @@ export function ManagementWorkspaceView({
               onClick={() => onChangeSection("metric")}
             />
             <SidebarItem
-              icon={FolderKanban}
-              label="Metric Sets"
-              active={activeSection === "metricSet"}
-              onClick={() => onChangeSection("metricSet")}
-            />
-            <SidebarItem
               icon={Layers}
               label="Dimensions"
               active={activeSection === "dimension"}
@@ -543,9 +436,9 @@ export function ManagementWorkspaceView({
             />
             <SidebarItem
               icon={Home}
-              label="Tenants"
-              active={activeSection === "tenant"}
-              onClick={() => onChangeSection("tenant")}
+              label="Datasources"
+              active={activeSection === "datasource"}
+              onClick={() => onChangeSection("datasource")}
             />
           </CardContent>
         </Card>
@@ -565,17 +458,6 @@ export function ManagementWorkspaceView({
                 <PlusCircle className="h-3.5 w-3.5" />
                 <span>{header.addLabel}</span>
               </Button>
-              {activeSection === "metricSet" && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium border-slate-200 shadow-sm hover:border-blue-200 hover:text-blue-600 transition-all"
-                  onClick={() => setIsTagManagementSheetOpen(true)}
-                >
-                  Manage tags
-                </Button>
-              )}
             </div>
           </CardHeader>
           <CardContent className="p-0 sm:p-4">{renderSectionContent()}</CardContent>
@@ -598,30 +480,6 @@ export function ManagementWorkspaceView({
         initialMetric={metricToEdit}
         mode={metricSheetMode}
         onUpdateMetric={onUpdateMetric}
-      />
-
-      <NewMetricSetSheet
-        open={isNewMetricSetSheetOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setMetricSetToEdit(null)
-            setMetricSetSheetMode("create")
-          }
-          setIsNewMetricSetSheetOpen(open)
-        }}
-        metrics={metrics}
-        metricSets={metricSets}
-        onMetricSetsChange={setMetricSets}
-        tenants={tenants}
-        mode={metricSetSheetMode}
-        initialMetricSet={metricSetToEdit}
-        tags={tags}
-      />
-
-      <NewTenantSheet
-        open={isNewTenantSheetOpen}
-        onOpenChange={setIsNewTenantSheetOpen}
-        onCreateTenant={onCreateTenant}
       />
 
       {tenantForCategories && (
@@ -649,30 +507,6 @@ export function ManagementWorkspaceView({
         initialDimension={dimensionToEdit}
         mode={dimensionSheetMode}
         onUpdateDimension={onUpdateDimension}
-      />
-
-      {metricSetToView && (
-        <MetricSetDetailSheet
-          open={isMetricSetDetailSheetOpen}
-          onOpenChange={(open) => {
-            setIsMetricSetDetailSheetOpen(open)
-            if (!open) {
-              setMetricSetToView(null)
-            }
-          }}
-          metricSet={metricSetToView}
-          metrics={metrics}
-          dimensions={dimensions}
-        />
-      )}
-
-      <TagManagementSheet
-        open={isTagManagementSheetOpen}
-        onOpenChange={setIsTagManagementSheetOpen}
-        tags={tags}
-        onTagsChange={setTags}
-        metricSets={metricSets}
-        onMetricSetsChange={setMetricSets}
       />
     </div>
   )

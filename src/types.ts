@@ -26,7 +26,7 @@ export interface Metric {
   categoryPath: string[]
   businessDefinition: string
   technicalDefinition: string
-  status: "Active" | "Draft"
+  status: "Active" | "Offline"
   tenant: string
   owners: {
     businessOwner: string
@@ -41,7 +41,6 @@ export interface Metric {
   heat?: number
   larkSheetLink?: string
   history?: ChangeLog[]
-  certified?: boolean
   dataType?: string
   unit?: string
 }

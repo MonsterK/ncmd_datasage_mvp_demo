@@ -90,6 +90,8 @@ export function MetricsWorkspaceView({
   const [metricSetSortDirection, setMetricSetSortDirection] = useState<MetricSortDirection>("desc")
   const [isNewMetricSheetOpen, setIsNewMetricSheetOpen] = useState(false)
   const [isNewMetricSetSheetOpen, setIsNewMetricSetSheetOpen] = useState(false)
+  const [metricSetSheetMode, setMetricSetSheetMode] = useState<"create" | "edit">("create")
+  const [metricSetToEdit, setMetricSetToEdit] = useState<Album | null>(null)
   const [isNewDimensionSheetOpen, setIsNewDimensionSheetOpen] = useState(false)
   const [selectedFieldNamesForQuery, setSelectedFieldNamesForQuery] = useState<string[]>([])
   const [isCombinedQuerySheetOpen, setIsCombinedQuerySheetOpen] = useState(false)
@@ -380,7 +382,11 @@ export function MetricsWorkspaceView({
               size="sm"
               variant="outline"
               className="rounded-full px-4 py-1 text-xs border-slate-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/50 transition-colors shadow-sm"
-              onClick={() => setIsNewMetricSetSheetOpen(true)}
+              onClick={() => {
+                setMetricSetSheetMode("create")
+                setMetricSetToEdit(null)
+                setIsNewMetricSetSheetOpen(true)
+              }}
             >
               New metric set
             </Button>
@@ -535,7 +541,22 @@ export function MetricsWorkspaceView({
                   Managing {metricsForSelectedSet.length} metrics in this set.
                 </p>
               </div>
-              <ButtonBackToMetricSets onClick={() => setSelectedMetricSetId(null)} />
+              <div className="flex items-center gap-3">
+                <Button
+                   type="button"
+                   variant="outline"
+                   size="sm"
+                   className="h-8 px-3 text-xs rounded-full border-slate-200 shadow-sm hover:border-blue-200 hover:text-blue-600"
+                   onClick={() => {
+                     setMetricSetSheetMode("edit")
+                     setMetricSetToEdit(selectedMetricSet)
+                     setIsNewMetricSetSheetOpen(true)
+                   }}
+                >
+                  Edit Set
+                </Button>
+                <ButtonBackToMetricSets onClick={() => setSelectedMetricSetId(null)} />
+              </div>
             </div>
             
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -622,11 +643,6 @@ export function MetricsWorkspaceView({
                         <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                           {m.status}
                         </Badge>
-                        {m.certified && (
-                          <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
-                            Certified
-                          </Badge>
-                        )}
                         {(m as any)._refVersion && (m as any)._refVersion !== "latest" && (
                           <span className="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
                             {(m as any)._refVersion}
@@ -711,13 +727,21 @@ export function MetricsWorkspaceView({
 
       <NewMetricSetSheet
         open={isNewMetricSetSheetOpen}
-        onOpenChange={setIsNewMetricSetSheetOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setMetricSetToEdit(null)
+            setMetricSetSheetMode("create")
+          }
+          setIsNewMetricSetSheetOpen(open)
+        }}
         metrics={metrics}
         metricSets={metricSets}
         onMetricSetsChange={onMetricSetsChange}
         tenants={tenants}
         initialTenantId={selectedTenantId ?? undefined}
         tags={tags}
+        mode={metricSetSheetMode}
+        initialMetricSet={metricSetToEdit}
       />
 
       <NewDimensionSheet
