@@ -20,14 +20,15 @@ export function useDataSage() {
   useEffect(() => {
     const load = async () => {
       try {
+        const t = Date.now()
         const [metricsRes, dimensionsRes, metricSetsRes, categoriesRes, tenantsRes, dimensionTreeRes] =
           await Promise.all([
-            fetch("/metrics.json"),
-            fetch("/dimensions.json"),
-            fetch("/metricSets.json"),
-            fetch("/categories.json"),
-            fetch("/tenants.json"),
-            fetch("/dimensionsTree.json"),
+            fetch(`/metrics.json?t=${t}`),
+            fetch(`/dimensions.json?t=${t}`),
+            fetch(`/metricSets.json?t=${t}`),
+            fetch(`/categories.json?t=${t}`),
+            fetch(`/tenants.json?t=${t}`),
+            fetch(`/dimensionsTree.json?t=${t}`),
           ])
 
         if (
