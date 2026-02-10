@@ -144,13 +144,9 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-2 text-slate-600 mb-2">
+                         {/* Fallback display if no expression is present */}
                         <div className="flex flex-col">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider">Origin Field</span>
-                          <span className="font-mono font-medium text-slate-700">{q.originField}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider">Aggregate</span>
-                          <span className="font-mono font-medium text-slate-700">{q.aggregate}</span>
+                           {/* Previously Origin Field */}
                         </div>
                       </div>
                     )}

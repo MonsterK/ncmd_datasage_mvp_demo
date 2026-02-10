@@ -234,7 +234,10 @@ function App() {
           ? {
               ...baseQuery,
               id: `q-${now}`,
-              filters: mergedFilters,
+              // Note: filters were removed from MetricQueryDefinition
+              // If we need to support filters for derived metrics, we might need to update the type or handle it differently
+              // For now, we'll append the filter condition to the technical definition
+              expression: baseQuery.expression || `SUM(${base.fieldName})`,
             }
           : {
               id: `q-${now}`,
