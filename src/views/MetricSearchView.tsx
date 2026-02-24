@@ -24,7 +24,7 @@ import {
 import { Search as SearchIcon, Flame, Filter, ArrowUpDown, User, BarChart2, LayoutGrid, List, Star } from "lucide-react"
 import { ResponsiveContainer, LineChart, Line } from "recharts"
 
-import { Metric } from "@/types"
+import { Metric, Tag } from "@/types"
 import { getMetricTimestamp } from "@/lib/utils"
 
 export interface MetricSearchViewProps {
@@ -34,6 +34,10 @@ export interface MetricSearchViewProps {
   onAddToMetricSetFromSelection?: (metricFieldNames: string[]) => void
   favoriteMetricFieldNames?: string[]
   onToggleFavoriteMetric?: (fieldName: string) => void
+  tags?: Tag[]
+  selectedTagIds?: string[]
+  onToggleTag?: (tagId: string) => void
+  onClearTags?: () => void
 }
 
 export type MetricViewMode = "card" | "list"
@@ -49,6 +53,10 @@ export function MetricSearchView({
   onAddToMetricSetFromSelection,
   favoriteMetricFieldNames,
   onToggleFavoriteMetric,
+  tags,
+  selectedTagIds,
+  onToggleTag,
+  onClearTags,
 }: MetricSearchViewProps) {
   const [search, setSearch] = useState("")
   const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "card")
@@ -157,7 +165,7 @@ export function MetricSearchView({
             <p className="text-slate-500">Search and discover metrics across your organization</p>
           </div>
           
-          <div className="flex gap-4 items-center">
+          <div className="flex flex-wrap gap-4 items-center">
             <div className="relative flex-1 max-w-lg">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
@@ -167,6 +175,37 @@ export function MetricSearchView({
                 className="pl-9 h-9 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-sm"
               />
             </div>
+            {tags && tags.length > 0 && onToggleTag && selectedTagIds && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Filter tags</span>
+                {tags.map((tag) => {
+                  const isActive = selectedTagIds.includes(tag.id)
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => onToggleTag(tag.id)}
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all ${
+                        isActive
+                          ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-200"
+                          : "border-slate-200 bg-slate-50 text-slate-600 hover:border-blue-300 hover:bg-white"
+                      }`}
+                    >
+                      {tag.name}
+                    </button>
+                  )
+                })}
+                {selectedTagIds.length > 0 && onClearTags && (
+                  <button
+                    type="button"
+                    className="text-[11px] text-blue-600 hover:text-blue-800 font-medium"
+                    onClick={onClearTags}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            )}
             <div className="flex items-center gap-2 border-l pl-4 ml-2">
                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1">
                 <Button

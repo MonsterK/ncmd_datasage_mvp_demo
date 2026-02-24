@@ -13,10 +13,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { ResponsiveContainer, LineChart, Line } from "recharts"
-import { Flame, Search, Filter, ArrowUpDown } from "lucide-react"
+import { Flame, Search, Filter, ArrowUpDown, Plus } from "lucide-react"
 
 import type {
   Metric,
@@ -361,42 +367,47 @@ export function MetricsWorkspaceView({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="rounded-full px-4 py-1 text-xs border-slate-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/50 transition-colors shadow-sm"
-              onClick={() => setIsNewMetricSheetOpen(true)}
-            >
-              New metric
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="rounded-full px-4 py-1 text-xs border-slate-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/50 transition-colors shadow-sm"
-              onClick={() => {
-                setMetricSetSheetMode("create")
-                setMetricSetToEdit(null)
-                setIsNewMetricSetSheetOpen(true)
-              }}
-            >
-              New metric set
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="rounded-full px-4 py-1 text-xs border-slate-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/50 transition-colors shadow-sm"
-              onClick={() => setIsNewDimensionSheetOpen(true)}
-            >
-              New dimension
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="rounded-full px-4 py-1 text-xs bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  +New
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem
+                  onClick={() => setIsNewMetricSheetOpen(true)}
+                  className="text-sm"
+                >
+                  New metric
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMetricSetSheetMode("create")
+                    setMetricSetToEdit(null)
+                    setIsNewMetricSetSheetOpen(true)
+                  }}
+                  className="text-sm"
+                >
+                  New metric set
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setIsNewDimensionSheetOpen(true)}
+                  className="text-sm"
+                >
+                  New dimension
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
          {workspaceMode === "metrics" && metricsViewMode === "sets" && !selectedMetricSet && (
-          <div className="grid gap-6">
+            <div className="grid gap-6">
             <div className="flex flex-col gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Metrics</span>
@@ -432,13 +443,11 @@ export function MetricsWorkspaceView({
               </div>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <span className="text-xs font-semibold text-slate-700 flex items-center gap-2">
-                  <Search className="h-3 w-3" /> Search metric sets
-                </span>
-                <div className="relative">
+                <div className="relative max-w-lg">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
-                    className="h-8 text-xs pl-3 border-slate-200 focus:border-blue-300 focus:ring-blue-100 bg-slate-50 focus:bg-white transition-all rounded-lg"
-                    placeholder="Search by name or description..."
+                    className="h-9 text-sm pl-9 border-slate-200 focus:border-blue-300 focus:ring-blue-100 bg-slate-50 focus:bg-white transition-all rounded-lg"
+                    placeholder="Search metric sets..."
                     value={metricSetSearch}
                     onChange={(e) => setMetricSetSearch(e.target.value)}
                   />
@@ -680,88 +689,25 @@ export function MetricsWorkspaceView({
         )}
 
         {workspaceMode === "metrics" && metricsViewMode === "library" && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Metrics</span>
-              <div className="h-4 w-px bg-slate-200 mx-1"></div>
-              <ToggleGroup
-                type="single"
-                size="sm"
-                variant="outline"
-                value={metricsViewMode}
-                onValueChange={(value) => {
-                  if (!value) return
-                  setMetricsViewMode(value as "sets" | "library")
-                  setSelectedMetricSetId(null)
-                }}
-                className="bg-slate-50 p-1 rounded-full border border-slate-200"
-                aria-label="Toggle metrics view mode"
-              >
-                <ToggleGroupItem
-                  value="sets"
-                  className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
-                  aria-label="View metric sets"
-                >
-                  Metric sets
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="library"
-                  className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
-                  aria-label="View metric library"
-                >
-                  Metric library
-                </ToggleGroupItem>
-              </ToggleGroup>
-              <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Filter tags</span>
-                {tags.length > 0 ? (
-                  tags.map((tag) => {
-                    const isActive = selectedTagIds.includes(tag.id)
-                    return (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        onClick={() =>
-                          setSelectedTagIds((prev) =>
-                            prev.includes(tag.id) ? prev.filter((id) => id !== tag.id) : [...prev, tag.id],
-                          )
-                        }
-                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all ${
-                          isActive
-                            ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-200"
-                            : "border-slate-200 bg-slate-50 text-slate-600 hover:border-blue-300 hover:bg-white"
-                        }`}
-                      >
-                        {tag.name}
-                      </button>
-                    )
-                  })
-                ) : (
-                  <span className="text-[11px] text-slate-400 italic">No tags configured.</span>
-                )}
-              </div>
-              {selectedTagIds.length > 0 && (
-                <button
-                  type="button"
-                  className="ml-auto text-[11px] text-blue-600 hover:text-blue-800 font-medium"
-                  onClick={() => setSelectedTagIds([])}
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-            <MetricSearchView
-              metrics={metricsForTenantWithTagFilter}
-              onOpenMetric={onOpenMetric}
-              initialViewMode="card"
-              onAddToMetricSetFromSelection={(fieldNames) => {
-                setSelectedFieldNamesForAddToMetricSet(fieldNames)
-                setIsAddToMetricSetSheetOpen(true)
-              }}
-              favoriteMetricFieldNames={favoriteMetricFieldNames}
-              onToggleFavoriteMetric={onToggleFavoriteMetric}
-            />
-          </div>
+          <MetricSearchView
+            metrics={metricsForTenantWithTagFilter}
+            onOpenMetric={onOpenMetric}
+            initialViewMode="card"
+            onAddToMetricSetFromSelection={(fieldNames) => {
+              setSelectedFieldNamesForAddToMetricSet(fieldNames)
+              setIsAddToMetricSetSheetOpen(true)
+            }}
+            favoriteMetricFieldNames={favoriteMetricFieldNames}
+            onToggleFavoriteMetric={onToggleFavoriteMetric}
+            tags={tags}
+            selectedTagIds={selectedTagIds}
+            onToggleTag={(tagId) =>
+              setSelectedTagIds((prev) =>
+                prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId],
+              )
+            }
+            onClearTags={() => setSelectedTagIds([])}
+          />
         )}
 
         {workspaceMode === "dimensions" && (

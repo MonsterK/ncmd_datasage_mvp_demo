@@ -78,7 +78,7 @@ function MetricListCard({ title, description, metrics, emptyLabel, onOpenMetric,
       <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 text-white shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-sky-500 text-white shadow-md shadow-blue-200/60 ring-1 ring-blue-100">
               <Icon className="h-4 w-4" />
             </div>
             <div>
@@ -111,7 +111,16 @@ function MetricListCard({ title, description, metrics, emptyLabel, onOpenMetric,
                   <div className="text-sm font-semibold text-slate-900 truncate">{metric.businessName}</div>
                   <div className="text-[10px] font-mono text-slate-400 truncate">{metric.fieldName}</div>
                 </div>
-                <Badge variant="outline" className="text-[10px] border-slate-200">
+                <Badge
+                  variant="outline"
+                  className={`text-[10px] border-slate-200 ${
+                    metric.status === "Active"
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : metric.status === "Offline"
+                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                        : "bg-slate-50 text-slate-600"
+                  }`}
+                >
                   {metric.status}
                 </Badge>
               </button>
