@@ -3,7 +3,7 @@ import { useMemo } from "react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Flame, LineChart as LineChartIcon } from "lucide-react"
+import { Flame, LineChart as LineChartIcon, Star } from "lucide-react"
 import {
   LineChart,
   Line,
@@ -23,9 +23,11 @@ export interface MetricProfileViewProps {
   metric: Metric
   dimensions: Dimension[]
   onDeriveMetric?: (metric: Metric) => void
+  isFavorite?: boolean
+  onToggleFavorite?: (fieldName: string) => void
 }
 
-export function MetricProfileView({ metric, dimensions, onDeriveMetric }: MetricProfileViewProps) {
+export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavorite, onToggleFavorite }: MetricProfileViewProps) {
   const boundDimensions = useMemo(
     () => dimensions.filter((d) => metric.boundDimensionFieldNames.includes(d.fieldName)),
     [dimensions, metric.boundDimensionFieldNames],
@@ -59,6 +61,19 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric }: Metric
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+            {onToggleFavorite && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onToggleFavorite(metric.fieldName)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-600 hover:border-yellow-300 hover:text-yellow-600"
+                >
+                  <Star className={`h-3.5 w-3.5 ${isFavorite ? "text-yellow-500 fill-yellow-400" : "text-slate-300"}`} />
+                  {isFavorite ? "Favorited" : "Favorite"}
+                </button>
+                <div className="h-4 w-px bg-slate-200 mx-1"></div>
+              </>
+            )}
             <div className="flex items-center gap-1.5 px-2 py-1 bg-orange-50 rounded-lg text-orange-700 border border-orange-100">
               <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-600" />
               <span className="font-bold">{metric.heat ?? 0}</span>

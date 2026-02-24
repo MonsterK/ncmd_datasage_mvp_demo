@@ -801,6 +801,8 @@ function App() {
             open={isMetricProfileOpen}
             onOpenChange={setIsMetricProfileOpen}
             onDeriveMetric={handleOpenDerivedMetricSheet}
+            isFavorite={favoriteMetricFieldNames.includes(selectedMetric.fieldName)}
+            onToggleFavorite={handleToggleFavoriteMetric}
           />
         )}
 

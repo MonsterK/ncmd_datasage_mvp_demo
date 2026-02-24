@@ -8,9 +8,19 @@ export interface MetricProfileSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onDeriveMetric?: (metric: Metric) => void
+  isFavorite?: boolean
+  onToggleFavorite?: (fieldName: string) => void
 }
 
-export function MetricProfileSheet({ metric, dimensions, open, onOpenChange, onDeriveMetric }: MetricProfileSheetProps) {
+export function MetricProfileSheet({
+  metric,
+  dimensions,
+  open,
+  onOpenChange,
+  onDeriveMetric,
+  isFavorite,
+  onToggleFavorite,
+}: MetricProfileSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
@@ -18,7 +28,13 @@ export function MetricProfileSheet({ metric, dimensions, open, onOpenChange, onD
           <SheetTitle className="text-sm font-semibold">Metric profile</SheetTitle>
         </SheetHeader>
         <div className="mt-4 pb-6">
-          <MetricProfileView metric={metric} dimensions={dimensions} onDeriveMetric={onDeriveMetric} />
+          <MetricProfileView
+            metric={metric}
+            dimensions={dimensions}
+            onDeriveMetric={onDeriveMetric}
+            isFavorite={isFavorite}
+            onToggleFavorite={onToggleFavorite}
+          />
         </div>
       </SheetContent>
     </Sheet>
