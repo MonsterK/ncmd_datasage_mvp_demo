@@ -104,13 +104,13 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
           </div>
           
           <div className="flex gap-4 items-center">
-            <div className="relative flex-1 max-w-lg">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
               <Input
                 placeholder="Search dimensions by name, field name, or description..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-sm"
+                className="pl-8 h-8 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-xs"
               />
             </div>
             <div className="flex items-center gap-2 border-l pl-4 ml-2">

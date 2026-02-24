@@ -35,9 +35,8 @@ export interface MetricSearchViewProps {
   favoriteMetricFieldNames?: string[]
   onToggleFavoriteMetric?: (fieldName: string) => void
   tags?: Tag[]
-  selectedTagIds?: string[]
-  onToggleTag?: (tagId: string) => void
-  onClearTags?: () => void
+  selectedTagId?: string | null
+  onSelectTag?: (tagId: string | null) => void
 }
 
 export type MetricViewMode = "card" | "list"
@@ -54,9 +53,8 @@ export function MetricSearchView({
   favoriteMetricFieldNames,
   onToggleFavoriteMetric,
   tags,
-  selectedTagIds,
-  onToggleTag,
-  onClearTags,
+  selectedTagId,
+  onSelectTag,
 }: MetricSearchViewProps) {
   const [search, setSearch] = useState("")
   const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "card")
@@ -166,46 +164,15 @@ export function MetricSearchView({
           </div>
           
           <div className="flex flex-wrap gap-4 items-center">
-            <div className="relative flex-1 max-w-lg">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <div className="relative flex-1 max-w-sm">
+              <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
               <Input
                 placeholder="Search metrics by name, description, or ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-sm"
+                className="pl-8 h-8 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-xs"
               />
             </div>
-            {tags && tags.length > 0 && onToggleTag && selectedTagIds && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Filter tags</span>
-                {tags.map((tag) => {
-                  const isActive = selectedTagIds.includes(tag.id)
-                  return (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      onClick={() => onToggleTag(tag.id)}
-                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all ${
-                        isActive
-                          ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-200"
-                          : "border-slate-200 bg-slate-50 text-slate-600 hover:border-blue-300 hover:bg-white"
-                      }`}
-                    >
-                      {tag.name}
-                    </button>
-                  )
-                })}
-                {selectedTagIds.length > 0 && onClearTags && (
-                  <button
-                    type="button"
-                    className="text-[11px] text-blue-600 hover:text-blue-800 font-medium"
-                    onClick={onClearTags}
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-            )}
             <div className="flex items-center gap-2 border-l pl-4 ml-2">
                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1">
                 <Button
@@ -263,6 +230,24 @@ export function MetricSearchView({
                 <SelectItem value="updatedAt">Updated Date</SelectItem>
               </SelectContent>
             </Select>
+            {tags && tags.length > 0 && onSelectTag && (
+              <Select
+                value={selectedTagId ?? "all"}
+                onValueChange={(value) => onSelectTag(value === "all" ? null : value)}
+              >
+                <SelectTrigger className="h-8 text-xs w-[160px] bg-white">
+                  <SelectValue placeholder="All tags" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All tags</SelectItem>
+                  {tags.map((tag) => (
+                    <SelectItem key={tag.id} value={tag.id}>
+                      {tag.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
 
              <Button 
               variant="ghost" 
@@ -274,6 +259,7 @@ export function MetricSearchView({
                 setTechOwnerFilter("all")
                 setHasQueryFilter("all")
                 setSearch("")
+                onSelectTag?.(null)
               }}
             >
               Reset Filters
