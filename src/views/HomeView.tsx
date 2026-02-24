@@ -78,7 +78,7 @@ function MetricListCard({ title, description, metrics, emptyLabel, onOpenMetric,
       <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 text-white shadow-sm">
               <Icon className="h-4 w-4" />
             </div>
             <div>
