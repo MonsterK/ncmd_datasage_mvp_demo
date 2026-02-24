@@ -285,13 +285,7 @@ export function ManagementWorkspaceView({
         const activeTenant = tenants.find((t) => t.id === activeTenantId)
         return (
           <Card className="border-slate-200 shadow-sm rounded-2xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-slate-900">Datasource Management</CardTitle>
-              <CardDescription className="text-xs text-slate-500">
-                Manage categories and data sources for the current tenant ({activeTenant?.name ?? "Unknown"}).
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               {activeTenant ? (
                 <div className="space-y-4">
                   <div className="space-y-2">
