@@ -22,9 +22,17 @@ export interface MetricRegistrationViewProps {
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric
   disableFieldNameEditing?: boolean
+  showLarkImport?: boolean
 }
 
-export function MetricRegistrationView({ tenants, dimensions, onRegisterMetric, initialMetric, disableFieldNameEditing }: MetricRegistrationViewProps) {
+export function MetricRegistrationView({
+  tenants,
+  dimensions,
+  onRegisterMetric,
+  initialMetric,
+  disableFieldNameEditing,
+  showLarkImport = false,
+}: MetricRegistrationViewProps) {
   const baseQuery = initialMetric?.queryDefinitions?.[0]
 
   const [selectedTenantId, setSelectedTenantId] = useState<string>(
@@ -137,49 +145,55 @@ export function MetricRegistrationView({ tenants, dimensions, onRegisterMetric, 
       </CardHeader>
       <CardContent className="px-0">
         <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <p className="text-sm font-semibold text-slate-900">Import from LarkSheet</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Paste a LarkSheet link to mock an import into the metric registration payload.
-                </p>
+          {showLarkImport && (
+            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Import from LarkSheet</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Paste a LarkSheet link to mock a batch import into the registration payload.
+                  </p>
+                </div>
+                {importMessage && (
+                  <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                    {importMessage}
+                  </span>
+                )}
               </div>
-              {importMessage && <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">{importMessage}</span>}
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="flex-1 space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700">LarkSheet link</label>
+                  <Input
+                    type="url"
+                    placeholder="https://..."
+                    value={larkSheetLink}
+                    onChange={(e) => {
+                      setLarkSheetLink(e.target.value)
+                      if (importMessage) setImportMessage(null)
+                    }}
+                    className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-9 text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 shadow-sm"
+                    onClick={() => {
+                      const trimmed = larkSheetLink.trim()
+                      if (!trimmed) {
+                        setImportMessage("Paste a LarkSheet link first (mock).")
+                        return
+                      }
+                      setImportMessage("Imported (mock)")
+                    }}
+                  >
+                    Import
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="flex-1 space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">LarkSheet link</label>
-                <Input
-                  type="url"
-                  placeholder="https://..."
-                  value={larkSheetLink}
-                  onChange={(e) => {
-                    setLarkSheetLink(e.target.value)
-                    if (importMessage) setImportMessage(null)
-                  }}
-                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
-                />
-              </div>
-              <div className="flex items-end">
-                <Button
-                  type="button"
-                  size="sm"
-                  className="h-9 text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 shadow-sm"
-                  onClick={() => {
-                    const trimmed = larkSheetLink.trim()
-                    if (!trimmed) {
-                      setImportMessage("Paste a LarkSheet link first (mock).")
-                      return
-                    }
-                    setImportMessage("Imported (mock)")
-                  }}
-                >
-                  Import
-                </Button>
-              </div>
-            </div>
-          </div>
+          )}
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-1.5">

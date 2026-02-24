@@ -294,50 +294,48 @@ export function ManagementWorkspaceView({
             <CardContent>
               {activeTenant ? (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
-                     <div>
-                       <h3 className="text-sm font-semibold text-slate-900">{activeTenant.name}</h3>
-                       <p className="text-xs text-slate-500 mt-1">{activeTenant.description}</p>
-                     </div>
-                     <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-4 text-xs font-medium bg-white border-slate-200 shadow-sm hover:border-blue-200 hover:text-blue-600"
-                        onClick={() => {
-                          setTenantForCategories(activeTenant)
-                          setIsTenantCategoriesSheetOpen(true)
-                        }}
-                      >
-                        Manage Categories & Datasources
-                      </Button>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="text-xs font-semibold text-slate-600">
+                      Current tenant: <span className="text-slate-900">{activeTenant.name}</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-4 text-xs font-medium bg-white border-slate-200 shadow-sm hover:border-blue-200 hover:text-blue-600"
+                      onClick={() => {
+                        setTenantForCategories(activeTenant)
+                        setIsTenantCategoriesSheetOpen(true)
+                      }}
+                    >
+                      Manage Categories & Datasources
+                    </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Current Categories</h4>
                     {activeTenant.categories && activeTenant.categories.length > 0 ? (
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                         {activeTenant.categories.map((cat, i) => (
-                           <div key={i} className="p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-                             <div className="font-medium text-slate-900 text-sm">{cat.name}</div>
-                             {cat.dataSource ? (
-                               <div className="mt-2 text-xs text-slate-500">
-                                 <div className="flex items-center gap-1.5">
-                                   <span className="font-semibold text-slate-600">Type:</span>
-                                   <span>{cat.dataSource.type}</span>
-                                 </div>
-                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="font-semibold text-slate-600">Link:</span>
-                                    <a href={cat.dataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate max-w-[150px] inline-block align-bottom">
-                                      {cat.dataSource.link}
-                                    </a>
-                                 </div>
-                               </div>
-                             ) : (
-                               <p className="mt-2 text-xs text-slate-400 italic">No datasource bound</p>
-                             )}
-                           </div>
-                         ))}
+                      <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+                        {activeTenant.categories.map((cat, i) => (
+                          <div key={i} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs">
+                            <div className="font-semibold text-slate-900">{cat.name}</div>
+                            {cat.dataSource ? (
+                              <div className="flex flex-wrap items-center gap-3 text-slate-500">
+                                <span className="font-medium text-slate-600">{cat.dataSource.type}</span>
+                                <a
+                                  href={cat.dataSource.link}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-blue-600 hover:underline truncate max-w-[260px]"
+                                >
+                                  {cat.dataSource.link}
+                                </a>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic">No datasource bound</span>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <p className="text-xs text-slate-400 italic">No categories defined yet.</p>
@@ -478,6 +476,7 @@ export function ManagementWorkspaceView({
         initialMetric={metricToEdit}
         mode={metricSheetMode}
         onUpdateMetric={onUpdateMetric}
+        enableImportOption
       />
 
       {tenantForCategories && (
@@ -532,13 +531,13 @@ function SidebarItem({ icon: Icon, label, active, disabled, onClick }: SidebarIt
       onClick={disabled ? undefined : onClick}
       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-200 ${
         active
-          ? "bg-slate-900 text-white shadow-md shadow-slate-900/20"
+          ? "bg-blue-600 text-white shadow-md shadow-blue-200"
           : disabled
             ? "cursor-not-allowed text-slate-300"
             : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       }`}
     >
-      <Icon className={`h-4 w-4 ${active ? "text-blue-400" : "text-slate-400"}`} />
+      <Icon className={`h-4 w-4 ${active ? "text-white" : "text-slate-400"}`} />
       <span>{label}</span>
     </button>
   )
@@ -553,6 +552,7 @@ interface NewMetricSheetProps {
   initialMetric?: Metric | null
   mode?: "create" | "edit"
   onUpdateMetric?: (fieldName: string, payload: NewMetricPayload) => void
+  enableImportOption?: boolean
 }
 
 export function NewMetricSheet({
@@ -564,8 +564,15 @@ export function NewMetricSheet({
   initialMetric,
   mode = "create",
   onUpdateMetric,
+  enableImportOption = false,
 }: NewMetricSheetProps) {
   const isEditMode = mode === "edit" && initialMetric && onUpdateMetric
+  const [createMode, setCreateMode] = useState<"manual" | "lark">("manual")
+
+  useEffect(() => {
+    if (!open) return
+    setCreateMode("manual")
+  }, [open])
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -579,13 +586,28 @@ export function NewMetricSheet({
               Define the business logic and technical implementation for a metric.
             </div>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+            {enableImportOption && !isEditMode && (
+              <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Create Mode</span>
+                <Select value={createMode} onValueChange={(value: "manual" | "lark") => setCreateMode(value)}>
+                  <SelectTrigger className="h-8 text-xs w-[220px] bg-white">
+                    <SelectValue placeholder="Select mode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="manual">Manual entry</SelectItem>
+                    <SelectItem value="lark">Import from LarkSheet (batch)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <MetricRegistrationView
               key={isEditMode && initialMetric ? initialMetric.id : "new"}
               tenants={tenants}
               dimensions={dimensions}
               initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
               disableFieldNameEditing={Boolean(isEditMode)}
+              showLarkImport={enableImportOption && !isEditMode && createMode === "lark"}
               onRegisterMetric={(payload) => {
                 if (isEditMode && initialMetric && onUpdateMetric) {
                   onUpdateMetric(initialMetric.fieldName, payload)

@@ -416,14 +416,14 @@ export function MetricsWorkspaceView({
                 >
                   <ToggleGroupItem
                     value="sets"
-                    className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-slate-900 data-[state=on]:text-white data-[state=on]:shadow-sm"
+                    className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
                     aria-label="View metric sets"
                   >
                     Metric sets
                   </ToggleGroupItem>
                   <ToggleGroupItem
                     value="library"
-                    className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-slate-900 data-[state=on]:text-white data-[state=on]:shadow-sm"
+                    className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
                     aria-label="View metric library"
                   >
                     Metric library
@@ -699,14 +699,14 @@ export function MetricsWorkspaceView({
               >
                 <ToggleGroupItem
                   value="sets"
-                  className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-slate-900 data-[state=on]:text-white data-[state=on]:shadow-sm"
+                  className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
                   aria-label="View metric sets"
                 >
                   Metric sets
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   value="library"
-                  className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-slate-900 data-[state=on]:text-white data-[state=on]:shadow-sm"
+                  className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
                   aria-label="View metric library"
                 >
                   Metric library
