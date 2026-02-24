@@ -13,13 +13,10 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 
 import { NewMetricPayload, CategoryNode, Metric, Tenant, Dimension } from "@/types"
-import { normalizeDimensions } from "@/lib/utils"
 
 export interface MetricRegistrationViewProps {
-  categories: CategoryNode[]
   tenants: Tenant[]
   dimensions: Dimension[]
   onRegisterMetric: (payload: NewMetricPayload) => void
@@ -27,45 +24,40 @@ export interface MetricRegistrationViewProps {
   disableFieldNameEditing?: boolean
 }
 
-function flattenCategoryPaths(nodes: CategoryNode[], prefix: string[] = []): string[] {
-  const paths: string[] = []
-  nodes.forEach((node) => {
-    const currentPath = [...prefix, node.name]
-    if (node.children && node.children.length > 0) {
-      paths.push(...flattenCategoryPaths(node.children, currentPath))
-    } else {
-      paths.push(currentPath.join(" > "))
-    }
-  })
-  return paths
-}
-
-export function MetricRegistrationView({ categories, tenants, dimensions, onRegisterMetric, initialMetric, disableFieldNameEditing }: MetricRegistrationViewProps) {
+export function MetricRegistrationView({ tenants, dimensions, onRegisterMetric, initialMetric, disableFieldNameEditing }: MetricRegistrationViewProps) {
   const baseQuery = initialMetric?.queryDefinitions?.[0]
 
-  const [categoryPathStr, setCategoryPathStr] = useState<string | undefined>(
-    initialMetric?.categoryPath.length ? initialMetric.categoryPath.join(" > ") : undefined,
+  const [selectedTenantId, setSelectedTenantId] = useState<string>(
+    initialMetric?.tenant ?? (tenants.length > 0 ? tenants[0].id : "")
   )
+
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>(
+    initialMetric?.categoryPath?.[0] ?? ""
+  )
+  
   const [linkedDataSource, setLinkedDataSource] = useState<{ type: string; link: string } | null>(null)
 
+  // Update available categories when tenant changes
+  const currentTenant = useMemo(() => {
+    return tenants.find(t => t.id === selectedTenantId)
+  }, [tenants, selectedTenantId])
+
+  const availableCategories = useMemo(() => {
+    return currentTenant?.categories ?? []
+  }, [currentTenant])
+
   useEffect(() => {
-    if (!categoryPathStr || !tenants) {
+    if (!selectedCategoryName || !currentTenant) {
       setLinkedDataSource(null)
       return
     }
-    // Find the tenant category that matches the path
-    let foundSource = null
-    for (const tenant of tenants) {
-      if (tenant.categories) {
-        const cat = tenant.categories.find((c) => c.name === categoryPathStr)
-        if (cat && cat.dataSource) {
-          foundSource = cat.dataSource
-          break
-        }
-      }
+    const cat = currentTenant.categories?.find(c => c.name === selectedCategoryName)
+    if (cat && cat.dataSource) {
+      setLinkedDataSource(cat.dataSource)
+    } else {
+      setLinkedDataSource(null)
     }
-    setLinkedDataSource(foundSource)
-  }, [categoryPathStr, tenants])
+  }, [selectedCategoryName, currentTenant])
 
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
@@ -94,18 +86,17 @@ export function MetricRegistrationView({ categories, tenants, dimensions, onRegi
 
   const [submittedFieldName, setSubmittedFieldName] = useState<string | null>(null)
 
-  const categoryOptions = useMemo(() => flattenCategoryPaths(categories), [categories])
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!businessName || !fieldName) return
+    if (!businessName || !fieldName || !selectedTenantId || !selectedCategoryName) return
 
     const payload: NewMetricPayload = {
       businessName,
       businessDefinition,
       fieldName,
       technicalDefinition,
-      categoryPath: categoryPathStr ? categoryPathStr.split(" > ") : [],
+      categoryPath: [selectedCategoryName], // Flat category
+      tenantId: selectedTenantId,
       larkSheetLink: larkSheetLink.trim() || undefined,
       query: {
         type: queryType,
@@ -118,7 +109,23 @@ export function MetricRegistrationView({ categories, tenants, dimensions, onRegi
         createInDownstream,
       },
     }
-
+    // We might need to pass the tenant in payload if NewMetricPayload supports it, 
+    // or rely on the parent to handle it. 
+    // But wait, NewMetricPayload doesn't have 'tenant' field in the type definition I saw earlier?
+    // Let's check src/types.ts again. 
+    // Metric has 'tenant', NewMetricPayload has 'categoryPath'.
+    // In App.tsx handleRegisterMetric:
+    // tenant: payload.categoryPath[0] ?? "Strategy Data", // Default tenant
+    // This logic in App.tsx seems to assume categoryPath[0] IS the tenant? 
+    // Or maybe it was just a fallback.
+    // I need to check App.tsx handleRegisterMetric logic.
+    
+    // Actually, I should probably update NewMetricPayload to include tenantId if I can't infer it.
+    // Or, if the backend/App.tsx infers it.
+    
+    // For now, I'll update onRegisterMetric to accept tenantId if possible, or hack it into payload?
+    // Let's look at App.tsx again.
+    
     onRegisterMetric(payload)
     setSubmittedFieldName(fieldName)
   }
@@ -230,24 +237,47 @@ export function MetricRegistrationView({ categories, tenants, dimensions, onRegi
 
           <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-700">Category (Determines Data Source)</label>
-                {linkedDataSource && (
-                  <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
-                    Bound to {linkedDataSource.type}
-                  </Badge>
-                )}
+              <label className="text-xs font-semibold text-slate-700">Tenant & Category</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                   <label className="text-[10px] font-medium text-slate-500">Tenant</label>
+                   <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
+                     <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
+                       <SelectValue placeholder="Select tenant" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       {tenants.map(t => (
+                         <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                </div>
+                <div className="space-y-1">
+                   <label className="text-[10px] font-medium text-slate-500">Category</label>
+                   <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
+                     <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
+                       <SelectValue placeholder="Select category" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       {availableCategories.length > 0 ? (
+                         availableCategories.map(c => (
+                           <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                         ))
+                       ) : (
+                         <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
+                       )}
+                     </SelectContent>
+                   </Select>
+                </div>
               </div>
-              <CategoryTreeSelect
-                categories={categories}
-                value={categoryPathStr ? categoryPathStr.split(" > ") : []}
-                onChange={(path: string[]) => setCategoryPathStr(path.join(" > "))}
-                placeholder="Select a category path"
-              />
+              
               {linkedDataSource && (
-                <p className="text-[10px] text-slate-500">
-                  Source Link: <a href={linkedDataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{linkedDataSource.link}</a>
-                </p>
+                <div className="mt-2 flex items-center gap-2 text-[10px] text-slate-500 bg-blue-50/50 p-2 rounded border border-blue-100">
+                  <Badge variant="outline" className="text-[10px] bg-white text-blue-700 border-blue-200 h-5">
+                    {linkedDataSource.type}
+                  </Badge>
+                  <span>Source: <a href={linkedDataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{linkedDataSource.link}</a></span>
+                </div>
               )}
             </div>
 

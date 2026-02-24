@@ -164,6 +164,7 @@ export interface NewMetricPayload {
     unit?: string
     createInDownstream?: string[]
   }
+  tenantId?: string
 }
 
 export interface FilterBasedDerivedDimensionFilter {

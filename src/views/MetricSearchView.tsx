@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search as SearchIcon, Flame, Filter, ArrowUpDown, User, BarChart2, LayoutGrid, List } from "lucide-react"
+import { Search as SearchIcon, Flame, Filter, ArrowUpDown, User, BarChart2, LayoutGrid, List, Star } from "lucide-react"
 import { ResponsiveContainer, LineChart, Line } from "recharts"
 
 import { Metric } from "@/types"
@@ -32,6 +32,8 @@ export interface MetricSearchViewProps {
   onOpenMetric: (fieldName: string) => void
   initialViewMode?: MetricViewMode
   onAddToMetricSetFromSelection?: (metricFieldNames: string[]) => void
+  favoriteMetricFieldNames?: string[]
+  onToggleFavoriteMetric?: (fieldName: string) => void
 }
 
 export type MetricViewMode = "card" | "list"
@@ -40,7 +42,14 @@ export type MetricSortField = "createdAt" | "updatedAt"
 export type MetricSortDirection = "asc" | "desc"
 export type HasQueryFilter = "all" | "yes" | "no"
 
-export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAddToMetricSetFromSelection }: MetricSearchViewProps) {
+export function MetricSearchView({
+  metrics,
+  onOpenMetric,
+  initialViewMode,
+  onAddToMetricSetFromSelection,
+  favoriteMetricFieldNames,
+  onToggleFavoriteMetric,
+}: MetricSearchViewProps) {
   const [search, setSearch] = useState("")
   const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "card")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
@@ -149,13 +158,13 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
           </div>
           
           <div className="flex gap-4 items-center">
-            <div className="relative flex-1 max-w-2xl">
+            <div className="relative flex-1 max-w-lg">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Search metrics by name, description, or ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 h-11 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="pl-9 h-9 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-sm"
               />
             </div>
             <div className="flex items-center gap-2 border-l pl-4 ml-2">
@@ -306,12 +315,32 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                           <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{metric.fieldName}</span>
                         </div>
                       </div>
-                      <Badge 
-                        variant={metric.status === 'Active' ? 'default' : 'secondary'}
-                        className={`shrink-0 ${metric.status === 'Active' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200' : ''}`}
-                      >
-                        {metric.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {onToggleFavoriteMetric && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onToggleFavoriteMetric(metric.fieldName)
+                            }}
+                            className="h-7 w-7 rounded-full border border-slate-200 bg-white flex items-center justify-center hover:border-yellow-300 hover:text-yellow-600"
+                          >
+                            <Star
+                              className={`h-3.5 w-3.5 ${
+                                favoriteMetricFieldNames?.includes(metric.fieldName)
+                                  ? "text-yellow-500 fill-yellow-400"
+                                  : "text-slate-300"
+                              }`}
+                            />
+                          </button>
+                        )}
+                        <Badge 
+                          variant={metric.status === 'Active' ? 'default' : 'secondary'}
+                          className={`shrink-0 ${metric.status === 'Active' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200' : ''}`}
+                        >
+                          {metric.status}
+                        </Badge>
+                      </div>
                     </div>
                     <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10">
                       {metric.businessDefinition}
@@ -362,6 +391,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
               <Table>
                 <TableHeader className="bg-slate-50">
                   <TableRow>
+                    {onToggleFavoriteMetric && <TableHead className="w-10"></TableHead>}
                     {hasBulkSelection && <TableHead className="w-12"></TableHead>}
                     <TableHead>Metric Name</TableHead>
                     <TableHead>Field Name</TableHead>
@@ -373,12 +403,32 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                 </TableHeader>
                 <TableBody>
                   {filtered.map((m) => (
-                    <TableRow 
+                  <TableRow 
                       key={m.id} 
                       className="cursor-pointer hover:bg-slate-50/80"
                       onClick={() => onOpenMetric(m.fieldName)}
                     >
-                      {hasBulkSelection && (
+                    {onToggleFavoriteMetric && (
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onToggleFavoriteMetric(m.fieldName)
+                          }}
+                          className="h-6 w-6 rounded-full border border-slate-200 bg-white flex items-center justify-center hover:border-yellow-300 hover:text-yellow-600"
+                        >
+                          <Star
+                            className={`h-3 w-3 ${
+                              favoriteMetricFieldNames?.includes(m.fieldName)
+                                ? "text-yellow-500 fill-yellow-400"
+                                : "text-slate-300"
+                            }`}
+                          />
+                        </button>
+                      </TableCell>
+                    )}
+                    {hasBulkSelection && (
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
                             checked={selectedMetricFieldNames.includes(m.fieldName)}
@@ -392,7 +442,7 @@ export function MetricSearchView({ metrics, onOpenMetric, initialViewMode, onAdd
                           />
                         </TableCell>
                       )}
-                      <TableCell className="font-medium text-slate-900">{m.businessName}</TableCell>
+                    <TableCell className="font-medium text-slate-900">{m.businessName}</TableCell>
                       <TableCell className="font-mono text-xs text-slate-500">{m.fieldName}</TableCell>
                       <TableCell className="text-xs text-slate-600 max-w-[200px] truncate" title={m.categoryPath.join(" > ")}>
                         {m.categoryPath.join(" › ")}

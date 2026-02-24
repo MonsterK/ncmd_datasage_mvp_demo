@@ -472,7 +472,6 @@ export function ManagementWorkspaceView({
           }
           setIsNewMetricSheetOpen(open)
         }}
-        categories={categories}
         tenants={tenants}
         dimensions={dimensions}
         onRegisterMetric={onRegisterMetric}
@@ -548,7 +547,6 @@ function SidebarItem({ icon: Icon, label, active, disabled, onClick }: SidebarIt
 interface NewMetricSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  categories: CategoryNode[]
   tenants: Tenant[]
   dimensions: Dimension[]
   onRegisterMetric: (payload: NewMetricPayload) => void
@@ -560,7 +558,6 @@ interface NewMetricSheetProps {
 export function NewMetricSheet({
   open,
   onOpenChange,
-  categories,
   tenants,
   dimensions,
   onRegisterMetric,
@@ -585,7 +582,6 @@ export function NewMetricSheet({
           <div className="flex-1 overflow-y-auto px-6 py-6">
             <MetricRegistrationView
               key={isEditMode && initialMetric ? initialMetric.id : "new"}
-              categories={categories}
               tenants={tenants}
               dimensions={dimensions}
               initialMetric={isEditMode ? initialMetric ?? undefined : undefined}

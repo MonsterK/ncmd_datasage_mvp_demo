@@ -90,6 +90,8 @@ function App() {
   const [activeGlobalTenantId, setActiveGlobalTenantId] = useState<string | null>(null)
   const [isDerivedMetricSheetOpen, setIsDerivedMetricSheetOpen] = useState(false)
   const [derivedMetricBaseFieldName, setDerivedMetricBaseFieldName] = useState<string | null>(null)
+  const [favoriteMetricFieldNames, setFavoriteMetricFieldNames] = useState<string[]>([])
+  const [recentMetricFieldNames, setRecentMetricFieldNames] = useState<string[]>([])
 
   const uniqueTenants = useMemo(() => {
     const map = new Map<string, Tenant>()
@@ -116,9 +118,66 @@ function App() {
     })
   }, [uniqueTenants, permittedTenants])
 
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const storedFavorites = window.localStorage.getItem("datasage.favoriteMetrics")
+    const storedRecent = window.localStorage.getItem("datasage.recentMetrics")
+    if (storedFavorites) {
+      try {
+        const parsed = JSON.parse(storedFavorites)
+        if (Array.isArray(parsed)) {
+          setFavoriteMetricFieldNames(parsed.filter((v) => typeof v === "string"))
+        }
+      } catch {
+        setFavoriteMetricFieldNames([])
+      }
+    }
+    if (storedRecent) {
+      try {
+        const parsed = JSON.parse(storedRecent)
+        if (Array.isArray(parsed)) {
+          setRecentMetricFieldNames(parsed.filter((v) => typeof v === "string"))
+        }
+      } catch {
+        setRecentMetricFieldNames([])
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    setFavoriteMetricFieldNames((prev) => prev.filter((fieldName) => data.metrics.some((m) => m.fieldName === fieldName)))
+    setRecentMetricFieldNames((prev) => prev.filter((fieldName) => data.metrics.some((m) => m.fieldName === fieldName)))
+  }, [data.metrics])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    window.localStorage.setItem("datasage.favoriteMetrics", JSON.stringify(favoriteMetricFieldNames))
+  }, [favoriteMetricFieldNames])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    window.localStorage.setItem("datasage.recentMetrics", JSON.stringify(recentMetricFieldNames))
+  }, [recentMetricFieldNames])
+
   const selectedMetric = useMemo(
     () => data.metrics.find((m) => m.fieldName === selectedMetricFieldName) ?? null,
     [data.metrics, selectedMetricFieldName],
+  )
+
+  const favoriteMetrics = useMemo(
+    () =>
+      favoriteMetricFieldNames
+        .map((fieldName) => data.metrics.find((m) => m.fieldName === fieldName))
+        .filter((m): m is Metric => Boolean(m)),
+    [data.metrics, favoriteMetricFieldNames],
+  )
+
+  const recentMetrics = useMemo(
+    () =>
+      recentMetricFieldNames
+        .map((fieldName) => data.metrics.find((m) => m.fieldName === fieldName))
+        .filter((m): m is Metric => Boolean(m)),
+    [data.metrics, recentMetricFieldNames],
   )
 
   const derivedBaseMetric = useMemo(
@@ -128,7 +187,20 @@ function App() {
 
   const handleOpenMetricProfile = (fieldName: string) => {
     setSelectedMetricFieldName(fieldName)
+    setRecentMetricFieldNames((prev) => {
+      const next = [fieldName, ...prev.filter((name) => name !== fieldName)]
+      return next.slice(0, 6)
+    })
     setIsMetricProfileOpen(true)
+  }
+
+  const handleToggleFavoriteMetric = (fieldName: string) => {
+    setFavoriteMetricFieldNames((prev) => {
+      if (prev.includes(fieldName)) {
+        return prev.filter((name) => name !== fieldName)
+      }
+      return [fieldName, ...prev]
+    })
   }
 
   const handleOpenDerivedMetricSheet = (metric: Metric) => {
@@ -147,7 +219,7 @@ function App() {
       businessDefinition: payload.businessDefinition,
       technicalDefinition: payload.technicalDefinition,
       status: "Offline",
-      tenant: payload.categoryPath[0] ?? "Strategy Data", // Default tenant
+      tenant: payload.tenantId ?? payload.categoryPath[0] ?? "Strategy Data", // Use explicit tenantId or fallback
       dataType: payload.query.dataType,
       unit: payload.query.unit,
       owners: {
@@ -662,7 +734,10 @@ function App() {
                 metrics={data.metrics}
                 dimensions={data.dimensions}
                 metricSets={metricSetsState}
+                favoriteMetrics={favoriteMetrics}
+                recentMetrics={recentMetrics}
                 onNavigateTopNav={setActiveTopNav}
+                onOpenMetric={handleOpenMetricProfile}
               />
             )}
 
@@ -673,13 +748,14 @@ function App() {
                 tenants={data.tenants}
                 dimensionTree={data.dimensionTree}
                 dimensions={data.dimensions}
-                categories={data.categories}
                 tags={tags}
                 activeGlobalTenantId={activeGlobalTenantId}
                 onOpenMetric={handleOpenMetricProfile}
                 onRegisterMetric={handleRegisterMetric}
                 onMetricSetsChange={setMetricSetsState}
                 onCreateDimension={handleCreateDimension}
+                favoriteMetricFieldNames={favoriteMetricFieldNames}
+                onToggleFavoriteMetric={handleToggleFavoriteMetric}
               />
             )}
 

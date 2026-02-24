@@ -11,10 +11,21 @@ export interface HomeViewProps {
   metrics: Metric[]
   dimensions: Dimension[]
   metricSets: Album[]
+  favoriteMetrics: Metric[]
+  recentMetrics: Metric[]
   onNavigateTopNav: (nav: TopNav) => void
+  onOpenMetric: (fieldName: string) => void
 }
 
-export function HomeView({ metrics, dimensions, metricSets, onNavigateTopNav }: HomeViewProps) {
+export function HomeView({
+  metrics,
+  dimensions,
+  metricSets,
+  favoriteMetrics,
+  recentMetrics,
+  onNavigateTopNav,
+  onOpenMetric,
+}: HomeViewProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <Card className="border-none shadow-none bg-transparent">
@@ -56,14 +67,32 @@ export function HomeView({ metrics, dimensions, metricSets, onNavigateTopNav }: 
             />
             <QuickLinkCard
               icon={FolderKanban}
-              title="Manage metric sets"
-              description="Organize metrics into collections for specific business areas."
+              title="Metrics workspace"
+              description="Switch between metric sets and the metrics library."
               onClick={() => onNavigateTopNav("metrics")}
               color="orange"
             />
           </div>
         </CardContent>
       </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <MetricListCard
+          title="Recently viewed"
+          description="Your latest accessed metrics"
+          metrics={recentMetrics}
+          emptyLabel="No recently viewed metrics yet."
+          onOpenMetric={onOpenMetric}
+          onBrowse={() => onNavigateTopNav("metrics")}
+        />
+        <MetricListCard
+          title="Favorites"
+          description="Pinned metrics you care about"
+          metrics={favoriteMetrics}
+          emptyLabel="No favorited metrics yet."
+          onOpenMetric={onOpenMetric}
+          onBrowse={() => onNavigateTopNav("metrics")}
+        />
+      </div>
     </div>
   )
 }
@@ -109,5 +138,60 @@ function QuickLinkCard({ icon: Icon, title, description, onClick, color }: Quick
         </div>
       </div>
     </button>
+  )
+}
+
+interface MetricListCardProps {
+  title: string
+  description: string
+  metrics: Metric[]
+  emptyLabel: string
+  onOpenMetric: (fieldName: string) => void
+  onBrowse: () => void
+}
+
+function MetricListCard({ title, description, metrics, emptyLabel, onOpenMetric, onBrowse }: MetricListCardProps) {
+  return (
+    <Card className="border-slate-200 shadow-sm rounded-2xl">
+      <CardHeader className="pb-3 border-b border-slate-50">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <CardTitle className="text-sm font-semibold text-slate-900">{title}</CardTitle>
+            <CardDescription className="text-xs text-slate-500 mt-1">{description}</CardDescription>
+          </div>
+          <button
+            type="button"
+            onClick={onBrowse}
+            className="text-[11px] font-medium text-blue-600 hover:text-blue-800"
+          >
+            Browse
+          </button>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4">
+        {metrics.length === 0 ? (
+          <div className="text-xs text-slate-400 italic text-center py-6">{emptyLabel}</div>
+        ) : (
+          <div className="space-y-3">
+            {metrics.slice(0, 6).map((metric) => (
+              <button
+                key={metric.id}
+                type="button"
+                onClick={() => onOpenMetric(metric.fieldName)}
+                className="w-full flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-600 hover:border-blue-200 hover:text-blue-700 hover:shadow-sm transition"
+              >
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-slate-900 truncate">{metric.businessName}</div>
+                  <div className="text-[10px] font-mono text-slate-400 truncate">{metric.fieldName}</div>
+                </div>
+                <Badge variant="outline" className="text-[10px] border-slate-200">
+                  {metric.status}
+                </Badge>
+              </button>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

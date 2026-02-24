@@ -24,7 +24,6 @@ import type {
   Tenant,
   DimensionTreeNode,
   Dimension,
-  CategoryNode,
   Tag,
   NewMetricPayload,
 } from "@/types"
@@ -44,7 +43,6 @@ export interface MetricsWorkspaceViewProps {
   tenants: Tenant[]
   dimensionTree: DimensionTreeNode[]
   dimensions: Dimension[]
-  categories: CategoryNode[]
   activeGlobalTenantId: string | null
   onOpenMetric: (fieldName: string) => void
   onRegisterMetric: (payload: NewMetricPayload) => void
@@ -57,6 +55,8 @@ export interface MetricsWorkspaceViewProps {
     sourceLink: string
   }) => void
   tags: Tag[]
+  favoriteMetricFieldNames?: string[]
+  onToggleFavoriteMetric?: (fieldName: string) => void
 }
 
 function getMetricSetTimestamp(metricSet: Album, key: "createdAt" | "updatedAt"): number {
@@ -72,19 +72,21 @@ export function MetricsWorkspaceView({
   tenants,
   dimensionTree,
   dimensions,
-  categories,
   activeGlobalTenantId,
   onOpenMetric,
   onRegisterMetric,
   onMetricSetsChange,
   onCreateDimension,
   tags,
+  favoriteMetricFieldNames,
+  onToggleFavoriteMetric,
 }: MetricsWorkspaceViewProps) {
 
   const selectedTenantId = activeGlobalTenantId
 
   const [selectedMetricSetId, setSelectedMetricSetId] = useState<string | null>(null)
-  const [workspaceMode, setWorkspaceMode] = useState<"metricSets" | "metrics" | "dimensions">("metricSets")
+  const [workspaceMode, setWorkspaceMode] = useState<"metrics" | "dimensions">("metrics")
+  const [metricsViewMode, setMetricsViewMode] = useState<"sets" | "library">("sets")
   const [metricSetSearch, setMetricSetSearch] = useState("")
   const [metricSetSortField, setMetricSetSortField] = useState<MetricSortField>("updatedAt")
   const [metricSetSortDirection, setMetricSetSortDirection] = useState<MetricSortDirection>("desc")
@@ -309,7 +311,7 @@ export function MetricsWorkspaceView({
   useEffect(() => {
     setSelectedFieldNamesForQuery([])
     setIsCombinedQuerySheetOpen(false)
-  }, [selectedMetricSetId, workspaceMode])
+  }, [selectedMetricSetId, workspaceMode, metricsViewMode])
 
   const handleSelectMetricSet = (id: string) => {
     setSelectedMetricSetId(id)
@@ -328,21 +330,12 @@ export function MetricsWorkspaceView({
                 value={workspaceMode}
                 onValueChange={(value) => {
                   if (!value) return
-                  setWorkspaceMode(value as "metricSets" | "metrics" | "dimensions")
-                  if (value !== "metricSets") {
-                    setSelectedMetricSetId(null)
-                  }
+                  setWorkspaceMode(value as "metrics" | "dimensions")
+                  setSelectedMetricSetId(null)
                 }}
                 className="bg-slate-100/50 p-1 rounded-full border border-slate-200"
-                aria-label="Toggle metrics workspace mode"
+                aria-label="Toggle workspace mode"
               >
-              <ToggleGroupItem
-                value="metricSets"
-                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
-                aria-label="View metric sets"
-              >
-                Metric sets
-              </ToggleGroupItem>
               <ToggleGroupItem
                 value="metrics"
                 className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
@@ -358,6 +351,36 @@ export function MetricsWorkspaceView({
                 Dimensions
               </ToggleGroupItem>
             </ToggleGroup>
+            {workspaceMode === "metrics" && (
+              <ToggleGroup
+                type="single"
+                size="sm"
+                variant="outline"
+                value={metricsViewMode}
+                onValueChange={(value) => {
+                  if (!value) return
+                  setMetricsViewMode(value as "sets" | "library")
+                  setSelectedMetricSetId(null)
+                }}
+                className="bg-white p-1 rounded-full border border-slate-200"
+                aria-label="Toggle metrics view mode"
+              >
+                <ToggleGroupItem
+                  value="sets"
+                  className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-slate-900 data-[state=on]:text-white data-[state=on]:shadow-sm"
+                  aria-label="View metric sets"
+                >
+                  Metric sets
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="library"
+                  className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-slate-900 data-[state=on]:text-white data-[state=on]:shadow-sm"
+                  aria-label="View metric library"
+                >
+                  Metric library
+                </ToggleGroupItem>
+              </ToggleGroup>
+            )}
             {selectedTenantId && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-[11px] text-slate-500 font-medium">
                 <span>Tenant:</span>
@@ -402,7 +425,7 @@ export function MetricsWorkspaceView({
           </div>
         </div>
 
-        {(workspaceMode === "metricSets" || workspaceMode === "metrics") && (
+        {workspaceMode === "metrics" && (
           <div className="flex flex-wrap items-center gap-3 text-xs bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Filter Tags</span>
             <div className="flex flex-wrap gap-2">
@@ -446,7 +469,7 @@ export function MetricsWorkspaceView({
           </div>
         )}
 
-         {workspaceMode === "metricSets" && !selectedMetricSet && (
+         {workspaceMode === "metrics" && metricsViewMode === "sets" && !selectedMetricSet && (
           <div className="grid gap-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
               <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -455,14 +478,14 @@ export function MetricsWorkspaceView({
                 </span>
                 <div className="relative">
                   <Input
-                    className="h-9 text-sm pl-3 border-slate-200 focus:border-blue-300 focus:ring-blue-100 bg-slate-50 focus:bg-white transition-all rounded-lg"
+                    className="h-8 text-xs pl-3 border-slate-200 focus:border-blue-300 focus:ring-blue-100 bg-slate-50 focus:bg-white transition-all rounded-lg"
                     placeholder="Search by name or description..."
                     value={metricSetSearch}
                     onChange={(e) => setMetricSetSearch(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="mt-2 flex min-w-0 flex-col gap-2 sm:mt-0 sm:w-72">
+              <div className="mt-2 flex min-w-0 flex-col gap-2 sm:mt-0 sm:w-64">
                 <span className="text-xs font-semibold text-slate-700 flex items-center gap-2">
                   <ArrowUpDown className="h-3 w-3" /> Sort
                 </span>
@@ -471,7 +494,7 @@ export function MetricsWorkspaceView({
                     value={metricSetSortField}
                     onValueChange={(value: MetricSortField) => setMetricSetSortField(value)}
                   >
-                    <SelectTrigger className="h-9 text-xs border-slate-200 rounded-lg bg-slate-50">
+                    <SelectTrigger className="h-8 text-xs border-slate-200 rounded-lg bg-slate-50">
                       <SelectValue placeholder="Field" />
                     </SelectTrigger>
                     <SelectContent>
@@ -483,7 +506,7 @@ export function MetricsWorkspaceView({
                     value={metricSetSortDirection}
                     onValueChange={(value: MetricSortDirection) => setMetricSetSortDirection(value)}
                   >
-                    <SelectTrigger className="h-9 text-xs border-slate-200 rounded-lg bg-slate-50">
+                    <SelectTrigger className="h-8 text-xs border-slate-200 rounded-lg bg-slate-50">
                       <SelectValue placeholder="Order" />
                     </SelectTrigger>
                     <SelectContent>
@@ -532,7 +555,7 @@ export function MetricsWorkspaceView({
           </div>
         )}
 
-        {workspaceMode === "metricSets" && selectedMetricSet && (
+        {workspaceMode === "metrics" && metricsViewMode === "sets" && selectedMetricSet && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
             <div className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -565,7 +588,7 @@ export function MetricsWorkspaceView({
                   <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/3">
                     <span className="text-[11px] font-semibold text-slate-700">Search</span>
                     <Input
-                      className="h-9 text-xs border-slate-200 rounded-lg"
+                      className="h-8 text-xs border-slate-200 rounded-lg"
                       placeholder="Search metrics..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
@@ -574,7 +597,7 @@ export function MetricsWorkspaceView({
                   <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/4">
                     <span className="text-[11px] font-semibold text-slate-700">Category</span>
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="h-9 text-xs border-slate-200 rounded-lg bg-white">
+                      <SelectTrigger className="h-8 text-xs border-slate-200 rounded-lg bg-white">
                         <SelectValue placeholder="All categories" />
                       </SelectTrigger>
                       <SelectContent>
@@ -593,7 +616,7 @@ export function MetricsWorkspaceView({
                      <Button
                         type="button"
                         size="sm"
-                        className="h-9 text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all"
+                        className="h-8 text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all"
                         disabled={selectedFieldNamesForQuery.length === 0}
                         onClick={() => setIsCombinedQuerySheetOpen(true)}
                       >
@@ -696,7 +719,7 @@ export function MetricsWorkspaceView({
           </div>
         )}
 
-        {workspaceMode === "metrics" && (
+        {workspaceMode === "metrics" && metricsViewMode === "library" && (
           <MetricSearchView
             metrics={metricsForTenantWithTagFilter}
             onOpenMetric={onOpenMetric}
@@ -705,6 +728,8 @@ export function MetricsWorkspaceView({
               setSelectedFieldNamesForAddToMetricSet(fieldNames)
               setIsAddToMetricSetSheetOpen(true)
             }}
+            favoriteMetricFieldNames={favoriteMetricFieldNames}
+            onToggleFavoriteMetric={onToggleFavoriteMetric}
           />
         )}
 
@@ -719,7 +744,6 @@ export function MetricsWorkspaceView({
       <NewMetricSheet
         open={isNewMetricSheetOpen}
         onOpenChange={setIsNewMetricSheetOpen}
-        categories={categories}
         tenants={tenants}
         dimensions={dimensions}
         onRegisterMetric={onRegisterMetric}
@@ -760,7 +784,7 @@ export function MetricsWorkspaceView({
         selectedTenantId={selectedTenantId ?? undefined}
       />
 
-      {workspaceMode === "metricSets" && selectedMetricSet && (
+      {workspaceMode === "metrics" && metricsViewMode === "sets" && selectedMetricSet && (
         <CombinedQuerySheet
           open={isCombinedQuerySheetOpen}
           onOpenChange={setIsCombinedQuerySheetOpen}
