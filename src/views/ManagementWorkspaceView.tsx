@@ -294,24 +294,6 @@ export function ManagementWorkspaceView({
             <CardContent>
               {activeTenant ? (
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-xs font-semibold text-slate-600">
-                      Current tenant: <span className="text-slate-900">{activeTenant.name}</span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-8 px-4 text-xs font-medium bg-white border-slate-200 shadow-sm hover:border-blue-200 hover:text-blue-600"
-                      onClick={() => {
-                        setTenantForCategories(activeTenant)
-                        setIsTenantCategoriesSheetOpen(true)
-                      }}
-                    >
-                      Manage Categories & Datasources
-                    </Button>
-                  </div>
-
                   <div className="space-y-2">
                     <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Current Categories</h4>
                     {activeTenant.categories && activeTenant.categories.length > 0 ? (
@@ -371,7 +353,7 @@ export function ManagementWorkspaceView({
         return {
           title: "Datasource management",
           description: "Manage categories and data sources for the current tenant.",
-          addLabel: "Add Category",
+          addLabel: "Manage Categories & Datasources",
         }
       default:
         return {
