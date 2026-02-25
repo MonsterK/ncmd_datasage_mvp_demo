@@ -1,5 +1,5 @@
 import { Metric, Dimension } from "@/types"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { MetricProfileView } from "@/views/MetricProfileView"
 
 export interface MetricProfileSheetProps {
@@ -23,11 +23,8 @@ export function MetricProfileSheet({
 }: MetricProfileSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="text-sm font-semibold">Metric profile</SheetTitle>
-        </SheetHeader>
-        <div className="mt-4 pb-6">
+      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl p-0">
+        <div className="px-6 py-6">
           <MetricProfileView
             metric={metric}
             dimensions={dimensions}

@@ -483,19 +483,22 @@ function App() {
   }
 
   const handleCreateDimension = (payload: {
-    id: string
-    name: string
+    fieldName: string
+    businessName: string
+    businessOwner: string
+    techOwner: string
     description: string
     category: string
     sourceLink: string
+    sourceDimensionField: string
   }) => {
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
 
     const newDimension: Dimension = {
-      id: payload.id,
-      name: payload.name,
-      fieldName: payload.id,
+      id: payload.fieldName,
+      name: payload.businessName,
+      fieldName: payload.fieldName,
       aliases: [],
       description: payload.description,
       tenant: "Strategy Data",
@@ -504,8 +507,13 @@ function App() {
       type: "enum",
       values: [],
       boundMetricFieldNames: [],
+      owners: {
+        businessOwner: payload.businessOwner || "TBD",
+        techOwner: payload.techOwner || "TBD",
+      },
       category: payload.category,
       sourceLink: payload.sourceLink,
+      sourceDimensionField: payload.sourceDimensionField,
       createdAt: nowIso,
       updatedAt: nowIso,
       history: [
@@ -597,10 +605,13 @@ function App() {
 
   const handleUpdateDimension = (payload: {
     id: string
-    name: string
+    businessName: string
+    businessOwner: string
+    techOwner: string
     description: string
     category: string
     sourceLink: string
+    sourceDimensionField: string
   }) => {
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
@@ -611,10 +622,15 @@ function App() {
         d.id === payload.id
           ? {
               ...d,
-              name: payload.name,
+              name: payload.businessName,
               description: payload.description,
               category: payload.category,
               sourceLink: payload.sourceLink,
+              sourceDimensionField: payload.sourceDimensionField,
+              owners: {
+                businessOwner: payload.businessOwner || d.owners?.businessOwner || "TBD",
+                techOwner: payload.techOwner || d.owners?.techOwner || "TBD",
+              },
               updatedAt: nowIso,
               history: [
                 ...(d.history ?? []),

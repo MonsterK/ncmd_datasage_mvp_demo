@@ -54,11 +54,14 @@ export interface MetricsWorkspaceViewProps {
   onRegisterMetric: (payload: NewMetricPayload) => void
   onMetricSetsChange: (sets: Album[]) => void
   onCreateDimension: (payload: {
-    id: string
-    name: string
+    fieldName: string
+    businessName: string
+    businessOwner: string
+    techOwner: string
     description: string
     category: string
     sourceLink: string
+    sourceDimensionField: string
   }) => void
   tags: Tag[]
   favoriteMetricFieldNames?: string[]

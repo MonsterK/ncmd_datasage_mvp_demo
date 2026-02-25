@@ -357,6 +357,14 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                       {dimension.type}
                     </Badge>
                   </div>
+                  <div className="space-y-1">
+                    <span className="text-slate-500">Business owner</span>
+                    <p className="font-medium text-slate-900">{dimension.owners?.businessOwner || "TBD"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-slate-500">Tech owner</span>
+                    <p className="font-medium text-slate-900">{dimension.owners?.techOwner || "TBD"}</p>
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <span className="text-slate-500">Description</span>

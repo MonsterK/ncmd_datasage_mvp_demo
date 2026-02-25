@@ -65,8 +65,10 @@ export interface ManagementWorkspaceViewProps {
   onCreateCategory: (payload: { id: string; name: string; description: string }) => void
   onUpdateTenant: (tenant: Tenant) => void
   onCreateDimension: (payload: {
-    id: string
-    name: string
+    fieldName: string
+    businessName: string
+    businessOwner: string
+    techOwner: string
     description: string
     category: string
     sourceLink: string
@@ -74,7 +76,9 @@ export interface ManagementWorkspaceViewProps {
   }) => void
   onUpdateDimension: (payload: {
     id: string
-    name: string
+    businessName: string
+    businessOwner: string
+    techOwner: string
     description: string
     category: string
     sourceLink: string
@@ -1392,8 +1396,10 @@ interface NewDimensionSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreateDimension: (payload: {
-    id: string
-    name: string
+    fieldName: string
+    businessName: string
+    businessOwner: string
+    techOwner: string
     description: string
     category: string
     sourceLink: string
@@ -1403,7 +1409,9 @@ interface NewDimensionSheetProps {
   mode?: "create" | "edit"
   onUpdateDimension?: (payload: {
     id: string
-    name: string
+    businessName: string
+    businessOwner: string
+    techOwner: string
     description: string
     category: string
     sourceLink: string
@@ -1419,8 +1427,10 @@ export function NewDimensionSheet({
   mode = "create",
   onUpdateDimension,
 }: NewDimensionSheetProps) {
-  const [id, setId] = useState("")
-  const [name, setName] = useState("")
+  const [fieldName, setFieldName] = useState("")
+  const [businessName, setBusinessName] = useState("")
+  const [businessOwner, setBusinessOwner] = useState("")
+  const [techOwner, setTechOwner] = useState("")
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState("")
   const [sourceLink, setSourceLink] = useState("")
@@ -1433,15 +1443,19 @@ export function NewDimensionSheet({
     if (!open) return
 
     if (isEditMode && initialDimension) {
-      setId(initialDimension.id)
-      setName(initialDimension.name)
+      setFieldName(initialDimension.fieldName)
+      setBusinessName(initialDimension.name)
+      setBusinessOwner(initialDimension.owners?.businessOwner ?? "")
+      setTechOwner(initialDimension.owners?.techOwner ?? "")
       setDescription(initialDimension.description)
       setCategory(initialDimension.category ?? "")
       setSourceLink(initialDimension.sourceLink ?? "")
       setSourceDimensionField(initialDimension.sourceDimensionField ?? "")
     } else {
-      setId("")
-      setName("")
+      setFieldName("")
+      setBusinessName("")
+      setBusinessOwner("")
+      setTechOwner("")
       setDescription("")
       setCategory("")
       setSourceLink("")
@@ -1452,26 +1466,35 @@ export function NewDimensionSheet({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const trimmedId = id.trim()
-    const trimmedName = name.trim()
-    if (!trimmedName || (!isEditMode && !trimmedId)) {
-      setMessage("ID and name are required.")
+    const trimmedFieldName = fieldName.trim()
+    const trimmedBusinessName = businessName.trim()
+    if (!trimmedBusinessName || (!isEditMode && !trimmedFieldName)) {
+      setMessage("Field name and business name are required.")
       return
     }
 
-    const payload = {
-      id: isEditMode && initialDimension ? initialDimension.id : trimmedId,
-      name: trimmedName,
-      description: description.trim(),
-      category: category.trim(),
-      sourceLink: sourceLink.trim(),
-      sourceDimensionField: sourceDimensionField.trim(),
-    }
-
     if (isEditMode && onUpdateDimension && initialDimension) {
-      onUpdateDimension(payload)
+      onUpdateDimension({
+        id: initialDimension.id,
+        businessName: trimmedBusinessName,
+        businessOwner: businessOwner.trim(),
+        techOwner: techOwner.trim(),
+        description: description.trim(),
+        category: category.trim(),
+        sourceLink: sourceLink.trim(),
+        sourceDimensionField: sourceDimensionField.trim(),
+      })
     } else {
-      onCreateDimension(payload)
+      onCreateDimension({
+        fieldName: trimmedFieldName,
+        businessName: trimmedBusinessName,
+        businessOwner: businessOwner.trim(),
+        techOwner: techOwner.trim(),
+        description: description.trim(),
+        category: category.trim(),
+        sourceLink: sourceLink.trim(),
+        sourceDimensionField: sourceDimensionField.trim(),
+      })
     }
     setMessage(null)
     onOpenChange(false)
@@ -1501,22 +1524,42 @@ export function NewDimensionSheet({
                 <div className="grid gap-5 pl-3">
                   <div className="grid grid-cols-2 gap-4">
                      <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">Dimension ID (field name)</label>
+                      <label className="text-xs font-semibold text-slate-700">Field name</label>
                       <Input
                         className="h-9 text-sm font-mono"
-                        value={id}
-                        onChange={(e) => setId(e.target.value)}
+                        value={fieldName}
+                        onChange={(e) => setFieldName(e.target.value)}
                         placeholder="e.g. agency_tier"
                         disabled={Boolean(isEditMode)}
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">Name</label>
+                      <label className="text-xs font-semibold text-slate-700">Business Name</label>
                       <Input
                         className="h-9 text-sm"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={businessName}
+                        onChange={(e) => setBusinessName(e.target.value)}
                         placeholder="Agency Tier"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-700">Business owner</label>
+                      <Input
+                        className="h-9 text-sm"
+                        value={businessOwner}
+                        onChange={(e) => setBusinessOwner(e.target.value)}
+                        placeholder="Owner name"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-700">Tech owner</label>
+                      <Input
+                        className="h-9 text-sm"
+                        value={techOwner}
+                        onChange={(e) => setTechOwner(e.target.value)}
+                        placeholder="Owner name"
                       />
                     </div>
                   </div>

@@ -70,6 +70,10 @@ export interface Dimension {
   type: string
   values: DimensionValue[]
   boundMetricFieldNames: string[]
+  owners?: {
+    businessOwner: string
+    techOwner: string
+  }
   category?: string
   sourceLink?: string
   sourceDimensionField?: string
