@@ -22,7 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces } from "lucide-react"
 
 import {
   Metric,
@@ -71,8 +73,10 @@ export interface ManagementWorkspaceViewProps {
     techOwner: string
     description: string
     category: string
+    tenantId: string
     sourceLink: string
     sourceDimensionField: string
+    values: { code: string; label: string }[]
   }) => void
   onUpdateDimension: (payload: {
     id: string
@@ -81,8 +85,10 @@ export interface ManagementWorkspaceViewProps {
     techOwner: string
     description: string
     category: string
+    tenantId: string
     sourceLink: string
     sourceDimensionField: string
+    values: { code: string; label: string }[]
   }) => void
   onDeleteDimension: (id: string) => void
   tags: Tag[]
@@ -477,6 +483,8 @@ export function ManagementWorkspaceView({
           }
           setIsNewDimensionSheetOpen(open)
         }}
+        tenants={tenants}
+        defaultTenantId={activeTenantId}
         onCreateDimension={onCreateDimension}
         initialDimension={dimensionToEdit}
         mode={dimensionSheetMode}
@@ -1400,11 +1408,15 @@ interface NewDimensionSheetProps {
     businessName: string
     businessOwner: string
     techOwner: string
-    description: string
+    tenantId: string
     category: string
+    description: string
     sourceLink: string
     sourceDimensionField: string
+    values: { code: string; label: string }[]
   }) => void
+  tenants?: Tenant[]
+  defaultTenantId?: string | null
   initialDimension?: Dimension | null
   mode?: "create" | "edit"
   onUpdateDimension?: (payload: {
@@ -1412,10 +1424,12 @@ interface NewDimensionSheetProps {
     businessName: string
     businessOwner: string
     techOwner: string
-    description: string
+    tenantId: string
     category: string
+    description: string
     sourceLink: string
     sourceDimensionField: string
+    values: { code: string; label: string }[]
   }) => void
 }
 
@@ -1423,6 +1437,8 @@ export function NewDimensionSheet({
   open,
   onOpenChange,
   onCreateDimension,
+  tenants = [],
+  defaultTenantId = null,
   initialDimension,
   mode = "create",
   onUpdateDimension,
@@ -1431,10 +1447,15 @@ export function NewDimensionSheet({
   const [businessName, setBusinessName] = useState("")
   const [businessOwner, setBusinessOwner] = useState("")
   const [techOwner, setTechOwner] = useState("")
+  const [selectedTenantId, setSelectedTenantId] = useState<string>("")
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>("")
   const [description, setDescription] = useState("")
-  const [category, setCategory] = useState("")
   const [sourceLink, setSourceLink] = useState("")
   const [sourceDimensionField, setSourceDimensionField] = useState("")
+  const [enumValues, setEnumValues] = useState<{ code: string; label: string }[]>([])
+  const [isFieldsOpen, setIsFieldsOpen] = useState(false)
+  const [fieldSearch, setFieldSearch] = useState("")
+  const [fieldTab, setFieldTab] = useState("source")
   const [message, setMessage] = useState<string | null>(null)
 
   const isEditMode = mode === "edit" && initialDimension && onUpdateDimension
@@ -1447,29 +1468,110 @@ export function NewDimensionSheet({
       setBusinessName(initialDimension.name)
       setBusinessOwner(initialDimension.owners?.businessOwner ?? "")
       setTechOwner(initialDimension.owners?.techOwner ?? "")
+      setSelectedTenantId(initialDimension.tenant ?? "")
+      setSelectedCategoryName(initialDimension.category ?? "")
       setDescription(initialDimension.description)
-      setCategory(initialDimension.category ?? "")
       setSourceLink(initialDimension.sourceLink ?? "")
       setSourceDimensionField(initialDimension.sourceDimensionField ?? "")
+      setEnumValues(initialDimension.values ?? [])
     } else {
       setFieldName("")
       setBusinessName("")
       setBusinessOwner("")
       setTechOwner("")
+      setSelectedTenantId(defaultTenantId ?? tenants[0]?.id ?? "")
+      setSelectedCategoryName("")
       setDescription("")
-      setCategory("")
       setSourceLink("")
       setSourceDimensionField("")
+      setEnumValues([])
     }
+    setFieldSearch("")
+    setFieldTab("source")
+    setIsFieldsOpen(false)
     setMessage(null)
-  }, [open, isEditMode, initialDimension])
+  }, [open, isEditMode, initialDimension, defaultTenantId, tenants])
+
+  const currentTenant = useMemo(
+    () => tenants.find((t) => t.id === selectedTenantId) ?? null,
+    [tenants, selectedTenantId],
+  )
+
+  const availableCategories = useMemo(
+    () => currentTenant?.categories ?? [],
+    [currentTenant],
+  )
+
+  useEffect(() => {
+    if (!selectedCategoryName) return
+    const exists = availableCategories.some((c) => c.name === selectedCategoryName)
+    if (!exists) {
+      setSelectedCategoryName("")
+    }
+  }, [availableCategories, selectedCategoryName])
+
+  useEffect(() => {
+    if (!currentTenant || !selectedCategoryName) return
+    const category = currentTenant.categories?.find((c) => c.name === selectedCategoryName)
+    if (category?.dataSource?.link && !sourceLink) {
+      setSourceLink(category.dataSource.link)
+    }
+  }, [currentTenant, selectedCategoryName, sourceLink])
+
+  const fieldGroups = useMemo(
+    () => ({
+      source: [
+        { name: "p_date", type: "date" },
+        { name: "data_dt", type: "date" },
+        { name: "ad_id", type: "number" },
+        { name: "rit", type: "number" },
+        { name: "external_action", type: "string" },
+        { name: "objective_type", type: "string" },
+        { name: "pricing_type", type: "string" },
+        { name: "smart_bid_type", type: "string" },
+        { name: "advertiser_origin", type: "string" },
+        { name: "advertiser_customer_type", type: "string" },
+        { name: "advertiser_id", type: "number" },
+        { name: "ad_ref_app_id", type: "number" },
+      ],
+      dataset: [
+        { name: "campaign_id", type: "number" },
+        { name: "campaign_name", type: "string" },
+        { name: "adgroup_id", type: "number" },
+        { name: "adgroup_name", type: "string" },
+        { name: "creative_id", type: "number" },
+        { name: "placement", type: "string" },
+        { name: "country_code", type: "string" },
+      ],
+      params: [
+        { name: "start_date", type: "param" },
+        { name: "end_date", type: "param" },
+        { name: "timezone", type: "param" },
+      ],
+    }),
+    [],
+  )
+
+  const filteredFields = useMemo(() => {
+    const list = fieldGroups[fieldTab as keyof typeof fieldGroups] ?? []
+    const keyword = fieldSearch.trim().toLowerCase()
+    if (!keyword) return list
+    return list.filter((field) => field.name.toLowerCase().includes(keyword))
+  }, [fieldGroups, fieldSearch, fieldTab])
+
+  const fieldIconMap = {
+    date: Calendar,
+    number: Hash,
+    string: Type,
+    param: Braces,
+  } as const
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const trimmedFieldName = fieldName.trim()
     const trimmedBusinessName = businessName.trim()
-    if (!trimmedBusinessName || (!isEditMode && !trimmedFieldName)) {
-      setMessage("Field name and business name are required.")
+    if (!trimmedBusinessName || (!isEditMode && !trimmedFieldName) || !selectedTenantId || !selectedCategoryName) {
+      setMessage("Field name, business name, tenant, and category are required.")
       return
     }
 
@@ -1479,10 +1581,12 @@ export function NewDimensionSheet({
         businessName: trimmedBusinessName,
         businessOwner: businessOwner.trim(),
         techOwner: techOwner.trim(),
+        tenantId: selectedTenantId,
+        category: selectedCategoryName,
         description: description.trim(),
-        category: category.trim(),
         sourceLink: sourceLink.trim(),
         sourceDimensionField: sourceDimensionField.trim(),
+        values: enumValues,
       })
     } else {
       onCreateDimension({
@@ -1490,10 +1594,12 @@ export function NewDimensionSheet({
         businessName: trimmedBusinessName,
         businessOwner: businessOwner.trim(),
         techOwner: techOwner.trim(),
+        tenantId: selectedTenantId,
+        category: selectedCategoryName,
         description: description.trim(),
-        category: category.trim(),
         sourceLink: sourceLink.trim(),
         sourceDimensionField: sourceDimensionField.trim(),
+        values: enumValues,
       })
     }
     setMessage(null)
@@ -1514,106 +1620,186 @@ export function NewDimensionSheet({
           </SheetHeader>
           
           <div className="flex-1 overflow-y-auto px-6 py-6">
-            <form id="dimension-form" className="space-y-8" onSubmit={handleSubmit}>
-              {/* Basic Details */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
-                  Dimension Details
-                </h3>
-                <div className="grid gap-5 pl-3">
-                  <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">Field name</label>
-                      <Input
-                        className="h-9 text-sm font-mono"
-                        value={fieldName}
-                        onChange={(e) => setFieldName(e.target.value)}
-                        placeholder="e.g. agency_tier"
-                        disabled={Boolean(isEditMode)}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">Business Name</label>
-                      <Input
-                        className="h-9 text-sm"
-                        value={businessName}
-                        onChange={(e) => setBusinessName(e.target.value)}
-                        placeholder="Agency Tier"
-                      />
-                    </div>
+            <form id="dimension-form" className="space-y-6" onSubmit={handleSubmit}>
+              <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
+                  <p className="text-xs text-slate-500 mt-1">Choose tenant and category for this dimension.</p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-medium text-slate-500">Tenant</label>
+                    <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
+                      <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
+                        <SelectValue placeholder="Select tenant" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tenants.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">Business owner</label>
-                      <Input
-                        className="h-9 text-sm"
-                        value={businessOwner}
-                        onChange={(e) => setBusinessOwner(e.target.value)}
-                        placeholder="Owner name"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-700">Tech owner</label>
-                      <Input
-                        className="h-9 text-sm"
-                        value={techOwner}
-                        onChange={(e) => setTechOwner(e.target.value)}
-                        placeholder="Owner name"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Description</label>
-                    <Textarea
-                      rows={3}
-                      className="text-sm resize-none"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Short description of this dimension term."
-                    />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-medium text-slate-500">Category</label>
+                    <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
+                      <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableCategories.length > 0 ? (
+                          availableCategories.map((c) => (
+                            <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                          ))
+                        ) : (
+                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
 
-              <div className="h-px bg-slate-100" />
-
-              {/* Data Settings */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                   <span className="w-1 h-4 bg-indigo-600 rounded-full"></span>
-                   Data Settings
-                </h3>
-                <div className="grid gap-5 pl-3">
-                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Category</label>
+              <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Business definition</p>
+                  <p className="text-xs text-slate-500 mt-1">Define the dimension in business terms.</p>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Business Name</label>
                     <Input
-                      className="h-9 text-sm"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      placeholder="e.g. Monetization entities"
+                      className="h-9 text-xs"
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder="Agency Tier"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Source dataset link</label>
-                    <div className="relative">
-                      <Input
-                        type="url"
-                        className="h-9 text-sm pl-8"
-                        value={sourceLink}
-                        onChange={(e) => setSourceLink(e.target.value)}
-                        placeholder="https://..."
-                      />
-                      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                      </div>
-                    </div>
+                    <label className="text-xs font-semibold text-slate-700">Field name</label>
+                    <Input
+                      className="h-9 text-xs font-mono"
+                      value={fieldName}
+                      onChange={(e) => setFieldName(e.target.value)}
+                      placeholder="e.g. agency_tier"
+                      disabled={Boolean(isEditMode)}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Business owner</label>
+                    <Input
+                      className="h-9 text-xs"
+                      value={businessOwner}
+                      onChange={(e) => setBusinessOwner(e.target.value)}
+                      placeholder="Owner name"
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Source Dimension Field</label>
+                    <label className="text-xs font-semibold text-slate-700">Tech owner</label>
                     <Input
-                      className="h-9 text-sm font-mono"
+                      className="h-9 text-xs"
+                      value={techOwner}
+                      onChange={(e) => setTechOwner(e.target.value)}
+                      placeholder="Owner name"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700">Business definition</label>
+                  <Textarea
+                    rows={3}
+                    className="text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 min-h-[80px]"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Short description of this dimension term."
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Enum definition</p>
+                  <p className="text-xs text-slate-500 mt-1">Manage enumerated values for this dimension.</p>
+                </div>
+                <div className="space-y-3">
+                  {enumValues.map((value, index) => (
+                    <div key={`${value.code}-${index}`} className="grid gap-3 md:grid-cols-[1fr_1fr_auto] items-center">
+                      <Input
+                        className="h-9 text-xs font-mono"
+                        placeholder="Code"
+                        value={value.code}
+                        onChange={(e) => {
+                          const next = [...enumValues]
+                          next[index] = { ...next[index], code: e.target.value }
+                          setEnumValues(next)
+                        }}
+                      />
+                      <Input
+                        className="h-9 text-xs"
+                        placeholder="Label"
+                        value={value.label}
+                        onChange={(e) => {
+                          const next = [...enumValues]
+                          next[index] = { ...next[index], label: e.target.value }
+                          setEnumValues(next)
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-9 text-xs border-slate-200"
+                        onClick={() => setEnumValues(enumValues.filter((_, i) => i !== index))}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 text-xs border-slate-200"
+                    onClick={() => setEnumValues([...enumValues, { code: "", label: "" }])}
+                  >
+                    Add enum value
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Query binding</p>
+                  <p className="text-xs text-slate-500 mt-1">Bind the dimension to a source dataset.</p>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Source dataset link</label>
+                    <Input
+                      type="url"
+                      className="h-9 text-xs"
+                      value={sourceLink}
+                      onChange={(e) => setSourceLink(e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-slate-700">Source Dimension Field</label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-3 text-[11px] border-slate-200 hover:bg-slate-50"
+                        onClick={() => setIsFieldsOpen(true)}
+                      >
+                        Fields
+                      </Button>
+                    </div>
+                    <Input
+                      className="h-9 text-xs font-mono"
                       value={sourceDimensionField}
                       onChange={(e) => setSourceDimensionField(e.target.value)}
                       placeholder="e.g. dim_agency_tier"
@@ -1621,6 +1807,114 @@ export function NewDimensionSheet({
                   </div>
                 </div>
               </div>
+
+              <Dialog open={isFieldsOpen} onOpenChange={setIsFieldsOpen}>
+                <DialogContent className="max-w-md p-0">
+                  <DialogHeader className="px-4 pt-4 pb-2">
+                    <DialogTitle className="text-sm font-semibold text-slate-900">Fields</DialogTitle>
+                  </DialogHeader>
+                  <Tabs value={fieldTab} onValueChange={setFieldTab} className="w-full">
+                    <div className="px-4 pb-2">
+                      <TabsList className="h-7 bg-slate-100 p-0.5 rounded-lg">
+                        <TabsTrigger value="source" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                          Data source fields
+                        </TabsTrigger>
+                        <TabsTrigger value="dataset" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                          Dataset fields
+                        </TabsTrigger>
+                        <TabsTrigger value="params" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                          Params
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
+                    <div className="px-4 pb-3">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                        <Input
+                          value={fieldSearch}
+                          onChange={(e) => setFieldSearch(e.target.value)}
+                          placeholder="Search fields"
+                          className="h-9 pl-8 text-xs bg-slate-50 border-slate-200 focus:bg-white"
+                        />
+                      </div>
+                    </div>
+                    <div className="max-h-[360px] overflow-y-auto px-2 pb-4">
+                      <TabsContent value="source" className="mt-0">
+                        <div className="space-y-1">
+                          {filteredFields.map((field) => {
+                            const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Hash
+                            return (
+                              <button
+                                key={field.name}
+                                type="button"
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
+                                onDoubleClick={() => {
+                                  setSourceDimensionField(field.name)
+                                  setIsFieldsOpen(false)
+                                }}
+                              >
+                                <Icon className="h-3.5 w-3.5 text-slate-400" />
+                                <span className="font-mono text-slate-800">{field.name}</span>
+                              </button>
+                            )
+                          })}
+                          {filteredFields.length === 0 && (
+                            <p className="text-xs text-slate-400 text-center py-6">No fields found.</p>
+                          )}
+                        </div>
+                      </TabsContent>
+                      <TabsContent value="dataset" className="mt-0">
+                        <div className="space-y-1">
+                          {filteredFields.map((field) => {
+                            const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Hash
+                            return (
+                              <button
+                                key={field.name}
+                                type="button"
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
+                                onDoubleClick={() => {
+                                  setSourceDimensionField(field.name)
+                                  setIsFieldsOpen(false)
+                                }}
+                              >
+                                <Icon className="h-3.5 w-3.5 text-slate-400" />
+                                <span className="font-mono text-slate-800">{field.name}</span>
+                              </button>
+                            )
+                          })}
+                          {filteredFields.length === 0 && (
+                            <p className="text-xs text-slate-400 text-center py-6">No fields found.</p>
+                          )}
+                        </div>
+                      </TabsContent>
+                      <TabsContent value="params" className="mt-0">
+                        <div className="space-y-1">
+                          {filteredFields.map((field) => {
+                            const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Braces
+                            return (
+                              <button
+                                key={field.name}
+                                type="button"
+                                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
+                                onDoubleClick={() => {
+                                  setSourceDimensionField(`:${field.name}`)
+                                  setIsFieldsOpen(false)
+                                }}
+                              >
+                                <Icon className="h-3.5 w-3.5 text-slate-400" />
+                                <span className="font-mono text-slate-800">{field.name}</span>
+                              </button>
+                            )
+                          })}
+                          {filteredFields.length === 0 && (
+                            <p className="text-xs text-slate-400 text-center py-6">No params found.</p>
+                          )}
+                        </div>
+                      </TabsContent>
+                    </div>
+                  </Tabs>
+                </DialogContent>
+              </Dialog>
             </form>
           </div>
 

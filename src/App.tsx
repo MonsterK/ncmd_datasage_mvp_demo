@@ -489,8 +489,10 @@ function App() {
     techOwner: string
     description: string
     category: string
+    tenantId: string
     sourceLink: string
     sourceDimensionField: string
+    values: { code: string; label: string }[]
   }) => {
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
@@ -501,11 +503,11 @@ function App() {
       fieldName: payload.fieldName,
       aliases: [],
       description: payload.description,
-      tenant: "Strategy Data",
+      tenant: payload.tenantId || "Strategy Data",
       version: "v1",
       scope: [],
       type: "enum",
-      values: [],
+      values: payload.values ?? [],
       boundMetricFieldNames: [],
       owners: {
         businessOwner: payload.businessOwner || "TBD",
@@ -610,8 +612,10 @@ function App() {
     techOwner: string
     description: string
     category: string
+    tenantId: string
     sourceLink: string
     sourceDimensionField: string
+    values: { code: string; label: string }[]
   }) => {
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
@@ -625,8 +629,10 @@ function App() {
               name: payload.businessName,
               description: payload.description,
               category: payload.category,
+              tenant: payload.tenantId || d.tenant,
               sourceLink: payload.sourceLink,
               sourceDimensionField: payload.sourceDimensionField,
+              values: payload.values ?? d.values,
               owners: {
                 businessOwner: payload.businessOwner || d.owners?.businessOwner || "TBD",
                 techOwner: payload.techOwner || d.owners?.techOwner || "TBD",
