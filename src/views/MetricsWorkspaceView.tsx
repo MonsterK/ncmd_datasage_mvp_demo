@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
@@ -586,87 +586,92 @@ export function MetricsWorkspaceView({
                 </div>
               </div>
 
-              <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 bg-slate-50/30">
+              <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-slate-50/30">
                 {filteredMetricsForSelectedSet.map((m) => (
                   <Card
                     key={m.id}
-                    className="group cursor-pointer border-slate-200 shadow-sm transition-all duration-200 hover:border-blue-300 hover:shadow-md hover:bg-white"
+                    className="group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col"
                     onClick={() => onOpenMetric(m.fieldName)}
                   >
-                    <CardHeader className="flex flex-row items-start justify-between gap-3 p-4 pb-2 space-y-0">
-                      <div className="flex flex-1 items-start gap-3">
-                        <Checkbox
-                          className="mt-1 border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                          checked={selectedFieldNamesForQuery.includes(m.fieldName)}
-                          onCheckedChange={(value) => {
-                            const isChecked = value === true
-                            setSelectedFieldNamesForQuery((prev) => {
-                              if (isChecked) {
-                                if (prev.includes(m.fieldName)) return prev
-                                return [...prev, m.fieldName]
-                              }
-                              return prev.filter((fieldName) => fieldName !== m.fieldName)
-                            })
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                          }}
-                          aria-label="Select metric for combined query"
-                        />
-                        <div>
-                          <CardTitle className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+                    <CardHeader className="space-y-3 pb-4">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="space-y-1 flex-1 min-w-0">
+                          <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedFieldNamesForQuery.includes(m.fieldName)}
+                              onCheckedChange={(value) => {
+                                const isChecked = value === true
+                                setSelectedFieldNamesForQuery((prev) => {
+                                  if (isChecked) {
+                                    if (prev.includes(m.fieldName)) return prev
+                                    return [...prev, m.fieldName]
+                                  }
+                                  return prev.filter((fieldName) => fieldName !== m.fieldName)
+                                })
+                              }}
+                            />
+                          </div>
+                          <CardTitle className="text-lg font-semibold leading-tight group-hover:text-blue-600 transition-colors truncate">
                             {m.businessName}
                           </CardTitle>
-                          <CardDescription className="text-[10px] font-mono text-slate-400 mt-0.5">
-                            {m.fieldName}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
-                          {m.status}
-                        </Badge>
-                        {(m as any)._refVersion && (m as any)._refVersion !== "latest" && (
-                          <span className="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                            {(m as any)._refVersion}
-                          </span>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-2">
-                      <p className="line-clamp-2 text-xs text-slate-500 mb-4 h-8 leading-relaxed">
-                        {m.businessDefinition}
-                      </p>
-                      <div className="flex items-end justify-between gap-2 pt-2 border-t border-slate-50">
-                        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
-                          <Flame className="h-3 w-3 text-orange-500 fill-orange-500" />
-                          <span className="font-semibold text-slate-700">{m.heat ?? 0}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                           <span className="capitalize">{m.dataType || 'decimal'}</span>
-                           {m.unit && <span>({m.unit})</span>}
-                        </div>
-                        {m.trend30d && m.trend30d.length > 0 && (
-                          <div className="h-8 w-20 opacity-70 group-hover:opacity-100 transition-opacity">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart
-                                data={m.trend30d}
-                                margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
-                              >
-                                <Line
-                                  type="monotone"
-                                  dataKey="value"
-                                  stroke="#3b82f6"
-                                  strokeWidth={2}
-                                  dot={false}
-                                  isAnimationActive={false}
-                                />
-                              </LineChart>
-                            </ResponsiveContainer>
+                          <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+                            <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{m.fieldName}</span>
                           </div>
-                        )}
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <Badge
+                            variant={m.status === "Active" ? "default" : "secondary"}
+                            className={`shrink-0 ${m.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : ""}`}
+                          >
+                            {m.status}
+                          </Badge>
+                          {(m as any)._refVersion && (m as any)._refVersion !== "latest" && (
+                            <span className="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                              {(m as any)._refVersion}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10">
+                        {m.businessDefinition}
+                      </CardDescription>
+                    </CardHeader>
+
+                    <CardContent className="pb-4 flex-1">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <span className="truncate">{m.owners?.businessOwner ?? "Unknown owner"}</span>
+                        </div>
+
+                        <div className="flex items-end justify-between gap-2 pt-2">
+                          <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-orange-50 px-2 py-1 rounded-full border border-orange-100">
+                            <Flame className="h-3 w-3 text-orange-500" />
+                            <span>{m.heat ?? 0} Heat</span>
+                          </div>
+
+                          {m.trend30d && m.trend30d.length > 0 && (
+                            <div className="h-8 w-20 opacity-70 group-hover:opacity-100 transition-opacity">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={m.trend30d}>
+                                  <Line
+                                    type="monotone"
+                                    dataKey="value"
+                                    stroke="#3b82f6"
+                                    strokeWidth={2}
+                                    dot={false}
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
+
+                    <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
+                      <span className="truncate max-w-[150px]">{m.categoryPath.join(" › ")}</span>
+                      <span>{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : "-"}</span>
+                    </CardFooter>
                   </Card>
                 ))}
                 {filteredMetricsForSelectedSet.length === 0 && (
