@@ -157,8 +157,8 @@ export function MetricSearchView({
     <div className="h-full flex flex-col bg-slate-50/50">
       {/* Header Section */}
       <div className="border-b bg-white px-6 py-4 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto space-y-4">
-          <div className="flex flex-wrap gap-3 items-center">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 max-w-xs">
               <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400" />
               <Input
@@ -167,6 +167,75 @@ export function MetricSearchView({
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-7 h-7 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-[11px]"
               />
+            </div>
+            <div className="flex flex-wrap items-center gap-2 ml-auto">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="h-7 text-[11px] w-[160px] bg-white">
+                  <SelectValue placeholder="All categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categoryOptions.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
+                <SelectTrigger className="h-7 text-[11px] w-[150px] bg-white">
+                  <SelectValue placeholder="All business owners" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Business Owners</SelectItem>
+                  {businessOwnerOptions.map((owner) => (
+                    <SelectItem key={owner} value={owner}>{owner}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
+                <SelectTrigger className="h-7 text-[11px] w-[130px] bg-white">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="createdAt">Created Date</SelectItem>
+                  <SelectItem value="updatedAt">Updated Date</SelectItem>
+                </SelectContent>
+              </Select>
+              {tags && tags.length > 0 && onSelectTag && (
+                <Select
+                  value={selectedTagId ?? "all"}
+                  onValueChange={(value) => onSelectTag(value === "all" ? null : value)}
+                >
+                  <SelectTrigger className="h-7 text-[11px] w-[140px] bg-white">
+                    <SelectValue placeholder="All tags" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All tags</SelectItem>
+                    {tags.map((tag) => (
+                      <SelectItem key={tag.id} value={tag.id}>
+                        {tag.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-[11px] text-slate-500"
+                onClick={() => {
+                  setCategoryFilter("all")
+                  setBusinessOwnerFilter("all")
+                  setTechOwnerFilter("all")
+                  setHasQueryFilter("all")
+                  setSearch("")
+                  onSelectTag?.(null)
+                }}
+              >
+                Reset Filters
+              </Button>
             </div>
             <div className="flex items-center gap-2 border-l pl-3 ml-2">
                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
@@ -188,77 +257,6 @@ export function MetricSearchView({
                 </Button>
               </div>
             </div>
-          </div>
-
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 pt-1">
-             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="h-7 text-[11px] w-[160px] bg-white">
-                <SelectValue placeholder="All categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categoryOptions.map((opt) => (
-                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
-              <SelectTrigger className="h-7 text-[11px] w-[150px] bg-white">
-                <SelectValue placeholder="All business owners" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Business Owners</SelectItem>
-                {businessOwnerOptions.map((owner) => (
-                  <SelectItem key={owner} value={owner}>{owner}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
-              <SelectTrigger className="h-7 text-[11px] w-[130px] bg-white">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="createdAt">Created Date</SelectItem>
-                <SelectItem value="updatedAt">Updated Date</SelectItem>
-              </SelectContent>
-            </Select>
-            {tags && tags.length > 0 && onSelectTag && (
-              <Select
-                value={selectedTagId ?? "all"}
-                onValueChange={(value) => onSelectTag(value === "all" ? null : value)}
-              >
-                <SelectTrigger className="h-7 text-[11px] w-[140px] bg-white">
-                  <SelectValue placeholder="All tags" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All tags</SelectItem>
-                  {tags.map((tag) => (
-                    <SelectItem key={tag.id} value={tag.id}>
-                      {tag.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-             <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-7 text-[11px] text-slate-500"
-              onClick={() => {
-                setCategoryFilter("all")
-                setBusinessOwnerFilter("all")
-                setTechOwnerFilter("all")
-                setHasQueryFilter("all")
-                setSearch("")
-                onSelectTag?.(null)
-              }}
-            >
-              Reset Filters
-            </Button>
           </div>
         </div>
       </div>

@@ -382,12 +382,6 @@ export function ManagementWorkspaceView({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <Card className="border-none shadow-none bg-transparent">
-        <CardHeader className="px-0 pt-0">
-          <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">Management</CardTitle>
-        </CardHeader>
-      </Card>
-
       <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
         <Card className="border-slate-200 shadow-sm rounded-2xl h-fit">
           <CardHeader className="pb-3 border-b border-slate-50">

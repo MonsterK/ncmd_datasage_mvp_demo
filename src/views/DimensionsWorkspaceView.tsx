@@ -97,8 +97,8 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
     <div className="h-full flex flex-col bg-slate-50/50">
       {/* Header Section */}
       <div className="border-b bg-white px-6 py-4 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto space-y-4">
-          <div className="flex gap-3 items-center">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 max-w-xs">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400" />
               <Input
@@ -107,6 +107,43 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-7 h-7 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-[11px]"
               />
+            </div>
+            <div className="flex flex-wrap items-center gap-2 ml-auto">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="h-7 text-[11px] w-[140px] bg-white">
+                  <SelectValue placeholder="All types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {typeOptions.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sortField} onValueChange={(value: DimensionSortField) => setSortField(value)}>
+                <SelectTrigger className="h-7 text-[11px] w-[130px] bg-white">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="updatedAt">Updated Date</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="usage">Usage Count</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-[11px] text-slate-500"
+                onClick={() => {
+                  setTypeFilter("all")
+                  setSearch("")
+                  setSortField("updatedAt")
+                }}
+              >
+                Reset Filters
+              </Button>
             </div>
             <div className="flex items-center gap-2 border-l pl-3 ml-2">
                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
@@ -128,45 +165,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                 </Button>
               </div>
             </div>
-          </div>
-
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 pt-1">
-             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="h-7 text-[11px] w-[140px] bg-white">
-                <SelectValue placeholder="All types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                {typeOptions.map((opt) => (
-                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={sortField} onValueChange={(value: DimensionSortField) => setSortField(value)}>
-              <SelectTrigger className="h-7 text-[11px] w-[130px] bg-white">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="updatedAt">Updated Date</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="usage">Usage Count</SelectItem>
-              </SelectContent>
-            </Select>
-
-             <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-7 text-[11px] text-slate-500"
-              onClick={() => {
-                setTypeFilter("all")
-                setSearch("")
-                setSortField("updatedAt")
-              }}
-            >
-              Reset Filters
-            </Button>
           </div>
         </div>
       </div>
