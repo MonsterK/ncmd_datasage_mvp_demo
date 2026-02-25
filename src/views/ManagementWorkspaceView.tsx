@@ -711,7 +711,7 @@ export function NewMetricSetSheet({
   const handleAddMetricRef = () => {
     if (!selectedMetricFieldName) return
     if (metricRefs.some(ref => ref.fieldName === selectedMetricFieldName)) {
-      setMessage(`Metric "${selectedMetricFieldName}" is already added to this metric set.`)
+      setMessage(`Metric "${selectedMetricFieldName}" is already added to this Metric View.`)
       return
     }
     setMetricRefs((prev) => [...prev, { fieldName: selectedMetricFieldName, version: "latest" }])
@@ -759,7 +759,7 @@ export function NewMetricSetSheet({
             timestamp: nowIso,
             editor: "Current User",
             action: "update",
-            comment: "Updated metric set configuration",
+            comment: "Updated Metric View configuration",
           }
         ]
       }
@@ -786,7 +786,7 @@ export function NewMetricSetSheet({
             timestamp: nowIso,
             editor: "Current User",
             action: "create",
-            comment: "Created metric set",
+            comment: "Created Metric View",
           }
         ]
       }
@@ -801,7 +801,7 @@ export function NewMetricSetSheet({
         <div className="flex flex-col h-full">
           <SheetHeader className="px-6 py-4 border-b bg-slate-50/50">
             <SheetTitle className="text-lg font-semibold text-slate-900">
-              {isEditMode ? "Edit Metric Set" : "Create Metric Set"}
+              {isEditMode ? "Edit Metric View" : "Create Metric View"}
             </SheetTitle>
             <div className="text-sm text-slate-500">
               Group related metrics together for better organization and discovery.
@@ -833,7 +833,7 @@ export function NewMetricSetSheet({
                       className="text-sm resize-none"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Describe the purpose of this metric set..."
+                      placeholder="Describe the purpose of this Metric View..."
                     />
                   </div>
                 </div>
@@ -988,7 +988,7 @@ export function NewMetricSetSheet({
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit" form="metric-set-form" className="bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100">
-                {isEditMode ? "Save Changes" : "Create Metric Set"}
+                {isEditMode ? "Save Changes" : "Create Metric View"}
               </Button>
             </div>
           </div>
@@ -1181,7 +1181,7 @@ function TagManagementSheet({
               </ul>
             ) : (
               <p className="text-[11px] text-zinc-500">
-                No tags yet. Create tags to group metric sets by region or usage.
+                No tags yet. Create tags to group Metric Views by region or usage.
               </p>
             )}
           </div>
@@ -2024,7 +2024,7 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensio
               </Table>
             ) : (
               <p className="text-[11px] text-zinc-500">
-                No metrics from the registry are currently mapped to this metric set.
+                No metrics from the registry are currently mapped to this Metric View.
               </p>
             )}
           </div>
@@ -2066,7 +2066,7 @@ function MetricSetDetailSheet({ open, onOpenChange, metricSet, metrics, dimensio
               </Table>
             ) : (
               <p className="text-[11px] text-zinc-500">
-                No dimensions mapped to this metric set.
+                No dimensions mapped to this Metric View.
               </p>
             )}
           </div>

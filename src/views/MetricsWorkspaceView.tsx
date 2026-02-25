@@ -388,7 +388,7 @@ export function MetricsWorkspaceView({
                   }}
                   className="text-sm"
                 >
-                  New metric view
+                  New Metric View
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setIsNewDimensionSheetOpen(true)}
@@ -421,9 +421,9 @@ export function MetricsWorkspaceView({
               <ToggleGroupItem
                 value="view"
                 className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
-                aria-label="View metric view"
+                aria-label="View Metric View"
               >
-                Metric view
+                Metric View
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="library"
@@ -445,7 +445,7 @@ export function MetricsWorkspaceView({
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400" />
                   <Input
                     className="h-7 text-[11px] pl-7 border-slate-200 focus:border-blue-300 focus:ring-blue-100 bg-slate-50 focus:bg-white transition-all rounded-lg"
-                    placeholder="Search metric views..."
+                    placeholder="Search Metric Views..."
                     value={metricSetSearch}
                     onChange={(e) => setMetricSetSearch(e.target.value)}
                   />
@@ -511,7 +511,7 @@ export function MetricsWorkspaceView({
               ))}
               {filteredSets.length === 0 && (
                 <div className="col-span-full py-12 text-center text-sm text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                  No metric views found matching your criteria.
+                  No Metric Views found matching your criteria.
                 </div>
               )}
             </div>
@@ -781,7 +781,7 @@ function ButtonBackToMetricSets({ onClick }: ButtonBackToMetricSetsProps) {
       onClick={onClick}
       className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50/30"
     >
-      ← Back to metric view
+      ← Back to Metric View
     </button>
   )
 }
@@ -829,7 +829,7 @@ function CombinedQuerySheet({
         <div className="mt-4 space-y-4 pb-6 text-xs">
           <p className="text-zinc-600">
             You are about to open a combined query for{" "}
-            <span className="font-semibold text-zinc-900">{selectedFieldNames.length}</span> metrics in metric view{" "}
+            <span className="font-semibold text-zinc-900">{selectedFieldNames.length}</span> metrics in Metric View{" "}
             <span className="font-semibold text-zinc-900">{metricSetName}</span>.
           </p>
 
@@ -925,12 +925,12 @@ function AddToMetricSetSheet({
 
   const handleAddSelectionToSet = () => {
     if (!selectedMetricSetId || selectedFieldNames.length === 0) {
-      setMessage("Select a metric view and at least one metric.")
+      setMessage("Select a Metric View and at least one metric.")
       return
     }
     const set = metricSets.find((s) => s.id === selectedMetricSetId)
     if (!set) {
-      setMessage("Selected metric view not found in mock data.")
+      setMessage("Selected Metric View not found in mock data.")
       return
     }
 
@@ -958,7 +958,7 @@ function AddToMetricSetSheet({
       return
     }
     if (metricSets.some((set) => set.name === trimmedName)) {
-      setMessage(`Metric view with name "${trimmedName}" already exists (mock uniqueness validation).`)
+      setMessage(`Metric View with name "${trimmedName}" already exists (mock uniqueness validation).`)
       return
     }
     const now = Date.now()
@@ -993,12 +993,12 @@ function AddToMetricSetSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
-          <SheetTitle className="text-sm font-semibold">Add to metric view</SheetTitle>
+          <SheetTitle className="text-sm font-semibold">Add to Metric View</SheetTitle>
         </SheetHeader>
         <div className="mt-4 space-y-5 pb-6 text-xs">
           <div className="space-y-3 rounded-md border border-zinc-200 bg-zinc-50 p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-semibold text-zinc-800">Add to existing metric view</p>
+              <p className="text-xs font-semibold text-zinc-800">Add to existing Metric View</p>
               <span className="text-[11px] text-zinc-500">
                 {selectedFieldNames.length
                   ? `${selectedFieldNames.length} metrics selected.`
@@ -1007,13 +1007,13 @@ function AddToMetricSetSheet({
             </div>
             <div className="grid gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-zinc-700">Metric view (filtered by tenant)</label>
+                <label className="text-[11px] font-medium text-zinc-700">Metric View (filtered by tenant)</label>
                 <Select
                   value={selectedMetricSetId ?? ""}
                   onValueChange={(value) => setSelectedMetricSetId(value)}
                 >
                   <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="Select metric view" />
+                    <SelectValue placeholder="Select Metric View" />
                   </SelectTrigger>
                   <SelectContent>
                     {metricSetsForTenant.map((set) => (
@@ -1040,7 +1040,7 @@ function AddToMetricSetSheet({
           </div>
 
           <div className="space-y-3 border-t border-zinc-200 pt-4">
-            <p className="text-xs font-semibold text-zinc-800">Create new metric view</p>
+            <p className="text-xs font-semibold text-zinc-800">Create new Metric View</p>
             <form className="space-y-4" onSubmit={handleCreateNewSet}>
               <div className="space-y-2">
                 <label className="text-xs font-medium text-zinc-700">Name</label>
@@ -1058,7 +1058,7 @@ function AddToMetricSetSheet({
                   className="text-xs"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Metric view for SGI / QBR core monetization metrics."
+                  placeholder="Metric View for SGI / QBR core monetization metrics."
                 />
               </div>
               <div className="space-y-2">

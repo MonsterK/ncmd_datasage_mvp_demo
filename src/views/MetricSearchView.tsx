@@ -286,7 +286,7 @@ export function MetricSearchView({
                   onAddToMetricSetFromSelection(selectedMetricFieldNames)
                 }}
               >
-                Add to Metric Set
+                Add to Metric View
               </Button>
             </div>
           )}
