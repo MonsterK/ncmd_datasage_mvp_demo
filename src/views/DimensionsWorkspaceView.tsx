@@ -305,121 +305,155 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+      <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl p-0">
+        <SheetHeader className="px-6 py-4 border-b bg-slate-50/50">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Tag className="h-5 w-5" />
             </div>
-            <div>
-               <SheetTitle className="text-lg font-bold text-slate-900">{dimension.name}</SheetTitle>
-               <p className="font-mono text-xs text-slate-500">{dimension.fieldName}</p>
+            <div className="space-y-1">
+              <SheetTitle className="text-lg font-bold text-slate-900">{dimension.name}</SheetTitle>
+              <p className="font-mono text-xs text-slate-500">{dimension.fieldName}</p>
             </div>
           </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700">
+              {dimension.type}
+            </Badge>
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-600">Tenant: {dimension.tenant}</span>
+            {dimension.category && (
+              <>
+                <span className="text-slate-300">•</span>
+                <span className="text-slate-600">{dimension.category}</span>
+              </>
+            )}
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-600">{dimension.boundMetricFieldNames.length} bound metrics</span>
+          </div>
         </SheetHeader>
-        
-        <div className="mt-6 space-y-8">
-           {/* Basic Info */}
-           <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-slate-500" />
-                Basic Information
-              </h3>
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                 <div className="space-y-1">
-                   <span className="text-slate-500">Tenant</span>
-                   <p className="font-medium text-slate-900">{dimension.tenant}</p>
-                 </div>
-                 <div className="space-y-1">
-                   <span className="text-slate-500">Type</span>
-                   <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-700">
+
+        <div className="px-6 py-6 space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="border-slate-200 shadow-sm rounded-2xl">
+              <CardHeader className="pb-3 border-b border-slate-50">
+                <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-slate-500" />
+                  Overview
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500">
+                  Tenant, type, and description details.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 p-5 text-xs">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <span className="text-slate-500">Tenant</span>
+                    <p className="font-medium text-slate-900">{dimension.tenant}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-slate-500">Type</span>
+                    <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-700">
                       {dimension.type}
-                   </Badge>
-                 </div>
-                 <div className="col-span-2 space-y-1">
-                   <span className="text-slate-500">Description</span>
-                   <p className="text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-                     {dimension.description || "No description provided."}
-                   </p>
-                 </div>
-              </div>
-           </div>
+                    </Badge>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-slate-500">Description</span>
+                  <p className="text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    {dimension.description || "No description provided."}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-           {/* Stats / Heat */}
-           <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Flame className="h-4 w-4 text-orange-500" />
-                Usage & Heat
-              </h3>
-              <div className="flex items-center gap-4">
-                 <div className="flex-1 bg-orange-50 rounded-xl p-4 border border-orange-100 flex flex-col items-center justify-center text-center">
-                    <span className="text-2xl font-bold text-orange-600">High</span>
-                    <span className="text-[10px] font-medium text-orange-700/70 uppercase tracking-wide mt-1">Usage Heat</span>
-                 </div>
-                 <div className="flex-1 bg-blue-50 rounded-xl p-4 border border-blue-100 flex flex-col items-center justify-center text-center">
-                    <span className="text-2xl font-bold text-blue-600">{dimension.boundMetricFieldNames.length}</span>
-                    <span className="text-[10px] font-medium text-blue-700/70 uppercase tracking-wide mt-1">Bound Metrics</span>
-                 </div>
-              </div>
-           </div>
+            <Card className="border-slate-200 shadow-sm rounded-2xl">
+              <CardHeader className="pb-3 border-b border-slate-50">
+                <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Flame className="h-4 w-4 text-orange-500" />
+                  Usage
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500">Adoption and binding overview.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-5">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="rounded-xl border border-orange-100 bg-orange-50 p-4">
+                    <div className="text-xl font-bold text-orange-600">High</div>
+                    <div className="text-[10px] font-medium text-orange-700/70 uppercase tracking-wide mt-1">
+                      Usage Heat
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                    <div className="text-xl font-bold text-blue-600">{dimension.boundMetricFieldNames.length}</div>
+                    <div className="text-[10px] font-medium text-blue-700/70 uppercase tracking-wide mt-1">
+                      Bound Metrics
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-           {/* Lineage / Bound Metrics */}
-           <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Share2 className="h-4 w-4 text-blue-500" />
-                Metric Lineage (Bound Metrics)
-              </h3>
+                Metric Lineage
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500">Metrics using this dimension.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4">
               {dimension.boundMetricFieldNames.length > 0 ? (
                 <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                   <div className="bg-slate-50/50 px-4 py-2 border-b border-slate-100 text-[10px] font-medium text-slate-500 uppercase tracking-wider">
-                     Metrics using this dimension
-                   </div>
-                   <ul className="divide-y divide-slate-100">
-                     {dimension.boundMetricFieldNames.map(fieldName => (
-                       <li key={fieldName} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                          <span className="text-xs font-medium text-slate-700">{fieldName}</span>
-                          <ArrowRight className="h-3 w-3 text-slate-300" />
-                       </li>
-                     ))}
-                   </ul>
+                  <ul className="divide-y divide-slate-100">
+                    {dimension.boundMetricFieldNames.map((fieldName) => (
+                      <li key={fieldName} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors text-xs">
+                        <span className="font-medium text-slate-700">{fieldName}</span>
+                        <ArrowRight className="h-3 w-3 text-slate-300" />
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ) : (
                 <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs text-slate-400">
                   No metrics are currently bound to this dimension.
                 </div>
               )}
-           </div>
+            </CardContent>
+          </Card>
 
-           {/* History */}
-           <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <History className="h-4 w-4 text-purple-500" />
                 Version History
-              </h3>
-              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden p-4">
-                  <div className="space-y-4">
-                    {dimension.history?.map((log, i) => (
-                        <div key={i} className="flex gap-3 text-xs">
-                            <div className="min-w-[30px] pt-1 flex flex-col items-center">
-                                <div className="h-1.5 w-1.5 rounded-full bg-purple-500 ring-2 ring-purple-50"></div>
-                                {i !== (dimension.history?.length ?? 0) - 1 && <div className="w-px h-full bg-slate-100 my-1"></div>}
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="font-bold text-slate-900">{log.version}</span>
-                                    <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleDateString()}</span>
-                                </div>
-                                <div className="text-slate-600">
-                                    <span className="font-medium text-slate-800 mr-1">{log.editor}</span>
-                                    <span>{log.action}d this dimension.</span>
-                                </div>
-                                {log.comment && <p className="text-slate-500 italic mt-0.5">"{log.comment}"</p>}
-                            </div>
-                        </div>
-                    )) ?? <p className="text-slate-400 italic">No history available.</p>}
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500">Change logs for this dimension.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-4">
+                {dimension.history?.map((log, i) => (
+                  <div key={i} className="flex gap-3 text-xs">
+                    <div className="min-w-[30px] pt-1 flex flex-col items-center">
+                      <div className="h-1.5 w-1.5 rounded-full bg-purple-500 ring-2 ring-purple-50"></div>
+                      {i !== (dimension.history?.length ?? 0) - 1 && <div className="w-px h-full bg-slate-100 my-1"></div>}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="font-bold text-slate-900">{log.version}</span>
+                        <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleDateString()}</span>
+                      </div>
+                      <div className="text-slate-600">
+                        <span className="font-medium text-slate-800 mr-1">{log.editor}</span>
+                        <span>{log.action}d this dimension.</span>
+                      </div>
+                      {log.comment && <p className="text-slate-500 italic mt-0.5">"{log.comment}"</p>}
+                    </div>
                   </div>
+                )) ?? <p className="text-slate-400 italic">No history available.</p>}
               </div>
-           </div>
+            </CardContent>
+          </Card>
         </div>
       </SheetContent>
     </Sheet>
