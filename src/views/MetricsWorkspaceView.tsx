@@ -399,7 +399,7 @@ export function MetricsWorkspaceView({
         </div>
 
         {workspaceMode === "metrics" && (
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Metrics</span>
             <div className="h-4 w-px bg-slate-200 mx-1"></div>
             <ToggleGroup
@@ -412,7 +412,7 @@ export function MetricsWorkspaceView({
                 setMetricsViewMode(value as "sets" | "library")
                 setSelectedMetricSetId(null)
               }}
-              className="bg-slate-50 p-1 rounded-full border border-slate-200"
+              className="bg-slate-50 p-0.5 rounded-full border border-slate-200"
               aria-label="Toggle metrics view mode"
             >
               <ToggleGroupItem
@@ -436,12 +436,12 @@ export function MetricsWorkspaceView({
          {workspaceMode === "metrics" && metricsViewMode === "sets" && !selectedMetricSet && (
             <div className="grid gap-6">
             <div className="flex flex-col gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <div className="relative max-w-sm">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <div className="relative max-w-xs">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400" />
                   <Input
-                    className="h-8 text-xs pl-8 border-slate-200 focus:border-blue-300 focus:ring-blue-100 bg-slate-50 focus:bg-white transition-all rounded-lg"
+                    className="h-7 text-[11px] pl-7 border-slate-200 focus:border-blue-300 focus:ring-blue-100 bg-slate-50 focus:bg-white transition-all rounded-lg"
                     placeholder="Search metric sets..."
                     value={metricSetSearch}
                     onChange={(e) => setMetricSetSearch(e.target.value)}
@@ -449,15 +449,12 @@ export function MetricsWorkspaceView({
                 </div>
               </div>
               <div className="mt-2 flex min-w-0 flex-col gap-2 sm:mt-0 sm:w-64">
-                <span className="text-xs font-semibold text-slate-700 flex items-center gap-2">
-                  <ArrowUpDown className="h-3 w-3" /> Sort
-                </span>
                 <div className="flex gap-2">
                   <Select
                     value={metricSetSortField}
                     onValueChange={(value: MetricSortField) => setMetricSetSortField(value)}
                   >
-                    <SelectTrigger className="h-8 text-xs border-slate-200 rounded-lg bg-slate-50">
+                    <SelectTrigger className="h-7 text-[11px] border-slate-200 rounded-lg bg-slate-50">
                       <SelectValue placeholder="Field" />
                     </SelectTrigger>
                     <SelectContent>
@@ -469,7 +466,7 @@ export function MetricsWorkspaceView({
                     value={metricSetSortDirection}
                     onValueChange={(value: MetricSortDirection) => setMetricSetSortDirection(value)}
                   >
-                    <SelectTrigger className="h-8 text-xs border-slate-200 rounded-lg bg-slate-50">
+                    <SelectTrigger className="h-7 text-[11px] border-slate-200 rounded-lg bg-slate-50">
                       <SelectValue placeholder="Order" />
                     </SelectTrigger>
                     <SelectContent>

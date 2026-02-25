@@ -156,29 +156,24 @@ export function MetricSearchView({
   return (
     <div className="h-full flex flex-col bg-slate-50/50">
       {/* Header Section */}
-      <div className="border-b bg-white px-8 py-6 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Metrics Library</h1>
-            <p className="text-slate-500">Search and discover metrics across your organization</p>
-          </div>
-          
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="relative flex-1 max-w-sm">
-              <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+      <div className="border-b bg-white px-6 py-4 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto space-y-4">
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 max-w-xs">
+              <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400" />
               <Input
                 placeholder="Search metrics by name, description, or ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 h-8 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-xs"
+                className="pl-7 h-7 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-[11px]"
               />
             </div>
-            <div className="flex items-center gap-2 border-l pl-4 ml-2">
-               <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-1">
+            <div className="flex items-center gap-2 border-l pl-3 ml-2">
+               <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-8 w-8 p-0 rounded-md ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                  className={`h-7 w-7 p-0 rounded-md ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
                   onClick={() => setViewMode('card')}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -186,7 +181,7 @@ export function MetricSearchView({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-8 w-8 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                  className={`h-7 w-7 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
                   onClick={() => setViewMode('list')}
                 >
                   <List className="h-4 w-4" />
@@ -196,9 +191,9 @@ export function MetricSearchView({
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-3 pt-2">
+          <div className="flex flex-wrap gap-2 pt-1">
              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="h-8 text-xs w-[180px] bg-white">
+              <SelectTrigger className="h-7 text-[11px] w-[160px] bg-white">
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
@@ -210,7 +205,7 @@ export function MetricSearchView({
             </Select>
 
             <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
-              <SelectTrigger className="h-8 text-xs w-[160px] bg-white">
+              <SelectTrigger className="h-7 text-[11px] w-[150px] bg-white">
                 <SelectValue placeholder="All business owners" />
               </SelectTrigger>
               <SelectContent>
@@ -222,7 +217,7 @@ export function MetricSearchView({
             </Select>
             
             <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
-              <SelectTrigger className="h-8 text-xs w-[140px] bg-white">
+              <SelectTrigger className="h-7 text-[11px] w-[130px] bg-white">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -235,7 +230,7 @@ export function MetricSearchView({
                 value={selectedTagId ?? "all"}
                 onValueChange={(value) => onSelectTag(value === "all" ? null : value)}
               >
-                <SelectTrigger className="h-8 text-xs w-[160px] bg-white">
+                <SelectTrigger className="h-7 text-[11px] w-[140px] bg-white">
                   <SelectValue placeholder="All tags" />
                 </SelectTrigger>
                 <SelectContent>
@@ -252,7 +247,7 @@ export function MetricSearchView({
              <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 text-xs text-slate-500"
+              className="h-7 text-[11px] text-slate-500"
               onClick={() => {
                 setCategoryFilter("all")
                 setBusinessOwnerFilter("all")
