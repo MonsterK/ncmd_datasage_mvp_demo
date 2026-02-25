@@ -443,6 +443,7 @@ export function ManagementWorkspaceView({
         tenants={tenants}
         dimensions={dimensions}
         onRegisterMetric={onRegisterMetric}
+        defaultTenantId={activeTenantId}
         initialMetric={metricToEdit}
         mode={metricSheetMode}
         onUpdateMetric={onUpdateMetric}
@@ -523,6 +524,7 @@ interface NewMetricSheetProps {
   mode?: "create" | "edit"
   onUpdateMetric?: (fieldName: string, payload: NewMetricPayload) => void
   enableImportOption?: boolean
+  defaultTenantId?: string | null
 }
 
 export function NewMetricSheet({
@@ -535,6 +537,7 @@ export function NewMetricSheet({
   mode = "create",
   onUpdateMetric,
   enableImportOption = false,
+  defaultTenantId,
 }: NewMetricSheetProps) {
   const isEditMode = mode === "edit" && initialMetric && onUpdateMetric
   const [createMode, setCreateMode] = useState<"manual" | "lark">("manual")
@@ -575,6 +578,7 @@ export function NewMetricSheet({
               key={isEditMode && initialMetric ? initialMetric.id : "new"}
               tenants={tenants}
               dimensions={dimensions}
+              defaultTenantId={defaultTenantId}
               initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
               disableFieldNameEditing={Boolean(isEditMode)}
               showLarkImport={enableImportOption && !isEditMode && createMode === "lark"}

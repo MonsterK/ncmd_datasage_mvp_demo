@@ -223,8 +223,8 @@ function App() {
       dataType: payload.query.dataType,
       unit: payload.query.unit,
       owners: {
-        businessOwner: "TBD",
-        techOwner: "TBD",
+        businessOwner: payload.businessOwner?.trim() || "TBD",
+        techOwner: payload.techOwner?.trim() || "TBD",
       },
       larkSheetLink: payload.larkSheetLink?.trim() || undefined,
       queryDefinitions: [
@@ -540,7 +540,11 @@ function App() {
           categoryPath: payload.categoryPath.length ? payload.categoryPath : ["Monetization"],
           businessDefinition: payload.businessDefinition,
           technicalDefinition: payload.technicalDefinition,
-          tenant: payload.categoryPath[0] ?? m.tenant,
+          tenant: payload.tenantId ?? payload.categoryPath[0] ?? m.tenant,
+          owners: {
+            businessOwner: payload.businessOwner?.trim() || m.owners.businessOwner,
+            techOwner: payload.techOwner?.trim() || m.owners.techOwner,
+          },
           larkSheetLink: payload.larkSheetLink?.trim() || undefined,
           dataType: payload.query.dataType,
           unit: payload.query.unit,

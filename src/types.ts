@@ -152,6 +152,8 @@ export interface NewMetricPayload {
   businessDefinition: string
   fieldName: string
   technicalDefinition: string
+  businessOwner?: string
+  techOwner?: string
   categoryPath: string[]
   larkSheetLink?: string
   query: {

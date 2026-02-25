@@ -715,6 +715,7 @@ export function MetricsWorkspaceView({
         tenants={tenants}
         dimensions={dimensions}
         onRegisterMetric={onRegisterMetric}
+        defaultTenantId={selectedTenantId}
       />
 
       <NewMetricSetSheet

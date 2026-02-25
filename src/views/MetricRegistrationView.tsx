@@ -23,6 +23,7 @@ export interface MetricRegistrationViewProps {
   initialMetric?: Metric
   disableFieldNameEditing?: boolean
   showLarkImport?: boolean
+  defaultTenantId?: string | null
 }
 
 export function MetricRegistrationView({
@@ -32,11 +33,12 @@ export function MetricRegistrationView({
   initialMetric,
   disableFieldNameEditing,
   showLarkImport = false,
+  defaultTenantId,
 }: MetricRegistrationViewProps) {
   const baseQuery = initialMetric?.queryDefinitions?.[0]
 
   const [selectedTenantId, setSelectedTenantId] = useState<string>(
-    initialMetric?.tenant ?? (tenants.length > 0 ? tenants[0].id : "")
+    initialMetric?.tenant ?? defaultTenantId ?? (tenants.length > 0 ? tenants[0].id : "")
   )
 
   const [selectedCategoryName, setSelectedCategoryName] = useState<string>(
@@ -55,24 +57,47 @@ export function MetricRegistrationView({
   }, [currentTenant])
 
   useEffect(() => {
+    if (initialMetric?.tenant) return
+    if (defaultTenantId && !selectedTenantId) {
+      setSelectedTenantId(defaultTenantId)
+    }
+  }, [defaultTenantId, initialMetric?.tenant, selectedTenantId])
+
+  useEffect(() => {
+    if (!currentTenant || !selectedCategoryName) return
+    const exists = currentTenant.categories?.some((c) => c.name === selectedCategoryName)
+    if (!exists) {
+      setSelectedCategoryName("")
+    }
+  }, [currentTenant, selectedCategoryName])
+
+  useEffect(() => {
     if (!selectedCategoryName || !currentTenant) {
       setLinkedDataSource(null)
+      setQuerySource("")
       return
     }
     const cat = currentTenant.categories?.find(c => c.name === selectedCategoryName)
     if (cat && cat.dataSource) {
       setLinkedDataSource(cat.dataSource)
+      const isOriginalCategory = initialMetric?.categoryPath?.[0] === selectedCategoryName
+      if (!initialMetric || !baseQuery?.source || !isOriginalCategory) {
+        setQuerySource(cat.dataSource.link ?? "")
+      }
     } else {
       setLinkedDataSource(null)
+      setQuerySource("")
     }
-  }, [selectedCategoryName, currentTenant])
+  }, [selectedCategoryName, currentTenant, initialMetric, baseQuery?.source])
 
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
+  const [businessOwner, setBusinessOwner] = useState(initialMetric?.owners?.businessOwner ?? "")
   const [fieldName, setFieldName] = useState(initialMetric?.fieldName ?? "")
   const [dataType, setDataType] = useState(initialMetric?.dataType ?? "decimal")
   const [unit, setUnit] = useState(initialMetric?.unit ?? "")
   const [technicalDefinition, setTechnicalDefinition] = useState(initialMetric?.technicalDefinition ?? "")
+  const [techOwner, setTechOwner] = useState(initialMetric?.owners?.techOwner ?? "")
   const [larkSheetLink, setLarkSheetLink] = useState(initialMetric?.larkSheetLink ?? "")
   const [importMessage, setImportMessage] = useState<string | null>(null)
 
@@ -103,6 +128,8 @@ export function MetricRegistrationView({
       businessDefinition,
       fieldName,
       technicalDefinition,
+      businessOwner,
+      techOwner,
       categoryPath: [selectedCategoryName], // Flat category
       tenantId: selectedTenantId,
       larkSheetLink: larkSheetLink.trim() || undefined,
@@ -117,23 +144,6 @@ export function MetricRegistrationView({
         createInDownstream,
       },
     }
-    // We might need to pass the tenant in payload if NewMetricPayload supports it, 
-    // or rely on the parent to handle it. 
-    // But wait, NewMetricPayload doesn't have 'tenant' field in the type definition I saw earlier?
-    // Let's check src/types.ts again. 
-    // Metric has 'tenant', NewMetricPayload has 'categoryPath'.
-    // In App.tsx handleRegisterMetric:
-    // tenant: payload.categoryPath[0] ?? "Strategy Data", // Default tenant
-    // This logic in App.tsx seems to assume categoryPath[0] IS the tenant? 
-    // Or maybe it was just a fallback.
-    // I need to check App.tsx handleRegisterMetric logic.
-    
-    // Actually, I should probably update NewMetricPayload to include tenantId if I can't infer it.
-    // Or, if the backend/App.tsx infers it.
-    
-    // For now, I'll update onRegisterMetric to accept tenantId if possible, or hack it into payload?
-    // Let's look at App.tsx again.
-    
     onRegisterMetric(payload)
     setSubmittedFieldName(fieldName)
   }
@@ -195,106 +205,143 @@ export function MetricRegistrationView({
             </div>
           )}
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
+              <p className="text-xs text-slate-500 mt-1">Choose tenant and category to bind the default source dataset.</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-1">
+                <label className="text-[10px] font-medium text-slate-500">Tenant</label>
+                <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
+                  <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
+                    <SelectValue placeholder="Select tenant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tenants.map(t => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-medium text-slate-500">Category</label>
+                <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
+                  <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCategories.length > 0 ? (
+                      availableCategories.map(c => (
+                        <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {linkedDataSource && (
+              <div className="flex items-center gap-2 text-[10px] text-slate-500 bg-blue-50/50 p-2 rounded border border-blue-100">
+                <Badge variant="outline" className="text-[10px] bg-white text-blue-700 border-blue-200 h-5">
+                  {linkedDataSource.type}
+                </Badge>
+                <span>
+                  Source dataset defaulted to{" "}
+                  <a href={linkedDataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                    {linkedDataSource.link}
+                  </a>
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Business information</p>
+              <p className="text-xs text-slate-500 mt-1">Describe the metric in business terms.</p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Business name</label>
+                <Input
+                  placeholder="SGI Payout"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Business owner</label>
+                <Input
+                  placeholder="Owner name"
+                  value={businessOwner}
+                  onChange={(e) => setBusinessOwner(e.target.value)}
+                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
+                />
+              </div>
+            </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Business name</label>
-              <Input
-                placeholder="SGI Payout"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
+              <label className="text-xs font-semibold text-slate-700">Business definition</label>
+              <Textarea
+                rows={3}
+                placeholder="Describe what this metric means, how it is used and basic calculation rules in business language."
+                value={businessDefinition}
+                onChange={(e) => setBusinessDefinition(e.target.value)}
+                className="text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 min-h-[80px]"
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Business definition</label>
-            <Textarea
-              rows={3}
-              placeholder="Describe what this metric means, how it is used and basic calculation rules in business language."
-              value={businessDefinition}
-              onChange={(e) => setBusinessDefinition(e.target.value)}
-              className="text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 min-h-[80px]"
-            />
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Field Name</label>
-              <Input
-                placeholder="sgi_payout"
-                value={fieldName}
-                onChange={(e) => setFieldName(e.target.value)}
-                disabled={Boolean(disableFieldNameEditing)}
-                className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
-              />
+          <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Technical information</p>
+              <p className="text-xs text-slate-500 mt-1">Define the technical metadata for the metric.</p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Field name</label>
+                <Input
+                  placeholder="sgi_payout"
+                  value={fieldName}
+                  onChange={(e) => setFieldName(e.target.value)}
+                  disabled={Boolean(disableFieldNameEditing)}
+                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Tech owner</label>
+                <Input
+                  placeholder="Owner name"
+                  value={techOwner}
+                  onChange={(e) => setTechOwner(e.target.value)}
+                  className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
+                />
+              </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Technical definition (pseudo SQL)</label>
+              <label className="text-xs font-semibold text-slate-700">Tech definition (SQL)</label>
               <div className="relative">
                 <Textarea
                   rows={5}
                   placeholder="e.g. CASE WHEN l3_product_tag='Auto Ads' THEN dollar_revenue_real ELSE 0 END"
                   value={technicalDefinition}
                   onChange={(e) => setTechnicalDefinition(e.target.value)}
-                  className="text-xs font-mono bg-slate-900 text-slate-50 border-slate-800 focus:border-blue-500 focus:ring-blue-900 min-h-[120px]"
+                  className="text-xs font-mono bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 min-h-[120px]"
                 />
                 <div className="absolute top-2 right-2 flex gap-1">
-                  <Badge variant="outline" className="bg-slate-800 text-slate-400 border-slate-700 text-[10px]">SQL</Badge>
+                  <Badge variant="outline" className="bg-slate-50 text-slate-400 border-slate-200 text-[10px]">SQL</Badge>
                 </div>
               </div>
-              <p className="text-[10px] text-slate-500">
-                Define calculation logic using standard SQL syntax. Support parameters like :start_date, :end_date.
-              </p>
             </div>
           </div>
 
           <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Tenant & Category</label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                   <label className="text-[10px] font-medium text-slate-500">Tenant</label>
-                   <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
-                     <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
-                       <SelectValue placeholder="Select tenant" />
-                     </SelectTrigger>
-                     <SelectContent>
-                       {tenants.map(t => (
-                         <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                       ))}
-                     </SelectContent>
-                   </Select>
-                </div>
-                <div className="space-y-1">
-                   <label className="text-[10px] font-medium text-slate-500">Category</label>
-                   <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
-                     <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
-                       <SelectValue placeholder="Select category" />
-                     </SelectTrigger>
-                     <SelectContent>
-                       {availableCategories.length > 0 ? (
-                         availableCategories.map(c => (
-                           <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
-                         ))
-                       ) : (
-                         <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
-                       )}
-                     </SelectContent>
-                   </Select>
-                </div>
-              </div>
-              
-              {linkedDataSource && (
-                <div className="mt-2 flex items-center gap-2 text-[10px] text-slate-500 bg-blue-50/50 p-2 rounded border border-blue-100">
-                  <Badge variant="outline" className="text-[10px] bg-white text-blue-700 border-blue-200 h-5">
-                    {linkedDataSource.type}
-                  </Badge>
-                  <span>Source: <a href={linkedDataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{linkedDataSource.link}</a></span>
-                </div>
-              )}
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Query binding</p>
+              <p className="text-xs text-slate-500 mt-1">Bind the metric to its query definition.</p>
             </div>
-
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Query type</label>
@@ -346,7 +393,7 @@ export function MetricRegistrationView({
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Data Type</label>
+                <label className="text-xs font-semibold text-slate-700">Data type</label>
                 <Select value={dataType} onValueChange={setDataType}>
                   <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
                     <SelectValue />
@@ -399,29 +446,29 @@ export function MetricRegistrationView({
             </div>
 
             <div className="space-y-1.5 pt-2 border-t border-slate-200/50">
-               <label className="text-xs font-semibold text-slate-700">Auto-create in downstream topics</label>
-               <div className="flex flex-wrap gap-4">
-                 {["downstream topic 1", "downstream topic 2"].map((topic) => (
-                   <div key={topic} className="flex items-center gap-2">
-                     <input
-                       type="checkbox"
-                       id={`topic-${topic}`}
-                       className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                       checked={createInDownstream.includes(topic)}
-                       onChange={(e) => {
-                         if (e.target.checked) {
-                           setCreateInDownstream([...createInDownstream, topic])
-                         } else {
-                           setCreateInDownstream(createInDownstream.filter(t => t !== topic))
-                         }
-                       }}
-                     />
-                     <label htmlFor={`topic-${topic}`} className="text-xs text-slate-700 select-none cursor-pointer capitalize">
-                       {topic}
-                     </label>
-                   </div>
-                 ))}
-               </div>
+              <label className="text-xs font-semibold text-slate-700">Auto-create in downstream topics</label>
+              <div className="flex flex-wrap gap-4">
+                {["downstream topic 1", "downstream topic 2"].map((topic) => (
+                  <div key={topic} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={`topic-${topic}`}
+                      className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                      checked={createInDownstream.includes(topic)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCreateInDownstream([...createInDownstream, topic])
+                        } else {
+                          setCreateInDownstream(createInDownstream.filter(t => t !== topic))
+                        }
+                      }}
+                    />
+                    <label htmlFor={`topic-${topic}`} className="text-xs text-slate-700 select-none cursor-pointer capitalize">
+                      {topic}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
