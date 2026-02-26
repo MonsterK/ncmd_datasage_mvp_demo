@@ -519,31 +519,6 @@ export function MetricRegistrationView({
                   </div>
                 </div>
 
-                <div className="space-y-1.5 pt-2 border-t border-slate-200/50">
-                  <label className="text-xs font-semibold text-slate-700">Auto-create in downstream topics</label>
-                  <div className="flex flex-wrap gap-4">
-                    {["downstream topic 1", "downstream topic 2"].map((topic) => (
-                      <div key={topic} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id={`topic-${topic}`}
-                          className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
-                          checked={createInDownstream.includes(topic)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setCreateInDownstream([...createInDownstream, topic])
-                            } else {
-                              setCreateInDownstream(createInDownstream.filter(t => t !== topic))
-                            }
-                          }}
-                        />
-                        <label htmlFor={`topic-${topic}`} className="text-xs text-slate-700 select-none cursor-pointer capitalize">
-                          {topic}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </>
           )}
