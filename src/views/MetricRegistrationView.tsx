@@ -120,8 +120,8 @@ export function MetricRegistrationView({
     baseQuery?.analysisDimensions ?? []
   )
   
-  const [createInDownstream, setCreateInDownstream] = useState<string[]>(
-    baseQuery?.createInDownstream ?? []
+  const [createInDatasets, setCreateInDatasets] = useState<string[]>(
+    baseQuery?.relatedDatasets ?? []
   )
 
   const [submittedFieldName, setSubmittedFieldName] = useState<string | null>(null)
@@ -211,7 +211,7 @@ export function MetricRegistrationView({
         analysisDimensions: selectedDimensionFieldNames,
         dataType,
         unit,
-        createInDownstream,
+        relatedDatasets: createInDatasets,
       },
     }
     onRegisterMetric(payload)
@@ -279,8 +279,8 @@ export function MetricRegistrationView({
             <>
               <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
-                  <p className="text-xs text-slate-500 mt-1">Choose tenant and category to bind the default source dataset.</p>
+                  <p className="text-sm font-semibold text-slate-900">Tenant & Domain</p>
+                  <p className="text-xs text-slate-500 mt-1">Choose tenant and domain to bind the default source dataset.</p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
@@ -297,10 +297,10 @@ export function MetricRegistrationView({
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-medium text-slate-500">Category</label>
+                    <label className="text-[10px] font-medium text-slate-500">Domain</label>
                     <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
                       <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder="Select Domain" />
                       </SelectTrigger>
                       <SelectContent>
                         {availableCategories.length > 0 ? (
@@ -308,7 +308,7 @@ export function MetricRegistrationView({
                             <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
                           ))
                         ) : (
-                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
+                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No domains for this tenant</div>
                         )}
                       </SelectContent>
                     </Select>
@@ -516,6 +516,35 @@ export function MetricRegistrationView({
                       </div>
                     ))}
                     {dimensions.length === 0 && <p className="text-xs text-slate-400 col-span-2">No dimensions available.</p>}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 pt-2 border-t border-slate-200/50">
+                  <label className="text-xs font-semibold text-slate-700">Create in datasets</label>
+                  <div className="flex flex-wrap gap-4">
+                    {[
+                      { id: "dataset A", label: "Dataset A" },
+                      { id: "dataset B", label: "Dataset B" },
+                    ].map((dataset) => (
+                      <div key={dataset.id} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`dataset-${dataset.id}`}
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                          checked={createInDatasets.includes(dataset.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setCreateInDatasets([...createInDatasets, dataset.id])
+                            } else {
+                              setCreateInDatasets(createInDatasets.filter(d => d !== dataset.id))
+                            }
+                          }}
+                        />
+                        <label htmlFor={`dataset-${dataset.id}`} className="text-xs text-slate-700 select-none cursor-pointer">
+                          {dataset.label}
+                        </label>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

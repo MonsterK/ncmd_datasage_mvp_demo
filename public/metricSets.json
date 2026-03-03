@@ -4,9 +4,9 @@
       "id": "ms1",
       "name": "2026H1 NA SGI",
       "description": "Core SGI payout metrics used for incentive performance tracking in North America.",
-      "scope": "Strategy Data",
+      "scope": "M10N Data",
       "visibility": "team",
-      "tenant": "Strategy Data",
+      "tenant": "M10N Data",
       "metricRefs": [
         { "fieldName": "spp_revenue", "version": "v1.1" },
         { "fieldName": "spp_revenue_penetration", "version": "v1.0" },
@@ -23,9 +23,9 @@
       "id": "ms2",
       "name": "QBR Revenue Pack",
       "description": "Key revenue metrics included in quarterly business reviews.",
-      "scope": "Strategy Data",
+      "scope": "M10N Data",
       "visibility": "team",
-      "tenant": "Strategy Data",
+      "tenant": "M10N Data",
       "metricRefs": [
         { "fieldName": "qbr_revenue", "version": "v1.0" }
       ],
@@ -37,9 +37,9 @@
       "id": "ms3",
       "name": "Creator Monetization Health",
       "description": "Creator-side supply and monetization activity metrics.",
-      "scope": "Creative",
+      "scope": "M10N Data",
       "visibility": "team",
-      "tenant": "Creative",
+      "tenant": "M10N Data",
       "metricRefs": [
         { "fieldName": "active_monetized_creators", "version": "v0.1" },
         { "fieldName": "creator_rev_per_creator", "version": "v1.0" }
@@ -52,9 +52,9 @@
       "id": "ms4",
       "name": "SGI vs QBR Revenue Overview",
       "description": "Cross-tenant comparison between SGI payout and QBR revenue.",
-      "scope": "SGI/QBR",
+      "scope": "M10N Data",
       "visibility": "team",
-      "tenant": "Strategy Data",
+      "tenant": "M10N Data",
       "metricRefs": [
         { "fieldName": "spp_revenue", "version": "v1.1" },
         { "fieldName": "qbr_revenue", "version": "v1.0" }
@@ -67,9 +67,9 @@
       "id": "ms5",
       "name": "Creator Monetization Deep Dive",
       "description": "Creator volume and monetization efficiency metrics.",
-      "scope": "Creative",
+      "scope": "M10N Data",
       "visibility": "team",
-      "tenant": "Creative",
+      "tenant": "M10N Data",
       "metricRefs": [
         { "fieldName": "active_monetized_creators", "version": "v0.1" },
         { "fieldName": "creator_rev_per_creator", "version": "v1.0" }

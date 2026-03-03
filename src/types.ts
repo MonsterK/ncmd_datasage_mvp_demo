@@ -7,6 +7,7 @@ export interface MetricQueryDefinition {
   businessDate: string
   analysisDimensions: string[]
   createInDownstream?: string[]
+  relatedDatasets?: string[]
 }
 
 export interface TrendPoint {
@@ -169,6 +170,7 @@ export interface NewMetricPayload {
     dataType?: string
     unit?: string
     createInDownstream?: string[]
+    relatedDatasets?: string[]
   }
   tenantId?: string
 }

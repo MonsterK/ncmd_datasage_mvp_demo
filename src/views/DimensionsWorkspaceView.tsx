@@ -235,7 +235,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                   </CardContent>
 
                   <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
-                    <span className="truncate max-w-[150px]">{dim.category ?? "Uncategorized"}</span>
+                    <span className="truncate max-w-[150px]">{dim.category ?? "No domain"}</span>
                     <span>{dim.updatedAt ? new Date(dim.updatedAt).toLocaleDateString() : "-"}</span>
                   </CardFooter>
                 </Card>
@@ -250,7 +250,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                     <TableHead>Field Name</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Tenant</TableHead>
-                    <TableHead>Category</TableHead>
+                    <TableHead>Domain</TableHead>
                     <TableHead>Usage</TableHead>
                     <TableHead className="text-right">Updated</TableHead>
                   </TableRow>
@@ -325,7 +325,7 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             {dimension.category && (
               <>
                 <span className="text-slate-300">•</span>
-                <span className="text-slate-600">{dimension.category}</span>
+                <span className="text-slate-600">Domain: {dimension.category}</span>
               </>
             )}
             <span className="text-slate-300">•</span>

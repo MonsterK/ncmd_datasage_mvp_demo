@@ -4,11 +4,11 @@
       "id": "m1",
       "businessName": "S++ Revenue",
       "fieldName": "spp_revenue",
-      "categoryPath": ["SGI"],
+      "categoryPath": ["delivery"],
       "businessDefinition": "Total S++ revenue for qualifying agencies within the selected period.",
       "technicalDefinition": "SELECT biz_date, SUM(payout_amount) AS spp_revenue FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
       "status": "Active",
-      "tenant": "Strategy Data",
+      "tenant": "M10N Data",
       "owners": {
         "businessOwner": "Monetization Strategy",
         "techOwner": "Ads Data Engineering"
@@ -25,7 +25,8 @@
           "aggregate": "SUM",
           "businessDate": "biz_date",
           "filters": ["market = 'US'", "product_line = 'Ads'"],
-          "analysisDimensions": ["agency", "region", "platform"]
+          "analysisDimensions": ["agency", "region", "platform"],
+          "relatedDatasets": ["dataset A", "dataset B"]
         }
       ],
       "trend30d": [
@@ -67,11 +68,11 @@
       "id": "m2",
       "businessName": "QBR Revenue",
       "fieldName": "qbr_revenue",
-      "categoryPath": ["QBR"],
+      "categoryPath": ["integrity"],
       "businessDefinition": "Net revenue recognized for quarterly business review scope.",
       "technicalDefinition": "SELECT biz_date, SUM(net_revenue) AS qbr_revenue FROM fact_qbr_revenue WHERE is_qbr = 1 GROUP BY biz_date",
       "status": "Active",
-      "tenant": "Strategy Data",
+      "tenant": "M10N Data",
       "owners": {
         "businessOwner": "Global Monetization PMO",
         "techOwner": "Ads Data Engineering"
@@ -123,11 +124,11 @@
       "id": "m3",
       "businessName": "Active Monetized Creators",
       "fieldName": "active_monetized_creators",
-      "categoryPath": ["Creators"],
+      "categoryPath": ["creative"],
       "businessDefinition": "Number of creators with at least one monetization event in the selected period.",
       "technicalDefinition": "SELECT biz_date, COUNT(DISTINCT creator_id) AS active_monetized_creators FROM fact_creator_monetization WHERE biz_date BETWEEN :start_date AND :end_date",
       "status": "Draft",
-      "tenant": "Creative",
+      "tenant": "M10N Data",
       "owners": {
         "businessOwner": "Creator Monetization PM",
         "techOwner": "Creator Data Engineering"
@@ -179,11 +180,11 @@
       "id": "m4",
       "businessName": "S++ Revenue Penetration",
       "fieldName": "spp_revenue_penetration",
-      "categoryPath": ["SGI"],
+      "categoryPath": ["performance"],
       "businessDefinition": "S++ Revenue as a percentage of Total Revenue (or similar penetration logic).",
       "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / SUM(total_revenue) AS spp_revenue_penetration FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
       "status": "Draft",
-      "tenant": "Strategy Data",
+      "tenant": "M10N Data",
       "owners": {
         "businessOwner": "Monetization Strategy",
         "techOwner": "Ads Data Engineering"
@@ -235,11 +236,11 @@
       "id": "m5",
       "businessName": "Creator Revenue per Active Creator",
       "fieldName": "creator_rev_per_creator",
-      "categoryPath": ["Creators"],
+      "categoryPath": ["creative"],
       "businessDefinition": "Average monetization revenue per active monetized creator.",
       "technicalDefinition": "SELECT biz_date, SUM(revenue) / COUNT(DISTINCT creator_id) AS creator_rev_per_creator FROM fact_creator_monetization WHERE biz_date BETWEEN :start_date AND :end_date",
       "status": "Active",
-      "tenant": "Creative",
+      "tenant": "M10N Data",
       "owners": {
         "businessOwner": "Creator Monetization PM",
         "techOwner": "Creator Data Engineering"
@@ -291,11 +292,11 @@
       "id": "m6",
       "businessName": "NA S++ Revenue Penetration",
       "fieldName": "na_spp_revenue_penetration",
-      "categoryPath": ["SGI"],
+      "categoryPath": ["performance"],
       "businessDefinition": "S++ Revenue Penetration for North America region.",
       "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / SUM(total_revenue) AS na_spp_revenue_penetration FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date AND region = 'NA' GROUP BY biz_date",
       "status": "Active",
-      "tenant": "Strategy Data",
+      "tenant": "M10N Data",
       "owners": {
         "businessOwner": "Monetization Strategy (NA)",
         "techOwner": "Ads Data Engineering"
@@ -347,11 +348,11 @@
       "id": "m7",
       "businessName": "Auto Ads Revenue",
       "fieldName": "auto_ads_revenue",
-      "categoryPath": ["Ads"],
+      "categoryPath": ["delivery"],
       "businessDefinition": "Revenue from Auto Ads.",
       "technicalDefinition": "CASE WHEN l3_product_tag='Auto Ads' THEN dollar_revenue_real ELSE 0 END",
       "status": "Active",
-      "tenant": "Strategy Data",
+      "tenant": "M10N Data",
       "owners": {
         "businessOwner": "sarah.guo",
         "techOwner": "xxx"

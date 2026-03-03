@@ -1,32 +1,24 @@
 {
   "categories": [
     {
-      "id": "c1",
-      "name": "Monetization",
-      "children": [
-        {
-          "id": "c1-1",
-          "name": "Revenue",
-          "children": [
-            {
-              "id": "c1-1-2",
-              "name": "QBR",
-              "metricFieldNames": ["qbr_revenue"]
-            }
-          ]
-        },
-        {
-          "id": "c1-2",
-          "name": "Supply",
-          "children": [
-            {
-              "id": "c1-2-1",
-              "name": "Creators",
-              "metricFieldNames": ["active_monetized_creators"]
-            }
-          ]
-        }
-      ]
+      "id": "domain-delivery",
+      "name": "delivery",
+      "metricFieldNames": ["spp_revenue", "auto_ads_revenue"]
+    },
+    {
+      "id": "domain-performance",
+      "name": "performance",
+      "metricFieldNames": ["spp_revenue_penetration", "na_spp_revenue_penetration"]
+    },
+    {
+      "id": "domain-creative",
+      "name": "creative",
+      "metricFieldNames": ["active_monetized_creators", "creator_rev_per_creator"]
+    },
+    {
+      "id": "domain-integrity",
+      "name": "integrity",
+      "metricFieldNames": ["qbr_revenue"]
     }
   ]
 }

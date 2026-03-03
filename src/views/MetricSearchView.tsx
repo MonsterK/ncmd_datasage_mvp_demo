@@ -171,10 +171,10 @@ export function MetricSearchView({
             <div className="flex flex-wrap items-center gap-2 ml-auto">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="h-7 text-[11px] w-[160px] bg-white">
-                  <SelectValue placeholder="All categories" />
+                  <SelectValue placeholder="All domains" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="all">All Domains</SelectItem>
                   {categoryOptions.map((opt) => (
                     <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                   ))}
@@ -413,7 +413,7 @@ export function MetricSearchView({
                     {hasBulkSelection && <TableHead className="w-12"></TableHead>}
                     <TableHead>Metric Name</TableHead>
                     <TableHead>Field Name</TableHead>
-                    <TableHead>Category</TableHead>
+                    <TableHead>Domain</TableHead>
                     <TableHead>Owner</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Updated</TableHead>

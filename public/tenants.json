@@ -1,71 +1,40 @@
 {
   "tenants": [
     {
-      "id": "Strategy Data",
-      "name": "Strategy Data",
-      "description": "Strategy Data Tenant",
+      "id": "M10N Data",
+      "name": "M10N Data",
+      "description": "M10N Data Tenant",
       "permitted": true,
       "categories": [
         {
-          "name": "Delivery",
+          "name": "delivery",
           "dataSource": {
             "type": "Hive",
             "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
           }
         },
         {
-          "name": "Supply",
+          "name": "performance",
           "dataSource": {
             "type": "MySQL",
             "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
           }
         },
         {
-          "name": "QBR",
-          "dataSource": {
-            "type": "Fabric model",
-            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
-          }
-        },
-        {
-          "name": "Ads",
-          "dataSource": {
-            "type": "Fabric model",
-            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
-          }
-        }
-      ]
-    },
-    {
-      "id": "Creative",
-      "name": "Creative",
-      "description": "Creative Tenant",
-      "permitted": true,
-      "categories": [
-        {
-          "name": "Growth",
+          "name": "creative",
           "dataSource": {
             "type": "ClickHouse",
             "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
           }
         },
         {
-          "name": "Creators",
+          "name": "integrity",
           "dataSource": {
-            "type": "ClickHouse",
+            "type": "Fabric model",
             "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
           }
         }
       ]
-    },
-    {
-      "id": "t5",
-      "name": "Business Integrity",
-      "type": "team",
-      "description": "Metrics related to business integrity and safety.",
-      "admins": [],
-      "categories": [],
-      "createdAt": "2026-02-09T00:00:00Z"
     }
   ]
 }

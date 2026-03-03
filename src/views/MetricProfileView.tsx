@@ -49,7 +49,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
                 {metric.fieldName}
               </span>
               <span className="text-slate-300">•</span>
-              <span className="text-slate-600">{metric.categoryPath.join(" › ")}</span>
+              <span className="text-slate-600">Domain: {metric.categoryPath.join(" › ")}</span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-600">Tenant: {metric.tenant}</span>
               <span className="text-slate-300">•</span>
@@ -165,11 +165,16 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
             <div className="space-y-3">
               <p className="font-semibold text-slate-800">Online queries</p>
               <div className="space-y-3">
-                {metric.queryDefinitions.map((q) => (
-                  <div
-                    key={q.id}
-                    className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px] transition-all hover:border-blue-200 hover:bg-white hover:shadow-sm"
-                  >
+                {metric.queryDefinitions.map((q) => {
+                  const relatedDatasets = Array.from(
+                    new Set([q.source, ...(q.relatedDatasets ?? []), ...(q.createInDownstream ?? [])]),
+                  )
+
+                  return (
+                    <div
+                      key={q.id}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px] transition-all hover:border-blue-200 hover:bg-white hover:shadow-sm"
+                    >
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
                         {q.type}
@@ -187,18 +192,25 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
                     <div className="flex flex-col gap-1 mt-3 pt-3 border-t border-slate-200/50">
                       <span className="text-[10px] text-slate-400 uppercase tracking-wider">Related Datasets</span>
                       <div className="flex flex-wrap gap-3">
-                        <a href={`https://aeolus-sg.tiktok-row.net/dataset/${q.source}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-[10px] flex items-center gap-1 font-medium">
-                          Source: {q.source}
-                        </a>
-                        {q.createInDownstream?.map((topic) => (
-                          <a key={topic} href={`https://aeolus-sg.tiktok-row.net/dataset/${topic.replace(/\s+/g, "_")}`} target="_blank" rel="noreferrer" className="text-purple-600 hover:underline text-[10px] flex items-center gap-1 font-medium">
-                            Downstream: {topic}
-                          </a>
-                        ))}
+                        {relatedDatasets.map((dataset) => {
+                          const isSource = dataset === q.source
+                          return (
+                            <a
+                              key={dataset}
+                              href={`https://aeolus-sg.tiktok-row.net/dataset/${dataset.replace(/\s+/g, "_")}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={isSource ? "text-blue-600 hover:underline text-[10px] flex items-center gap-1 font-medium" : "text-purple-600 hover:underline text-[10px] flex items-center gap-1 font-medium"}
+                            >
+                              {isSource ? "Source" : "Related"}: {dataset}
+                            </a>
+                          )
+                        })}
                       </div>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
             <div className="space-y-1.5 pt-2 border-t border-slate-100">

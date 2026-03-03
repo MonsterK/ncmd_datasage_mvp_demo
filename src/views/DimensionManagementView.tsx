@@ -132,7 +132,7 @@ export function DimensionManagementView({ metrics, dimensions }: DimensionManage
                     <span>Scope: {selected.scope.join(", ")}</span>
                   </div>
                   {selected.category && (
-                    <div className="text-[11px] text-zinc-500">Category: {selected.category}</div>
+                    <div className="text-[11px] text-zinc-500">Domain: {selected.category}</div>
                   )}
                   {selected.sourceLink && (
                     <div className="text-[11px] text-zinc-500">

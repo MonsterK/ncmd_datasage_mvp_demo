@@ -299,7 +299,7 @@ export function ManagementWorkspaceView({
               activeTenant.categories && activeTenant.categories.length > 0 ? (
                 <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
                   <div className="grid grid-cols-[minmax(0,1fr)_140px_minmax(0,1.2fr)] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-400 bg-slate-50">
-                    <span>Category</span>
+                    <span>Domain</span>
                     <span>Source Type</span>
                     <span>Datasource Link</span>
                   </div>
@@ -329,7 +329,7 @@ export function ManagementWorkspaceView({
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400 italic">No categories defined yet.</p>
+                <p className="text-xs text-slate-400 italic">No domains defined yet.</p>
               )
             ) : (
               <p className="text-xs text-slate-500">No active tenant selected.</p>
@@ -358,8 +358,8 @@ export function ManagementWorkspaceView({
       case "datasource":
         return {
           title: "Datasource management",
-          description: "Manage categories and data sources for the current tenant.",
-          addLabel: "Manage Categories & Datasources",
+          description: "Manage domains and data sources for the current tenant.",
+          addLabel: "Manage Domains & Datasources",
         }
       default:
         return {
@@ -1275,7 +1275,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
     const validCategories = categories.filter(c => c.name.trim() && c.sourceType.trim() && c.sourceLink.trim())
     
     if (validCategories.length === 0) {
-      setMessage("At least one valid category (with Name, Type and Link) is required.")
+      setMessage("At least one valid domain (with Name, Type and Link) is required.")
       return
     }
     
@@ -1316,7 +1316,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
                 className="h-8 text-xs"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Strategy Data"
+                placeholder="M10N Data"
               />
             </div>
             <div className="space-y-2">
@@ -1332,9 +1332,9 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
 
             <div className="space-y-3 pt-2 border-t border-slate-100">
                <div className="flex items-center justify-between">
-                 <label className="text-xs font-medium text-zinc-700">Categories</label>
+                 <label className="text-xs font-medium text-zinc-700">Domains</label>
                  <Button type="button" size="sm" variant="ghost" className="h-6 text-xs text-blue-600" onClick={handleAddCategory}>
-                   + Add Category
+                   + Add Domain
                  </Button>
                </div>
                
@@ -1352,12 +1352,12 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
                      )}
                      
                      <div className="space-y-1">
-                       <label className="text-[10px] font-medium text-zinc-500">Category Name</label>
+                      <label className="text-[10px] font-medium text-zinc-500">Domain Name</label>
                        <Input
                          className="h-7 text-xs bg-white"
                          value={cat.name}
                          onChange={(e) => handleCategoryChange(index, "name", e.target.value)}
-                         placeholder="e.g. Core Metrics"
+                        placeholder="e.g. performance"
                        />
                      </div>
                      <div className="grid grid-cols-2 gap-2">
@@ -1571,7 +1571,7 @@ export function NewDimensionSheet({
     const trimmedFieldName = fieldName.trim()
     const trimmedBusinessName = businessName.trim()
     if (!trimmedBusinessName || (!isEditMode && !trimmedFieldName) || !selectedTenantId || !selectedCategoryName) {
-      setMessage("Field name, business name, tenant, and category are required.")
+      setMessage("Field name, business name, tenant, and domain are required.")
       return
     }
 
@@ -1623,8 +1623,8 @@ export function NewDimensionSheet({
             <form id="dimension-form" className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
-                  <p className="text-xs text-slate-500 mt-1">Choose tenant and category for this dimension.</p>
+                  <p className="text-sm font-semibold text-slate-900">Tenant & Domain</p>
+                  <p className="text-xs text-slate-500 mt-1">Choose tenant and domain for this dimension.</p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
@@ -1641,10 +1641,10 @@ export function NewDimensionSheet({
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-medium text-slate-500">Category</label>
+                    <label className="text-[10px] font-medium text-slate-500">Domain</label>
                     <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
                       <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder="Select Domain" />
                       </SelectTrigger>
                       <SelectContent>
                         {availableCategories.length > 0 ? (
@@ -1652,7 +1652,7 @@ export function NewDimensionSheet({
                             <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
                           ))
                         ) : (
-                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
+                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No domains for this tenant</div>
                         )}
                       </SelectContent>
                     </Select>
@@ -2154,7 +2154,7 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
 
   const handleSave = () => {
     if (!name.trim()) {
-      setError("Category name is required")
+      setError("Domain name is required")
       return
     }
 
@@ -2172,7 +2172,7 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
     } else {
       // Check for duplicate names
       if (categories.some(c => c.name === newCategory.name)) {
-        setError("Category name already exists")
+        setError("Domain name already exists")
         return
       }
       newCategories.push(newCategory)
@@ -2187,12 +2187,12 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
-          <SheetTitle className="text-sm font-semibold">Manage Categories for {tenant.name}</SheetTitle>
+          <SheetTitle className="text-sm font-semibold">Manage Domains for {tenant.name}</SheetTitle>
         </SheetHeader>
         <div className="mt-6 space-y-6">
            {/* List of existing categories */}
            <div className="space-y-3">
-             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Existing Categories</h3>
+             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Existing Domains</h3>
              {categories.length > 0 ? (
                <div className="rounded-lg border border-slate-200 divide-y divide-slate-100">
                  {categories.map((cat, idx) => (
@@ -2213,7 +2213,7 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
                  ))}
                </div>
              ) : (
-               <p className="text-xs text-slate-400 italic">No categories defined for this tenant.</p>
+               <p className="text-xs text-slate-400 italic">No domains defined for this tenant.</p>
              )}
            </div>
 
@@ -2221,11 +2221,11 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
 
            {/* Add/Edit Form */}
            <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
-             <h3 className="text-xs font-semibold text-slate-900">{isEditing ? "Edit Category" : "Add New Category"}</h3>
+             <h3 className="text-xs font-semibold text-slate-900">{isEditing ? "Edit Domain" : "Add New Domain"}</h3>
              <div className="space-y-3">
                <div className="space-y-1">
                  <label className="text-xs font-medium text-slate-700">Name</label>
-                 <Input className="h-8 text-xs" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Delivery" />
+                 <Input className="h-8 text-xs" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. delivery" />
                </div>
                <div className="grid grid-cols-2 gap-3">
                  <div className="space-y-1">
