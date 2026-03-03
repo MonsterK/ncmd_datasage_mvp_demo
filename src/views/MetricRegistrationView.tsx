@@ -279,8 +279,8 @@ export function MetricRegistrationView({
             <>
               <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Tenant & Domain</p>
-                  <p className="text-xs text-slate-500 mt-1">Choose tenant and domain to bind the default source dataset.</p>
+                  <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
+                  <p className="text-xs text-slate-500 mt-1">Choose tenant and category to bind the default source dataset.</p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
@@ -297,10 +297,10 @@ export function MetricRegistrationView({
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-medium text-slate-500">Domain</label>
+                    <label className="text-[10px] font-medium text-slate-500">Category</label>
                     <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
                       <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
-                        <SelectValue placeholder="Select Domain" />
+                        <SelectValue placeholder="Select Category" />
                       </SelectTrigger>
                       <SelectContent>
                         {availableCategories.length > 0 ? (
@@ -308,7 +308,7 @@ export function MetricRegistrationView({
                             <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
                           ))
                         ) : (
-                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No domains for this tenant</div>
+                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
                         )}
                       </SelectContent>
                     </Select>

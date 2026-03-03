@@ -49,7 +49,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
                 {metric.fieldName}
               </span>
               <span className="text-slate-300">•</span>
-              <span className="text-slate-600">Domain: {metric.categoryPath.join(" › ")}</span>
+              <span className="text-slate-600">Category: {metric.categoryPath.join(" › ")}</span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-600">Tenant: {metric.tenant}</span>
               <span className="text-slate-300">•</span>

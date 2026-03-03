@@ -1,22 +1,22 @@
 {
   "categories": [
     {
-      "id": "domain-delivery",
+      "id": "category-delivery",
       "name": "delivery",
       "metricFieldNames": ["spp_revenue", "auto_ads_revenue"]
     },
     {
-      "id": "domain-performance",
+      "id": "category-performance",
       "name": "performance",
       "metricFieldNames": ["spp_revenue_penetration", "na_spp_revenue_penetration"]
     },
     {
-      "id": "domain-creative",
+      "id": "category-creative",
       "name": "creative",
       "metricFieldNames": ["active_monetized_creators", "creator_rev_per_creator"]
     },
     {
-      "id": "domain-integrity",
+      "id": "category-integrity",
       "name": "integrity",
       "metricFieldNames": ["qbr_revenue"]
     }

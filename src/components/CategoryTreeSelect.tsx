@@ -23,7 +23,7 @@ export function CategoryTreeSelect({
   categories,
   value,
   onChange,
-  placeholder = "Select Domain...",
+  placeholder = "Select Category...",
   className,
   disabled,
 }: CategoryTreeSelectProps) {

@@ -558,10 +558,10 @@ export function MetricsWorkspaceView({
                     />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/4">
-                    <span className="text-[11px] font-semibold text-slate-700">Domain</span>
+                    <span className="text-[11px] font-semibold text-slate-700">Category</span>
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                       <SelectTrigger className="h-8 text-xs border-slate-200 rounded-lg bg-white">
-                        <SelectValue placeholder="All domains" />
+                        <SelectValue placeholder="All categories" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All</SelectItem>
