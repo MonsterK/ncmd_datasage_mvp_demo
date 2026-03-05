@@ -24,6 +24,15 @@
         { "code": "AGENCY_C", "label": "Agency C" }
       ],
       "boundMetricFieldNames": ["spp_revenue", "spp_revenue_penetration", "na_spp_revenue_penetration"],
+      "deployHistory": [
+        {
+          "targetType": "Aeolus Dataset",
+          "target": "dim_agency_v1",
+          "status": "success",
+          "deployedAt": "2025-01-01T10:00:00Z",
+          "fieldCount": 3
+        }
+      ],
       "history": [
         {
           "version": "v1",
@@ -58,6 +67,15 @@
         { "code": "APAC", "label": "Asia Pacific" }
       ],
       "boundMetricFieldNames": ["spp_revenue", "qbr_revenue", "active_monetized_creators", "spp_revenue_penetration", "creator_rev_per_creator"],
+      "deployHistory": [
+        {
+          "targetType": "Aeolus Dataset",
+          "target": "dim_region_v2",
+          "status": "success",
+          "deployedAt": "2025-06-01T12:00:00Z",
+          "fieldCount": 3
+        }
+      ],
       "history": [
         {
           "version": "v1",
@@ -99,6 +117,15 @@
         { "code": "OTHER", "label": "Other" }
       ],
       "boundMetricFieldNames": ["active_monetized_creators", "creator_rev_per_creator"],
+      "deployHistory": [
+        {
+          "targetType": "Aeolus Dataset",
+          "target": "dim_platform_v1",
+          "status": "failed",
+          "deployedAt": "2025-01-01T10:05:00Z",
+          "fieldCount": 2
+        }
+      ],
       "history": [
         {
           "version": "v1",
@@ -133,6 +160,15 @@
         { "code": "BRAND", "label": "Brand" }
       ],
       "boundMetricFieldNames": ["qbr_revenue", "creator_rev_per_creator"],
+      "deployHistory": [
+        {
+          "targetType": "Aeolus Dataset",
+          "target": "dim_vertical_v1",
+          "status": "success",
+          "deployedAt": "2025-01-01T10:10:00Z",
+          "fieldCount": 3
+        }
+      ],
       "history": [
         {
           "version": "v1",

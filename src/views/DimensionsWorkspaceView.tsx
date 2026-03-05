@@ -315,6 +315,11 @@ interface DimensionDetailSheetProps {
 }
 
 function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetailSheetProps) {
+  const latestDeploy = useMemo(() => {
+    if (!dimension?.deployHistory || dimension.deployHistory.length === 0) return null
+    return dimension.deployHistory[dimension.deployHistory.length - 1]
+  }, [dimension])
+
   if (!dimension) return null
 
   return (
@@ -411,7 +416,27 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             <CardContent className="p-5 text-xs">
                <div className="space-y-1.5">
                   <p className="font-semibold text-slate-800">Deploy status</p>
-                  <p className="text-xs text-slate-500">No deploy history yet.</p>
+                  {latestDeploy ? (
+                    <div className="text-xs text-slate-600 space-y-2">
+                      <div>
+                        {latestDeploy.targetType} · {latestDeploy.target}
+                      </div>
+                      <div className="text-[11px] text-slate-500">
+                        {latestDeploy.status} · {new Date(latestDeploy.deployedAt).toLocaleString()}
+                      </div>
+                      {dimension.deployHistory && dimension.deployHistory.length > 1 && (
+                        <div className="space-y-1 text-[11px] text-slate-500">
+                          {dimension.deployHistory.slice(-3).reverse().map((item, index) => (
+                            <div key={`${item.target}-${item.deployedAt}-${index}`}>
+                              {item.targetType} · {item.target} · {item.status}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500">No deploy history yet.</p>
+                  )}
                 </div>
             </CardContent>
           </Card>

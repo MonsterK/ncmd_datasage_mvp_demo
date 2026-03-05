@@ -165,27 +165,26 @@ export function MetricProfileView({
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 text-xs">
-            <div className="space-y-3">
+            <div className="space-y-4">
               {metric.queryDefinitions.map((q) => (
-                 <div key={q.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px]">
-                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
-                        {q.type}
-                      </Badge>
-                      <span className="font-mono text-[11px] text-slate-500">
-                        {q.fields && q.fields.length > 0
-                          ? `${q.fields.join(", ")} from ${q.source}`
-                          : q.source}
-                      </span>
-                    </div>
-                    {q.expression && (
-                      <div className="mb-3">
-                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Expression</span>
-                        <code className="block text-slate-700 bg-slate-100 px-2 py-1.5 rounded border border-slate-200 font-mono text-[10px] whitespace-pre-wrap">
-                          {q.expression}
-                        </code>
+                 <div key={q.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 last:pb-0 border-b last:border-0 border-slate-100">
+                    <div className="space-y-1">
+                      <span className="text-slate-500">Source Table</span>
+                      <div className="flex items-center gap-2">
+                        <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200 truncate">
+                          {q.source}
+                        </p>
+                        <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
+                          {q.type}
+                        </Badge>
                       </div>
-                    )}
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-slate-500">Source Field</span>
+                      <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200 break-all">
+                        {q.fields && q.fields.length > 0 ? q.fields.join(", ") : (q.expression || "Not configured")}
+                      </p>
+                    </div>
                  </div>
               ))}
             </div>

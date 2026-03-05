@@ -87,6 +87,7 @@ export interface Dimension {
   createdAt?: string
   updatedAt?: string
   history?: ChangeLog[]
+  deployHistory?: DeployHistory[]
 }
 
 export type TopNav = "home" | "metrics" | "dimensions" | "workspace" | "management"
