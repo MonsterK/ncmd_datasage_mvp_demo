@@ -684,36 +684,6 @@ export function MetricRegistrationView({
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">Query binding</p>
-                  <p className="text-xs text-slate-500 mt-1">Bind the metric to its query definition.</p>
-                </div>
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Query type</label>
-                    <Select value={queryType} disabled>
-                      <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Aeolus Visual Query">Aeolus Visual Query</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Source dataset</label>
-                    <Input
-                      placeholder="fabric_sgi_payout_daily"
-                      value={querySource}
-                      onChange={(e) => setQuerySource(e.target.value)}
-                      className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
-                    />
-                  </div>
-                </div>
-
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold text-slate-700">Expression (SQL)</label>
@@ -741,90 +711,6 @@ export function MetricRegistrationView({
                     </div>
                   </div>
                 </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Data type</label>
-                    <Select value={dataType} onValueChange={setDataType}>
-                      <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="decimal">Decimal</SelectItem>
-                        <SelectItem value="percentage">Percentage</SelectItem>
-                        <SelectItem value="integer">Integer</SelectItem>
-                        <SelectItem value="currency">Currency</SelectItem>
-                        <SelectItem value="string">String</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Unit</label>
-                    <Input
-                      placeholder="USD, %, etc."
-                      value={unit}
-                      onChange={(e) => setUnit(e.target.value)}
-                      className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-700">Analysis dimensions</label>
-                  <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 max-h-[150px] overflow-y-auto">
-                    {dimensions.map((dim) => (
-                      <div key={dim.id} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id={`dim-${dim.id}`}
-                          className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                          checked={selectedDimensionFieldNames.includes(dim.fieldName)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedDimensionFieldNames([...selectedDimensionFieldNames, dim.fieldName])
-                            } else {
-                              setSelectedDimensionFieldNames(selectedDimensionFieldNames.filter(d => d !== dim.fieldName))
-                            }
-                          }}
-                        />
-                        <label htmlFor={`dim-${dim.id}`} className="text-xs text-slate-700 select-none cursor-pointer">
-                          {dim.name} <span className="text-slate-400 text-[10px]">({dim.fieldName})</span>
-                        </label>
-                      </div>
-                    ))}
-                    {dimensions.length === 0 && <p className="text-xs text-slate-400 col-span-2">No dimensions available.</p>}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 pt-2 border-t border-slate-200/50">
-                  <label className="text-xs font-semibold text-slate-700">Create in datasets</label>
-                  <div className="flex flex-wrap gap-4">
-                    {[
-                      { id: "dataset A", label: "Dataset A" },
-                      { id: "dataset B", label: "Dataset B" },
-                    ].map((dataset) => (
-                      <div key={dataset.id} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id={`dataset-${dataset.id}`}
-                          className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                          checked={createInDatasets.includes(dataset.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setCreateInDatasets([...createInDatasets, dataset.id])
-                            } else {
-                              setCreateInDatasets(createInDatasets.filter(d => d !== dataset.id))
-                            }
-                          }}
-                        />
-                        <label htmlFor={`dataset-${dataset.id}`} className="text-xs text-slate-700 select-none cursor-pointer">
-                          {dataset.label}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
               </div>
                 </>
               )}

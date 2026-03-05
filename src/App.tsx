@@ -840,25 +840,8 @@ function App() {
             dimensions={data.dimensions}
             open={isMetricProfileOpen}
             onOpenChange={setIsMetricProfileOpen}
-            onDeriveMetric={handleOpenDerivedMetricSheet}
             isFavorite={favoriteMetricFieldNames.includes(selectedMetric.fieldName)}
             onToggleFavorite={handleToggleFavoriteMetric}
-          />
-        )}
-
-        {derivedBaseMetric && (
-          <DerivedMetricSheet
-            baseMetric={derivedBaseMetric}
-            metrics={data.metrics}
-            dimensions={data.dimensions}
-            open={isDerivedMetricSheetOpen}
-            onOpenChange={(open) => {
-              setIsDerivedMetricSheetOpen(open)
-              if (!open) {
-                setDerivedMetricBaseFieldName(null)
-              }
-            }}
-            onCreate={handleCreateDerivedMetric}
           />
         )}
       </main>
