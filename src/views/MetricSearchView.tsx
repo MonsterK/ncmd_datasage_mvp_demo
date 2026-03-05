@@ -24,7 +24,7 @@ import {
 import { Search as SearchIcon, Flame, Filter, ArrowUpDown, User, BarChart2, LayoutGrid, List, Star } from "lucide-react"
 import { ResponsiveContainer, LineChart, Line } from "recharts"
 
-import { Metric, Tag } from "@/types"
+import { Metric } from "@/types"
 import { getMetricTimestamp } from "@/lib/utils"
 
 export interface MetricSearchViewProps {
@@ -302,9 +302,9 @@ export function MetricSearchView({
                         <span className="truncate">{metric.owners.businessOwner}</span>
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        Dispatch:{" "}
-                        {metric.dispatchHistory && metric.dispatchHistory.length > 0
-                          ? `${metric.dispatchHistory[metric.dispatchHistory.length - 1].targetType} · ${metric.dispatchHistory[metric.dispatchHistory.length - 1].status}`
+                        Deploy:{" "}
+                        {metric.deployHistory && metric.deployHistory.length > 0
+                          ? `${metric.deployHistory[metric.deployHistory.length - 1].targetType} · ${metric.deployHistory[metric.deployHistory.length - 1].status}`
                           : "-"}
                       </div>
                       
@@ -351,7 +351,7 @@ export function MetricSearchView({
                     <TableHead>Category</TableHead>
                     <TableHead>Owner</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Dispatch</TableHead>
+                    <TableHead>Deploy</TableHead>
                     <TableHead className="text-right">Updated</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -399,8 +399,8 @@ export function MetricSearchView({
                         </div>
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">
-                        {m.dispatchHistory && m.dispatchHistory.length > 0
-                          ? `${m.dispatchHistory[m.dispatchHistory.length - 1].targetType} · ${m.dispatchHistory[m.dispatchHistory.length - 1].status}`
+                        {m.deployHistory && m.deployHistory.length > 0
+                          ? `${m.deployHistory[m.deployHistory.length - 1].targetType} · ${m.deployHistory[m.deployHistory.length - 1].status}`
                           : "-"}
                       </TableCell>
                       <TableCell className="text-xs text-slate-500 text-right">{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : "-"}</TableCell>

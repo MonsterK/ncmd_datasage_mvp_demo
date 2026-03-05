@@ -214,7 +214,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 text-xs text-slate-600">
                         <Database className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="truncate">{dim.tenant}</span>
+                        <span className="truncate">{dim.type}</span>
                       </div>
                       
                       <div className="flex items-end justify-between gap-2 pt-2">
@@ -249,7 +249,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                     <TableHead>Dimension Name</TableHead>
                     <TableHead>Field Name</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Tenant</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Usage</TableHead>
                     <TableHead className="text-right">Updated</TableHead>
@@ -272,7 +271,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                           {d.type}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-slate-600">{d.tenant}</TableCell>
                       <TableCell className="text-xs text-slate-600">
                         {d.categoryPath?.join(" › ") ?? d.category ?? "-"}
                       </TableCell>
@@ -322,8 +320,6 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700">
               {dimension.type}
             </Badge>
-            <span className="text-slate-300">•</span>
-            <span className="text-slate-600">Tenant: {dimension.tenant}</span>
             {(dimension.categoryPath?.length || dimension.category) && (
               <>
                 <span className="text-slate-300">•</span>
@@ -351,10 +347,6 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
               </CardHeader>
               <CardContent className="space-y-4 p-5 text-xs">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <span className="text-slate-500">Tenant</span>
-                    <p className="font-medium text-slate-900">{dimension.tenant}</p>
-                  </div>
                   <div className="space-y-1">
                     <span className="text-slate-500">Type</span>
                     <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-700">

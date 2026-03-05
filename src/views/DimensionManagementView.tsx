@@ -96,7 +96,6 @@ export function DimensionManagementView({ metrics, dimensions }: DimensionManage
                       <div className="font-semibold">{d.name}</div>
                       <div className="font-mono text-[10px] opacity-80">{d.fieldName}</div>
                     </div>
-                    <div className="text-[10px] opacity-80">{d.tenant}</div>
                   </button>
                 ))}
                 {dimensions.length === 0 && (
@@ -127,7 +126,6 @@ export function DimensionManagementView({ metrics, dimensions }: DimensionManage
                   </div>
                   <p className="text-zinc-700">{selected.description}</p>
                   <div className="flex flex-wrap gap-2 text-[11px] text-zinc-500">
-                    <span>Tenant: {selected.tenant}</span>
                     <span>Version: {selected.version}</span>
                     <span>Scope: {selected.scope.join(", ")}</span>
                   </div>

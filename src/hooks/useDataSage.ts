@@ -7,7 +7,6 @@ const EMPTY_DATA: DataState = {
   dimensions: [],
   metricSets: [],
   categories: [],
-  tenants: [],
   dimensionTree: [],
 }
 
@@ -21,13 +20,12 @@ export function useDataSage() {
     const load = async () => {
       try {
         const t = Date.now()
-        const [metricsRes, dimensionsRes, metricSetsRes, categoriesRes, tenantsRes, dimensionTreeRes] =
+        const [metricsRes, dimensionsRes, metricSetsRes, categoriesRes, dimensionTreeRes] =
           await Promise.all([
             fetch(`/metrics.json?t=${t}`),
             fetch(`/dimensions.json?t=${t}`),
             fetch(`/metricSets.json?t=${t}`),
             fetch(`/categories.json?t=${t}`),
-            fetch(`/tenants.json?t=${t}`),
             fetch(`/dimensionsTree.json?t=${t}`),
           ])
 
@@ -36,7 +34,6 @@ export function useDataSage() {
           !dimensionsRes.ok ||
           !metricSetsRes.ok ||
           !categoriesRes.ok ||
-          !tenantsRes.ok ||
           !dimensionTreeRes.ok
         ) {
           throw new Error("Failed to load mock JSON data")
@@ -46,7 +43,6 @@ export function useDataSage() {
         const dimensionsJson = await dimensionsRes.json()
         const metricSetsJson = await metricSetsRes.json()
         const categoriesJson = await categoriesRes.json()
-        const tenantsJson = await tenantsRes.json()
         const dimensionTreeJson = await dimensionTreeRes.json()
 
         const metricSetsRaw = metricSetsJson.metricSets ?? []
@@ -60,7 +56,6 @@ export function useDataSage() {
           dimensions: dimensionsJson.dimensions ?? [],
           metricSets,
           categories: categoriesJson.categories ?? [],
-          tenants: tenantsJson.tenants ?? [],
           dimensionTree: dimensionTreeJson.nodes ?? dimensionTreeJson.dimensionTree ?? [],
         }
 
