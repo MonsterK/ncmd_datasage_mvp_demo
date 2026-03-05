@@ -25,7 +25,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
-import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces, Trash2, Database } from "lucide-react"
+import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces, Trash2, Database, Eye } from "lucide-react"
 
 import {
   Metric,
@@ -360,11 +360,13 @@ export function ManagementWorkspaceView({
                         setIsCategorySheetOpen(true)
                       }}
                       onDelete={(id) => onDeleteCategory?.(id)}
-                      onConfigSemanticView={(cat) => {
-                        setSemanticViewCategory(cat)
-                        setSemanticViewName(cat.semanticView?.name || "")
-                        setSemanticViewTables(cat.semanticView?.hiveTables || [])
-                        setIsSemanticViewDialogOpen(true)
+                      onViewSemanticView={(cat) => {
+                        setSemanticViewPreview({
+                          name: cat.semanticView?.name ?? `${cat.name}_semantic_view`,
+                          tables: cat.semanticView?.hiveTables ?? [],
+                          categoryName: cat.name,
+                        })
+                        setIsSemanticViewPreviewOpen(true)
                       }}
                     />
                   ))}
@@ -700,8 +702,8 @@ interface NewCategorySheetProps {
   mode: "create" | "edit"
   initialCategory?: CategoryNode | null
   parentCategory?: CategoryNode | null
-  onCreateCategory: (payload: { id: string; name: string; description: string }) => void
-  onUpdateCategory: (payload: { id: string; name: string; description: string }) => void
+  onCreateCategory: (payload: { id: string; name: string; description: string; semanticView?: { name: string; hiveTables: string[] } }) => void
+  onUpdateCategory: (payload: { id: string; name: string; description: string; semanticView?: { name: string; hiveTables: string[] } }) => void
 }
 
 function NewCategorySheet({
@@ -715,15 +717,24 @@ function NewCategorySheet({
 }: NewCategorySheetProps) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
+  const [semanticViewName, setSemanticViewName] = useState("")
+  const [semanticViewTables, setSemanticViewTables] = useState<string[]>([])
+
+  // Only top-level categories (no parent) can have semantic view configuration
+  const showSemanticViewConfig = !parentCategory
 
   useEffect(() => {
     if (open) {
       if (mode === "edit" && initialCategory) {
         setName(initialCategory.name)
         setDescription(initialCategory.description || "")
+        setSemanticViewName(initialCategory.semanticView?.name || "")
+        setSemanticViewTables(initialCategory.semanticView?.hiveTables || [])
       } else {
         setName("")
         setDescription("")
+        setSemanticViewName("")
+        setSemanticViewTables([])
       }
     }
   }, [open, mode, initialCategory])
@@ -732,17 +743,26 @@ function NewCategorySheet({
     e.preventDefault()
     if (!name.trim()) return
 
+    const semanticView = showSemanticViewConfig && (semanticViewName.trim() || semanticViewTables.length > 0)
+      ? {
+          name: semanticViewName.trim() || `${name.trim()}_semantic_view`,
+          hiveTables: semanticViewTables.map(t => t.trim()).filter(Boolean),
+        }
+      : undefined
+
     if (mode === "edit" && initialCategory) {
       onUpdateCategory({
         id: initialCategory.id,
         name: name.trim(),
         description: description.trim(),
+        semanticView,
       })
     } else {
       onCreateCategory({
         id: `cat-${Date.now()}`,
         name: name.trim(),
         description: description.trim(),
+        semanticView,
       })
     }
     onOpenChange(false)
@@ -758,26 +778,84 @@ function NewCategorySheet({
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
-            <form id="category-form" onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-slate-700">Name</label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. User Growth"
-                  className="h-9 text-xs"
-                  required
-                />
+            <form id="category-form" onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-700">Name</label>
+                  <Input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. User Growth"
+                    className="h-9 text-xs"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-700">Description</label>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Describe this category..."
+                    className="min-h-[100px] text-xs resize-none"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-slate-700">Description</label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe this category..."
-                  className="min-h-[100px] text-xs resize-none"
-                />
-              </div>
+
+              {showSemanticViewConfig && (
+                <div className="space-y-4 pt-4 border-t border-slate-100">
+                  <h3 className="text-sm font-semibold text-slate-900">Semantic View Configuration</h3>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-700">View Name</label>
+                    <Input
+                      value={semanticViewName}
+                      onChange={(e) => setSemanticViewName(e.target.value)}
+                      placeholder="Optional view name"
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-700">Hive CDM Tables</label>
+                    <div className="space-y-2">
+                      {semanticViewTables.map((table, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Input
+                            value={table}
+                            onChange={(e) => {
+                              const next = [...semanticViewTables]
+                              next[index] = e.target.value
+                              setSemanticViewTables(next)
+                            }}
+                            className="h-8 text-xs"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"
+                            onClick={() => {
+                              const next = semanticViewTables.filter((_, i) => i !== index)
+                              setSemanticViewTables(next)
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full h-8 text-xs border-dashed"
+                        onClick={() => setSemanticViewTables([...semanticViewTables, ""])}
+                      >
+                        <PlusCircle className="mr-2 h-3.5 w-3.5" />
+                        Add Table
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="p-6 border-t bg-slate-50/50 flex justify-end gap-3 absolute bottom-0 left-0 right-0">
                 <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
                   Cancel
@@ -815,10 +893,10 @@ interface CategoryRowProps {
   onEdit: (cat: CategoryNode) => void
   onCreateSub: (parent: CategoryNode) => void
   onDelete: (id: string) => void
-  onConfigSemanticView: (cat: CategoryNode) => void
+  onViewSemanticView: (cat: CategoryNode) => void
 }
 
-function CategoryRow({ category, level, onEdit, onCreateSub, onDelete, onConfigSemanticView }: CategoryRowProps) {
+function CategoryRow({ category, level, onEdit, onCreateSub, onDelete, onViewSemanticView }: CategoryRowProps) {
   const [expanded, setExpanded] = useState(false)
   const hasChildren = category.children && category.children.length > 0
 
@@ -869,16 +947,18 @@ function CategoryRow({ category, level, onEdit, onCreateSub, onDelete, onConfigS
         </TableCell>
         <TableCell>
           <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
-              title="Configure Semantic View"
-              onClick={() => onConfigSemanticView(category)}
-            >
-              <Database className="h-4 w-4" />
-            </Button>
+            {level === 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+                title="View CDM Topology"
+                onClick={() => onViewSemanticView(category)}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -920,7 +1000,7 @@ function CategoryRow({ category, level, onEdit, onCreateSub, onDelete, onConfigS
           onEdit={onEdit}
           onCreateSub={onCreateSub}
           onDelete={onDelete}
-          onConfigSemanticView={onConfigSemanticView}
+          onViewSemanticView={onViewSemanticView}
         />
       ))}
     </>

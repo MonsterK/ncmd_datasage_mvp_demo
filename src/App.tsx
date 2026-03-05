@@ -795,22 +795,8 @@ function App() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 ml-4 border-l-2 border-slate-100 pl-6">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tenant</span>
-                {data.tenants.length > 0 && (
-                  <Select value={tenantSelectValue} onValueChange={(value) => setActiveGlobalTenantId(value)}>
-                    <SelectTrigger className="h-8 w-[150px] border-slate-200 bg-white text-sm rounded-lg hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:ring-2 focus:ring-blue-100">
-                      <SelectValue placeholder="Select tenant" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(permittedTenants.length ? permittedTenants : uniqueTenants).map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+              <div className="hidden">
+                {/* Tenant selection hidden */}
               </div>
             </div>
 

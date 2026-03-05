@@ -21,7 +21,7 @@ import { NewMetricPayload, CategoryNode, Metric, Tenant, Dimension, DispatchHist
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 import { mockResolveCdm, CdmFieldRecommendation } from "@/mocks/cdm"
 import { mockValidateDispatch, CdmBindingItem, DispatchValidationResult } from "@/mocks/production"
-import { Calendar, Hash, Search, Type, Braces } from "lucide-react"
+import { Calendar, Hash, Search, Type, Braces, Trash2 } from "lucide-react"
 
 export interface MetricRegistrationViewProps {
   tenants: Tenant[]
@@ -279,7 +279,7 @@ export function MetricRegistrationView({
     )
   }
 
-  const handleUpdateBinding = (fieldName: string, updates: Partial<CdmBindingItem>) => {
+  const handleUpdateBinding = (fieldName: string, updates: Partial<CdmBindingItem> & { recommendedTableName?: string }) => {
     setCdmBindings((prev) =>
       prev.map((binding) =>
         binding.fieldName === fieldName
@@ -288,6 +288,7 @@ export function MetricRegistrationView({
               tableName: updates.tableName ?? binding.tableName,
               isCertifiedCDM: updates.isCertifiedCDM ?? binding.isCertifiedCDM,
               notFound: updates.notFound ?? binding.notFound,
+              recommendedTableName: updates.recommendedTableName ?? binding.recommendedTableName,
             }
           : binding,
       ),
@@ -722,41 +723,24 @@ export function MetricRegistrationView({
                     </div>
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-700">Expression (SQL)</label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-7 px-3 text-[11px] border-slate-200 hover:bg-slate-50"
-                      onClick={() => setIsFieldsOpen(true)}
-                    >
-                      Fields
-                    </Button>
-                  </div>
-                  <div className="relative">
-                    <Textarea
-                      rows={4}
-                      placeholder="e.g. SUM(payout_amount) WHERE market = 'US'"
-                      value={expression}
-                      onChange={(e) => setExpression(e.target.value)}
-                      ref={expressionRef}
-                      className="text-xs font-mono bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 min-h-[100px]"
-                    />
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      <Badge variant="outline" className="bg-slate-50 text-slate-400 border-slate-200 text-[10px]">SQL</Badge>
-                    </div>
-                  </div>
+                <div className="hidden">
+                  <label className="text-xs font-semibold text-slate-700">Expression (SQL)</label>
+                  {/* Expression module hidden */}
+                  <Textarea
+                    rows={4}
+                    value={expression}
+                    onChange={(e) => setExpression(e.target.value)}
+                    ref={expressionRef}
+                  />
                 </div>
               </div>
 
               <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Smart CDM recommendation</p>
+                      <p className="text-sm font-semibold text-slate-900">Source Info</p>
                       <p className="text-xs text-slate-500 mt-1">
-                        Parse Expression to suggest CDM tables for each field.
+                        Map fields to source CDM tables.
                       </p>
                     </div>
                     <Button
@@ -766,7 +750,7 @@ export function MetricRegistrationView({
                       onClick={handleRunCdm}
                       disabled={cdmLoading}
                     >
-                      {cdmLoading ? "Analyzing..." : "Run analysis"}
+                      {cdmLoading ? "Analyzing..." : "Refresh Source Info"}
                     </Button>
                   </div>
                   {cdmError && (
@@ -782,10 +766,17 @@ export function MetricRegistrationView({
                           className="rounded-xl border border-slate-200 bg-slate-50/40 px-4 py-3"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                              <div className="text-xs font-semibold text-slate-900">{binding.fieldName}</div>
-                              <div className="text-[11px] text-slate-500">
-                                Recommended: {binding.recommendedTableName}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-semibold text-slate-900">Field: {binding.fieldName}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-slate-500">Source Table:</span>
+                                <Input
+                                  value={binding.recommendedTableName}
+                                  onChange={(e) => handleUpdateBinding(binding.fieldName, { recommendedTableName: e.target.value })}
+                                  className="h-7 text-xs bg-white border-slate-200 w-[200px]"
+                                />
                               </div>
                             </div>
                             <Badge
@@ -795,64 +786,43 @@ export function MetricRegistrationView({
                               {binding.isCertifiedCDM ? "Certified CDM" : "Non-certified"}
                             </Badge>
                           </div>
-                          <div className="mt-3 grid gap-3 md:grid-cols-[1fr_140px]">
-                            <div className="space-y-1.5">
-                              <label className="text-[10px] font-medium text-slate-500">CDM table</label>
-                              <Select
-                                value={binding.tableName}
-                                onValueChange={(value) =>
-                                  handleUpdateBinding(binding.fieldName, {
-                                    tableName: value,
-                                    isCertifiedCDM: value.startsWith("cdm_"),
-                                    notFound: false,
-                                  })
-                                }
-                                disabled={binding.notFound}
-                              >
-                                <SelectTrigger className="h-8 text-xs bg-white border-slate-200">
-                                  <SelectValue placeholder="Select table" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {binding.candidateTableNames.map((name) => (
-                                    <SelectItem key={name} value={name}>
-                                      {name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="flex items-end">
-                              <Button
-                                type="button"
-                                variant={binding.notFound ? "default" : "outline"}
-                                size="sm"
-                                className={`h-8 text-xs w-full ${binding.notFound ? "bg-slate-900 text-white" : ""}`}
-                                onClick={() =>
-                                  handleUpdateBinding(binding.fieldName, {
-                                    notFound: !binding.notFound,
-                                  })
-                                }
-                              >
-                                {binding.notFound ? "Marked as not found" : "Not found"}
-                              </Button>
-                            </div>
-                          </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-center text-xs text-slate-500">
-                      Run analysis to generate CDM recommendations.
+                    <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs text-slate-400">
+                      No source info available.
                     </div>
                   )}
-                </div>
 
               <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">Production dispatch</p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Configure target and run preflight validation before dispatch.
-                    </p>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">Delivery Scenario</p>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Configure target and run preflight validation before delivery.
+                        </p>
+                      </div>
+                      {(dispatchTargetId || dispatchValidation) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => {
+                            setDispatchTargetId("")
+                            setDispatchValidation(null)
+                            setDispatchResult(null)
+                            setDispatchErrors([])
+                            setDispatchSteps([])
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-3.5 w-3.5" />
+                          Delete Scenario
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1.5">
@@ -865,8 +835,8 @@ export function MetricRegistrationView({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Aeolus Dataset">风神数据集</SelectItem>
-                          <SelectItem value="Hive Table">Hive 表</SelectItem>
+                          <SelectItem value="Aeolus Dataset">Aeolus Dataset</SelectItem>
+                          <SelectItem value="Hive Table">Hive Table</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -889,7 +859,7 @@ export function MetricRegistrationView({
                       onClick={handleValidateAndDispatch}
                       disabled={dispatchRunning}
                     >
-                      {dispatchRunning ? "Dispatching..." : "Validate & Dispatch"}
+                      {dispatchRunning ? "Delivering..." : "Validate & Deliver"}
                     </Button>
                     {dispatchValidation && dispatchValidation.ok && (
                       <span className="text-xs text-emerald-600">Validation passed</span>

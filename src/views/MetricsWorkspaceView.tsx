@@ -409,37 +409,8 @@ export function MetricsWorkspaceView({
         </div>
 
         {workspaceMode === "metrics" && (
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Metrics</span>
-            <div className="h-4 w-px bg-slate-200 mx-1"></div>
-            <ToggleGroup
-              type="single"
-              size="sm"
-              variant="outline"
-              value={metricsViewMode}
-              onValueChange={(value) => {
-                if (!value) return
-                setMetricsViewMode(value as "view" | "library")
-                setSelectedMetricSetId(null)
-              }}
-              className="bg-slate-50 p-0.5 rounded-full border border-slate-200"
-              aria-label="Toggle metrics view mode"
-            >
-              <ToggleGroupItem
-                value="library"
-                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
-                aria-label="View metric library"
-              >
-                Metric Library
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="view"
-                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
-                aria-label="View Metric View"
-              >
-                Metric View
-              </ToggleGroupItem>
-            </ToggleGroup>
+          <div className="hidden">
+            {/* Metric View toggle hidden */}
           </div>
         )}
 
