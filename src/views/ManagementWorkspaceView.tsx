@@ -382,12 +382,6 @@ export function ManagementWorkspaceView({
             </div>
           </div>
         )
-      case "category":
-        return {
-          title: "Category Management",
-          description: "Manage hierarchical categories for metrics and dimensions.",
-          addLabel: "New Category",
-        }
       default:
         return null
     }

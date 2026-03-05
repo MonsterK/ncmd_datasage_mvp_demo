@@ -597,7 +597,7 @@ export function MetricRegistrationView({
                 </div>
               )}
 
-                <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
                   <p className="text-xs text-slate-500 mt-1">Choose tenant and category path (up to 3 levels).</p>
@@ -794,6 +794,7 @@ export function MetricRegistrationView({
                       No source info available.
                     </div>
                   )}
+              </div>
 
               <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                   <div>
@@ -996,114 +997,6 @@ export function MetricRegistrationView({
             </>
           )}
 
-          <Dialog open={isFieldsOpen} onOpenChange={setIsFieldsOpen}>
-            <DialogContent className="max-w-md p-0">
-              <DialogHeader className="px-4 pt-4 pb-2">
-                <DialogTitle className="text-sm font-semibold text-slate-900">Fields</DialogTitle>
-              </DialogHeader>
-              <Tabs value={fieldTab} onValueChange={setFieldTab} className="w-full">
-                <div className="px-4 pb-2">
-                  <TabsList className="h-7 bg-slate-100 p-0.5 rounded-lg">
-                    <TabsTrigger value="source" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                      Data source fields
-                    </TabsTrigger>
-                    <TabsTrigger value="dataset" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                      Dataset fields
-                    </TabsTrigger>
-                    <TabsTrigger value="params" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                      Params
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-                <div className="px-4 pb-3">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                    <Input
-                      value={fieldSearch}
-                      onChange={(e) => setFieldSearch(e.target.value)}
-                      placeholder="Search fields"
-                      className="h-9 pl-8 text-xs bg-slate-50 border-slate-200 focus:bg-white"
-                    />
-                  </div>
-                </div>
-                <div className="max-h-[360px] overflow-y-auto px-2 pb-4">
-                  <TabsContent value="source" className="mt-0">
-                    <div className="space-y-1">
-                      {filteredFields.map((field) => {
-                        const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Hash
-                        return (
-                          <button
-                            key={field.name}
-                            type="button"
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
-                            onDoubleClick={() => {
-                              handleInsertField(field.name)
-                              setIsFieldsOpen(false)
-                            }}
-                          >
-                            <Icon className="h-3.5 w-3.5 text-slate-400" />
-                            <span className="font-mono text-slate-800">{field.name}</span>
-                          </button>
-                        )
-                      })}
-                      {filteredFields.length === 0 && (
-                        <p className="text-xs text-slate-400 text-center py-6">No fields found.</p>
-                      )}
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="dataset" className="mt-0">
-                    <div className="space-y-1">
-                      {filteredFields.map((field) => {
-                        const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Hash
-                        return (
-                          <button
-                            key={field.name}
-                            type="button"
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
-                            onDoubleClick={() => {
-                              handleInsertField(field.name)
-                              setIsFieldsOpen(false)
-                            }}
-                          >
-                            <Icon className="h-3.5 w-3.5 text-slate-400" />
-                            <span className="font-mono text-slate-800">{field.name}</span>
-                          </button>
-                        )
-                      })}
-                      {filteredFields.length === 0 && (
-                        <p className="text-xs text-slate-400 text-center py-6">No fields found.</p>
-                      )}
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="params" className="mt-0">
-                    <div className="space-y-1">
-                      {filteredFields.map((field) => {
-                        const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Braces
-                        return (
-                          <button
-                            key={field.name}
-                            type="button"
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
-                            onDoubleClick={() => {
-                              handleInsertField(`:${field.name}`)
-                              setIsFieldsOpen(false)
-                            }}
-                          >
-                            <Icon className="h-3.5 w-3.5 text-slate-400" />
-                            <span className="font-mono text-slate-800">{field.name}</span>
-                          </button>
-                        )
-                      })}
-                      {filteredFields.length === 0 && (
-                        <p className="text-xs text-slate-400 text-center py-6">No params found.</p>
-                      )}
-                    </div>
-                  </TabsContent>
-                </div>
-              </Tabs>
-            </DialogContent>
-          </Dialog>
-
           <div className="flex items-center justify-between pt-4 border-t border-slate-100">
             <div></div>
             <div className="flex items-center gap-3">
@@ -1123,6 +1016,114 @@ export function MetricRegistrationView({
           </div>
         </form>
       </CardContent>
+
+      <Dialog open={isFieldsOpen} onOpenChange={setIsFieldsOpen}>
+        <DialogContent className="max-w-md p-0">
+          <DialogHeader className="px-4 pt-4 pb-2">
+            <DialogTitle className="text-sm font-semibold text-slate-900">Fields</DialogTitle>
+          </DialogHeader>
+          <Tabs value={fieldTab} onValueChange={setFieldTab} className="w-full">
+            <div className="px-4 pb-2">
+              <TabsList className="h-7 bg-slate-100 p-0.5 rounded-lg">
+                <TabsTrigger value="source" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  Data source fields
+                </TabsTrigger>
+                <TabsTrigger value="dataset" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  Dataset fields
+                </TabsTrigger>
+                <TabsTrigger value="params" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  Params
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <div className="px-4 pb-3">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <Input
+                  value={fieldSearch}
+                  onChange={(e) => setFieldSearch(e.target.value)}
+                  placeholder="Search fields"
+                  className="h-9 pl-8 text-xs bg-slate-50 border-slate-200 focus:bg-white"
+                />
+              </div>
+            </div>
+            <div className="max-h-[360px] overflow-y-auto px-2 pb-4">
+              <TabsContent value="source" className="mt-0">
+                <div className="space-y-1">
+                  {filteredFields.map((field) => {
+                    const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Hash
+                    return (
+                      <button
+                        key={field.name}
+                        type="button"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
+                        onDoubleClick={() => {
+                          handleInsertField(field.name)
+                          setIsFieldsOpen(false)
+                        }}
+                      >
+                        <Icon className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="font-mono text-slate-800">{field.name}</span>
+                      </button>
+                    )
+                  })}
+                  {filteredFields.length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-6">No fields found.</p>
+                  )}
+                </div>
+              </TabsContent>
+              <TabsContent value="dataset" className="mt-0">
+                <div className="space-y-1">
+                  {filteredFields.map((field) => {
+                    const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Hash
+                    return (
+                      <button
+                        key={field.name}
+                        type="button"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
+                        onDoubleClick={() => {
+                          handleInsertField(field.name)
+                          setIsFieldsOpen(false)
+                        }}
+                      >
+                        <Icon className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="font-mono text-slate-800">{field.name}</span>
+                      </button>
+                    )
+                  })}
+                  {filteredFields.length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-6">No fields found.</p>
+                  )}
+                </div>
+              </TabsContent>
+              <TabsContent value="params" className="mt-0">
+                <div className="space-y-1">
+                  {filteredFields.map((field) => {
+                    const Icon = fieldIconMap[field.type as keyof typeof fieldIconMap] ?? Braces
+                    return (
+                      <button
+                        key={field.name}
+                        type="button"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-700 hover:bg-slate-50"
+                        onDoubleClick={() => {
+                          handleInsertField(`:${field.name}`)
+                          setIsFieldsOpen(false)
+                        }}
+                      >
+                        <Icon className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="font-mono text-slate-800">{field.name}</span>
+                      </button>
+                    )
+                  })}
+                  {filteredFields.length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-6">No params found.</p>
+                  )}
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
