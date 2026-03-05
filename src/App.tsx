@@ -211,6 +211,7 @@ function App() {
   const handleRegisterMetric = (payload: NewMetricPayload) => {
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
+    const dispatchHistory = payload.dispatchSummary ? [payload.dispatchSummary] : []
     const newMetric: Metric = {
       id: `m-${now}`,
       businessName: payload.businessName,
@@ -245,6 +246,8 @@ function App() {
       createdAt: nowIso,
       updatedAt: nowIso,
       heat: 0,
+      dispatchHistory,
+      lastDispatchAt: payload.dispatchSummary?.dispatchedAt,
       history: [
         {
           version: "v1",
@@ -488,6 +491,7 @@ function App() {
     businessName: string
     businessOwner: string
     techOwner: string
+    technicalDefinition: string
     description: string
     category: string
     tenantId: string
@@ -514,6 +518,7 @@ function App() {
         businessOwner: payload.businessOwner || "TBD",
         techOwner: payload.techOwner || "TBD",
       },
+      technicalDefinition: payload.technicalDefinition,
       category: payload.category,
       sourceLink: payload.sourceLink,
       sourceDimensionField: payload.sourceDimensionField,
@@ -544,6 +549,9 @@ function App() {
       ...prev,
       metrics: prev.metrics.map((m) => {
         if (m.fieldName !== fieldName) return m
+        const nextDispatchHistory = payload.dispatchSummary
+          ? [...(m.dispatchHistory ?? []), payload.dispatchSummary]
+          : m.dispatchHistory
         return {
           ...m,
           businessName: payload.businessName,
@@ -572,6 +580,8 @@ function App() {
             },
           ],
           boundDimensionFieldNames: payload.query.analysisDimensions,
+          dispatchHistory: nextDispatchHistory,
+          lastDispatchAt: payload.dispatchSummary?.dispatchedAt ?? m.lastDispatchAt,
           updatedAt: nowIso,
           history: [
             ...(m.history ?? []),
@@ -612,6 +622,7 @@ function App() {
     businessName: string
     businessOwner: string
     techOwner: string
+    technicalDefinition: string
     description: string
     category: string
     tenantId: string
@@ -630,6 +641,7 @@ function App() {
               ...d,
               name: payload.businessName,
               description: payload.description,
+              technicalDefinition: payload.technicalDefinition,
               category: payload.category,
               tenant: payload.tenantId || d.tenant,
               sourceLink: payload.sourceLink,

@@ -369,6 +369,12 @@ export function MetricSearchView({
                         <User className="h-3.5 w-3.5 text-slate-400" />
                         <span className="truncate">{metric.owners.businessOwner}</span>
                       </div>
+                      <div className="text-[11px] text-slate-500">
+                        Dispatch:{" "}
+                        {metric.dispatchHistory && metric.dispatchHistory.length > 0
+                          ? `${metric.dispatchHistory[metric.dispatchHistory.length - 1].targetType} · ${metric.dispatchHistory[metric.dispatchHistory.length - 1].status}`
+                          : "-"}
+                      </div>
                       
                       <div className="flex items-end justify-between gap-2 pt-2">
                         <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-orange-50 px-2 py-1 rounded-full border border-orange-100">
@@ -414,6 +420,7 @@ export function MetricSearchView({
                     <TableHead>Category</TableHead>
                     <TableHead>Owner</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Dispatch</TableHead>
                     <TableHead className="text-right">Updated</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -471,6 +478,11 @@ export function MetricSearchView({
                         >
                           {m.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-600">
+                        {m.dispatchHistory && m.dispatchHistory.length > 0
+                          ? `${m.dispatchHistory[m.dispatchHistory.length - 1].targetType} · ${m.dispatchHistory[m.dispatchHistory.length - 1].status}`
+                          : "-"}
                       </TableCell>
                       <TableCell className="text-xs text-slate-500 text-right">{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : "-"}</TableCell>
                     </TableRow>

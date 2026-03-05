@@ -71,6 +71,7 @@ export interface ManagementWorkspaceViewProps {
     businessName: string
     businessOwner: string
     techOwner: string
+    technicalDefinition: string
     description: string
     category: string
     tenantId: string
@@ -83,6 +84,7 @@ export interface ManagementWorkspaceViewProps {
     businessName: string
     businessOwner: string
     techOwner: string
+    technicalDefinition: string
     description: string
     category: string
     tenantId: string
@@ -454,6 +456,7 @@ export function ManagementWorkspaceView({
         }}
         tenants={tenants}
         dimensions={dimensions}
+        metrics={metrics}
         onRegisterMetric={onRegisterMetric}
         defaultTenantId={activeTenantId}
         initialMetric={metricToEdit}
@@ -533,6 +536,7 @@ interface NewMetricSheetProps {
   onOpenChange: (open: boolean) => void
   tenants: Tenant[]
   dimensions: Dimension[]
+  metrics: Metric[]
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric | null
   mode?: "create" | "edit"
@@ -546,6 +550,7 @@ export function NewMetricSheet({
   onOpenChange,
   tenants,
   dimensions,
+  metrics,
   onRegisterMetric,
   initialMetric,
   mode = "create",
@@ -592,6 +597,7 @@ export function NewMetricSheet({
               key={isEditMode && initialMetric ? initialMetric.id : "new"}
               tenants={tenants}
               dimensions={dimensions}
+              metrics={metrics}
               defaultTenantId={defaultTenantId}
               initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
               disableFieldNameEditing={Boolean(isEditMode)}
@@ -1408,6 +1414,7 @@ interface NewDimensionSheetProps {
     businessName: string
     businessOwner: string
     techOwner: string
+    technicalDefinition: string
     tenantId: string
     category: string
     description: string
@@ -1424,6 +1431,7 @@ interface NewDimensionSheetProps {
     businessName: string
     businessOwner: string
     techOwner: string
+    technicalDefinition: string
     tenantId: string
     category: string
     description: string
@@ -1447,6 +1455,7 @@ export function NewDimensionSheet({
   const [businessName, setBusinessName] = useState("")
   const [businessOwner, setBusinessOwner] = useState("")
   const [techOwner, setTechOwner] = useState("")
+  const [technicalDefinition, setTechnicalDefinition] = useState("")
   const [selectedTenantId, setSelectedTenantId] = useState<string>("")
   const [selectedCategoryName, setSelectedCategoryName] = useState<string>("")
   const [description, setDescription] = useState("")
@@ -1468,6 +1477,7 @@ export function NewDimensionSheet({
       setBusinessName(initialDimension.name)
       setBusinessOwner(initialDimension.owners?.businessOwner ?? "")
       setTechOwner(initialDimension.owners?.techOwner ?? "")
+      setTechnicalDefinition(initialDimension.technicalDefinition ?? "")
       setSelectedTenantId(initialDimension.tenant ?? "")
       setSelectedCategoryName(initialDimension.category ?? "")
       setDescription(initialDimension.description)
@@ -1479,6 +1489,7 @@ export function NewDimensionSheet({
       setBusinessName("")
       setBusinessOwner("")
       setTechOwner("")
+      setTechnicalDefinition("")
       setSelectedTenantId(defaultTenantId ?? tenants[0]?.id ?? "")
       setSelectedCategoryName("")
       setDescription("")
@@ -1570,8 +1581,19 @@ export function NewDimensionSheet({
     e.preventDefault()
     const trimmedFieldName = fieldName.trim()
     const trimmedBusinessName = businessName.trim()
-    if (!trimmedBusinessName || (!isEditMode && !trimmedFieldName) || !selectedTenantId || !selectedCategoryName) {
-      setMessage("Field name, business name, tenant, and category are required.")
+    const trimmedDescription = description.trim()
+    const trimmedTechnicalDefinition = technicalDefinition.trim()
+    if (
+      !trimmedBusinessName ||
+      !trimmedDescription ||
+      (!isEditMode && !trimmedFieldName) ||
+      !selectedTenantId ||
+      !selectedCategoryName ||
+      !trimmedTechnicalDefinition ||
+      !businessOwner.trim() ||
+      !techOwner.trim()
+    ) {
+      setMessage("Business name, definition, owners, field name, expression, tenant, and category are required.")
       return
     }
 
@@ -1581,9 +1603,10 @@ export function NewDimensionSheet({
         businessName: trimmedBusinessName,
         businessOwner: businessOwner.trim(),
         techOwner: techOwner.trim(),
+        technicalDefinition: trimmedTechnicalDefinition,
         tenantId: selectedTenantId,
         category: selectedCategoryName,
-        description: description.trim(),
+        description: trimmedDescription,
         sourceLink: sourceLink.trim(),
         sourceDimensionField: sourceDimensionField.trim(),
         values: enumValues,
@@ -1594,9 +1617,10 @@ export function NewDimensionSheet({
         businessName: trimmedBusinessName,
         businessOwner: businessOwner.trim(),
         techOwner: techOwner.trim(),
+        technicalDefinition: trimmedTechnicalDefinition,
         tenantId: selectedTenantId,
         category: selectedCategoryName,
-        description: description.trim(),
+        description: trimmedDescription,
         sourceLink: sourceLink.trim(),
         sourceDimensionField: sourceDimensionField.trim(),
         values: enumValues,
@@ -1717,6 +1741,23 @@ export function NewDimensionSheet({
                   />
                 </div>
               </div>
+
+            <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Technical definition</p>
+                <p className="text-xs text-slate-500 mt-1">Define the expression or derivation logic.</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Expression (SQL)</label>
+                <Textarea
+                  rows={4}
+                  className="text-xs font-mono bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 min-h-[100px]"
+                  value={technicalDefinition}
+                  onChange={(e) => setTechnicalDefinition(e.target.value)}
+                  placeholder="e.g. CASE WHEN agency_level = '1' THEN 'Top' ELSE 'Standard' END"
+                />
+              </div>
+            </div>
 
               <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div>

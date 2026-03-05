@@ -44,6 +44,8 @@ export interface Metric {
   history?: ChangeLog[]
   dataType?: string
   unit?: string
+  dispatchHistory?: DispatchHistory[]
+  lastDispatchAt?: string
 }
 
 export interface ChangeLog {
@@ -78,6 +80,7 @@ export interface Dimension {
   category?: string
   sourceLink?: string
   sourceDimensionField?: string
+  technicalDefinition?: string
   createdAt?: string
   updatedAt?: string
   history?: ChangeLog[]
@@ -173,6 +176,17 @@ export interface NewMetricPayload {
     relatedDatasets?: string[]
   }
   tenantId?: string
+  dispatchSummary?: DispatchHistory
+}
+
+export type DispatchTargetType = "Aeolus Dataset" | "Hive Table"
+
+export interface DispatchHistory {
+  targetType: DispatchTargetType
+  target: string
+  status: "success" | "failed"
+  dispatchedAt: string
+  fieldCount: number
 }
 
 export interface FilterBasedDerivedDimensionFilter {

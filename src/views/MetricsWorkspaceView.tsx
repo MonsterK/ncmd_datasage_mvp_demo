@@ -58,6 +58,7 @@ export interface MetricsWorkspaceViewProps {
     businessName: string
     businessOwner: string
     techOwner: string
+    technicalDefinition: string
     description: string
     category: string
     tenantId: string
@@ -716,6 +717,7 @@ export function MetricsWorkspaceView({
         onOpenChange={setIsNewMetricSheetOpen}
         tenants={tenants}
         dimensions={dimensions}
+        metrics={metrics}
         onRegisterMetric={onRegisterMetric}
         defaultTenantId={selectedTenantId}
       />

@@ -32,6 +32,10 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
     () => dimensions.filter((d) => metric.boundDimensionFieldNames.includes(d.fieldName)),
     [dimensions, metric.boundDimensionFieldNames],
   )
+  const latestDispatch = useMemo(() => {
+    if (!metric.dispatchHistory || metric.dispatchHistory.length === 0) return null
+    return metric.dispatchHistory[metric.dispatchHistory.length - 1]
+  }, [metric.dispatchHistory])
 
   return (
     <div className="space-y-6">
@@ -117,6 +121,30 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
                   <span className="text-slate-500">Unit</span>
                   <p className="text-slate-700">{metric.unit || "-"}</p>
                 </div>
+              </div>
+              <div className="space-y-1.5 pt-3 border-t border-slate-100">
+                <p className="font-semibold text-slate-800">Dispatch status</p>
+                {latestDispatch ? (
+                  <div className="text-xs text-slate-600 space-y-2">
+                    <div>
+                      {latestDispatch.targetType} · {latestDispatch.target}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      {latestDispatch.status} · {new Date(latestDispatch.dispatchedAt).toLocaleString()}
+                    </div>
+                    {metric.dispatchHistory && metric.dispatchHistory.length > 1 && (
+                      <div className="space-y-1 text-[11px] text-slate-500">
+                        {metric.dispatchHistory.slice(-3).reverse().map((item, index) => (
+                          <div key={`${item.target}-${item.dispatchedAt}-${index}`}>
+                            {item.targetType} · {item.target} · {item.status}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500">No dispatch history yet.</p>
+                )}
               </div>
             </CardContent>
           </Card>
