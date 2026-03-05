@@ -31,7 +31,7 @@ export function WorkspaceChatView({
       id: "intro",
       role: "assistant",
       content:
-        "I am your metric assistant. I can create metrics, bind categories, and deploy them through chat. Try: “create metric daily active users” or “deploy metric spp_revenue to Hive table”.",
+        "I am your smart assistant. I can create metrics&dimensions and deploy them through chat. Try: “create metric daily active users” or “deploy metric spp_revenue to Hive table”.",
     },
   ])
   const [input, setInput] = useState("")
@@ -103,7 +103,7 @@ export function WorkspaceChatView({
             <div>
               <CardTitle className="text-base font-bold text-slate-900">AI Workspace</CardTitle>
               <CardDescription className="text-xs text-slate-500">
-                Create metrics, bind categories, and delivery to target systems via chat.
+                Create metrics&dimensions, and delivery to target systems via chat.
               </CardDescription>
             </div>
             {onBack && (
@@ -166,6 +166,15 @@ export function WorkspaceChatView({
                 onClick={() => handleQuickInput("deploy metric spp_revenue to Hive table")}
               >
                 Deploy metric
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-[10px]"
+                onClick={() => handleQuickInput("create dimension user_segment")}
+              >
+                Create dimension
               </Button>
             </div>
             <div className="flex items-center gap-2">
