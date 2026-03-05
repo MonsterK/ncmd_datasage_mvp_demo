@@ -31,7 +31,7 @@ export interface MetricProfileViewProps {
   isFavorite?: boolean
   onToggleFavorite?: (fieldName: string) => void
   onNavigateWorkspace?: () => void
-  onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Offline") => void
+  onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Draft") => void
 }
 
 export function MetricProfileView({
@@ -61,7 +61,7 @@ export function MetricProfileView({
               <CardTitle className="text-xl font-bold text-slate-900">{metric.businessName}</CardTitle>
               <Select
                 value={metric.status}
-                onValueChange={(val) => onUpdateMetricStatus?.(metric.fieldName, val as "Active" | "Offline")}
+                onValueChange={(val) => onUpdateMetricStatus?.(metric.fieldName, val as "Active" | "Draft")}
                 disabled={!onUpdateMetricStatus}
               >
                 <SelectTrigger className={`h-6 text-[10px] w-[80px] border-0 px-2 rounded-full ${metric.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
@@ -69,7 +69,7 @@ export function MetricProfileView({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Offline">Offline</SelectItem>
+                  <SelectItem value="Draft">Draft</SelectItem>
                 </SelectContent>
               </Select>
             </div>

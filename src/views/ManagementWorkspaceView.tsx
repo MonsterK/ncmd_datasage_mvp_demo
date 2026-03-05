@@ -167,7 +167,7 @@ export function ManagementWorkspaceView({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="Offline">Offline</SelectItem>
+                          <SelectItem value="Draft">Draft</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>

@@ -114,7 +114,7 @@ function MetricListCard({ title, description, metrics, emptyLabel, onOpenMetric,
                   className={`text-[10px] border-slate-200 ${
                     metric.status === "Active"
                       ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : metric.status === "Offline"
+                      : metric.status === "Draft"
                         ? "bg-amber-50 text-amber-700 border-amber-200"
                         : "bg-slate-50 text-slate-600"
                   }`}

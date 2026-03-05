@@ -177,7 +177,7 @@ function App() {
       categoryPath: payload.categoryPath.length ? payload.categoryPath : ["performance"],
       businessDefinition: payload.businessDefinition,
       technicalDefinition: payload.technicalDefinition,
-      status: "Offline",
+      status: "Draft",
       dataType: payload.query.dataType,
       unit: payload.query.unit,
       owners: {
@@ -297,7 +297,7 @@ function App() {
         categoryPath: base.categoryPath,
         businessDefinition,
         technicalDefinition,
-        status: "Offline",
+        status: "Draft",
         owners: base.owners,
         queryDefinitions: [newQuery],
         trend30d: createFlatTrend(),
@@ -361,7 +361,7 @@ function App() {
         categoryPath: base.categoryPath,
         businessDefinition,
         technicalDefinition,
-        status: "Offline",
+        status: "Draft",
         owners: base.owners,
         queryDefinitions: [query],
         trend30d: createFlatTrend(),
@@ -597,7 +597,7 @@ function App() {
     }))
   }
 
-  const handleUpdateMetricStatus = (fieldName: string, status: "Active" | "Offline") => {
+  const handleUpdateMetricStatus = (fieldName: string, status: "Active" | "Draft") => {
     const nowIso = new Date().toISOString()
     setData((prev) => ({
       ...prev,

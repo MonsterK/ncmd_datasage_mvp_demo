@@ -20,7 +20,7 @@ export interface TopDimensionPoint {
   value: number
 }
 
-export type MetricStatus = "Active" | "Offline"
+export type MetricStatus = "Active" | "Draft"
 
 export interface Metric {
   id: string
