@@ -672,11 +672,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <header className="sticky top-0 z-50 border-b border-blue-100 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/90 shadow-sm">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200/50 ring-1 ring-blue-500/10">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-200/50 ring-1 ring-blue-500/10">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -691,51 +691,51 @@ function App() {
                 </svg>
               </div>
               <div className="flex flex-col">
-                 <span className="text-xl font-bold tracking-tight text-slate-900 leading-none">DataSage</span>
-                 <span className="text-[10px] text-slate-500 font-medium tracking-wide">Unified Metric Semantics</span>
+                <span className="text-xl font-bold tracking-tight text-slate-900 leading-none">DataSage</span>
+                <span className="text-[10px] text-slate-500 font-medium tracking-wide">Unified Metric Semantics</span>
               </div>
             </div>
 
             <div className="flex items-center gap-3 ml-4 border-l-2 border-slate-100 pl-6">
-               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tenant</span>
-               {data.tenants.length > 0 && (
-                  <Select value={tenantSelectValue} onValueChange={(value) => setActiveGlobalTenantId(value)}>
-                    <SelectTrigger className="h-8 w-[150px] border-slate-200 bg-white text-sm rounded-lg hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:ring-2 focus:ring-blue-100">
-                      <SelectValue placeholder="Select tenant" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(permittedTenants.length ? permittedTenants : uniqueTenants).map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tenant</span>
+              {data.tenants.length > 0 && (
+                <Select value={tenantSelectValue} onValueChange={(value) => setActiveGlobalTenantId(value)}>
+                  <SelectTrigger className="h-8 w-[150px] border-slate-200 bg-white text-sm rounded-lg hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:ring-2 focus:ring-blue-100">
+                    <SelectValue placeholder="Select tenant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(permittedTenants.length ? permittedTenants : uniqueTenants).map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
 
-          <nav className="flex items-center bg-slate-100/80 p-1.5 rounded-full border border-slate-200/50">
-              <TopNavButton
-                label="Home"
-                active={activeTopNav === "home"}
-                onClick={() => handleChangeTopNav("home")}
-              />
-              <TopNavButton
-                label="Metrics & Dimensions"
-                active={activeTopNav === "metrics" || activeTopNav === "dimensions"}
-                onClick={() => handleChangeTopNav("metrics")}
-              />
-              <TopNavButton
-                label="Management"
-                active={activeTopNav === "management"}
-                onClick={() => handleChangeTopNav("management")}
-              />
+          <nav className="flex items-center bg-slate-100/70 p-1.5 rounded-full border border-slate-200/60">
+            <TopNavButton
+              label="Home"
+              active={activeTopNav === "home"}
+              onClick={() => handleChangeTopNav("home")}
+            />
+            <TopNavButton
+              label="Metrics & Dimensions"
+              active={activeTopNav === "metrics" || activeTopNav === "dimensions"}
+              onClick={() => handleChangeTopNav("metrics")}
+            />
+            <TopNavButton
+              label="Management"
+              active={activeTopNav === "management"}
+              onClick={() => handleChangeTopNav("management")}
+            />
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
         {loading && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
              {[1, 2, 3].map((i) => (

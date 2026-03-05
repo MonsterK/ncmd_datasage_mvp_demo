@@ -226,7 +226,7 @@ export function MetricRegistrationView({
       <CardContent className="px-0">
         <form className="space-y-6" onSubmit={handleSubmit}>
           {showLarkImport && (
-            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 shadow-sm">
+            <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Import from LarkSheet</p>
@@ -277,7 +277,7 @@ export function MetricRegistrationView({
 
           {!showLarkImport && (
             <>
-              <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
                   <p className="text-xs text-slate-500 mt-1">Choose tenant and category to bind the default source dataset.</p>
@@ -329,7 +329,7 @@ export function MetricRegistrationView({
                 )}
               </div>
 
-              <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Business information</p>
                   <p className="text-xs text-slate-500 mt-1">Describe the metric in business terms.</p>
@@ -366,7 +366,7 @@ export function MetricRegistrationView({
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Technical information</p>
                   <p className="text-xs text-slate-500 mt-1">Define the technical metadata for the metric.</p>
@@ -409,7 +409,7 @@ export function MetricRegistrationView({
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Query binding</p>
                   <p className="text-xs text-slate-500 mt-1">Bind the metric to its query definition.</p>

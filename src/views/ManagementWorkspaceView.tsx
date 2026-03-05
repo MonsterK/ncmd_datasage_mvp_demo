@@ -396,7 +396,7 @@ export function ManagementWorkspaceView({
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
         <Card className="border-slate-200 shadow-sm rounded-2xl h-fit">
-          <CardHeader className="pb-3 border-b border-slate-50">
+          <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/60">
             <CardTitle className="text-sm font-semibold text-slate-900">Areas</CardTitle>
             <CardDescription className="text-xs text-slate-500">Navigation modules</CardDescription>
           </CardHeader>
@@ -423,7 +423,7 @@ export function ManagementWorkspaceView({
         </Card>
 
         <Card className="border-slate-200 shadow-sm rounded-2xl">
-          <CardHeader className="flex flex-col gap-4 pb-4 border-b border-slate-50 sm:flex-row sm:items-center sm:justify-between">
+          <CardHeader className="flex flex-col gap-4 pb-4 border-b border-slate-100 bg-slate-50/40 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="text-lg font-bold text-slate-900">{header.title}</CardTitle>
               <CardDescription className="text-sm text-slate-500 mt-1">{header.description}</CardDescription>
@@ -431,7 +431,7 @@ export function ManagementWorkspaceView({
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700 hover:shadow-lg transition-all"
+                className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-xs font-medium bg-blue-600 text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:shadow-md transition-all"
                 onClick={handleAddClick}
               >
                 <PlusCircle className="h-3.5 w-3.5" />

@@ -36,7 +36,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between bg-slate-50/50 border-b border-slate-100 p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between bg-white/80 border-b border-slate-200/70 p-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <CardTitle className="text-xl font-bold text-slate-900">{metric.businessName}</CardTitle>
@@ -89,7 +89,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
       <div className="grid gap-6">
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="border-slate-200 shadow-sm rounded-2xl">
-            <CardHeader className="pb-3 border-b border-slate-50">
+            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
               <CardTitle className="text-sm font-bold text-slate-900">Overview</CardTitle>
               <CardDescription className="text-xs text-slate-500">
                 Business definition and ownership details.
@@ -122,7 +122,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
           </Card>
 
           <Card className="border-slate-200 shadow-sm rounded-2xl">
-            <CardHeader className="pb-3 border-b border-slate-50">
+            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
               <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Flame className="h-4 w-4 text-orange-500" />
                 Usage
@@ -149,7 +149,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
         </div>
 
         <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-          <CardHeader className="pb-3 border-b border-slate-50">
+          <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
             <CardTitle className="text-sm font-bold text-slate-900">Definition & Query</CardTitle>
             <CardDescription className="text-xs text-slate-500">
               Technical definition and online query configurations.
@@ -232,7 +232,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
               <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900">
                 <LineChartIcon className="h-4 w-4 text-blue-500" />
                 30 day trend
@@ -264,7 +264,7 @@ export function MetricProfileView({ metric, dimensions, onDeriveMetric, isFavori
           </Card>
 
           <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
               <CardTitle className="text-sm font-bold text-slate-900">Top dimensions</CardTitle>
             </CardHeader>
             <CardContent className="p-4">

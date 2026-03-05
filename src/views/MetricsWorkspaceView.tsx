@@ -546,21 +546,21 @@ export function MetricsWorkspaceView({
             </div>
             
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+              <div className="px-5 py-4 border-b border-slate-200/70 bg-white/70">
                 <div className="flex flex-wrap gap-4 text-xs">
                   <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/3">
-                    <span className="text-[11px] font-semibold text-slate-700">Search</span>
+                    <span className="text-xs font-semibold text-slate-700">Search</span>
                     <Input
-                      className="h-8 text-xs border-slate-200 rounded-lg"
+                      className="h-9 text-xs bg-slate-50 border-slate-200 rounded-lg focus:bg-white"
                       placeholder="Search metrics..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/4">
-                    <span className="text-[11px] font-semibold text-slate-700">Category</span>
+                    <span className="text-xs font-semibold text-slate-700">Category</span>
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="h-8 text-xs border-slate-200 rounded-lg bg-white">
+                      <SelectTrigger className="h-9 text-xs border-slate-200 rounded-lg bg-white">
                         <SelectValue placeholder="All categories" />
                       </SelectTrigger>
                       <SelectContent>
@@ -574,11 +574,11 @@ export function MetricsWorkspaceView({
                     </Select>
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-2 md:basis-1/4">
-                     <span className="text-[11px] font-semibold text-slate-700">Actions</span>
+                    <span className="text-xs font-semibold text-slate-700">Actions</span>
                      <Button
                         type="button"
                         size="sm"
-                        className="h-8 text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all"
+                        className="h-9 text-xs bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all"
                         disabled={selectedFieldNamesForQuery.length === 0}
                         onClick={() => setIsCombinedQuerySheetOpen(true)}
                       >

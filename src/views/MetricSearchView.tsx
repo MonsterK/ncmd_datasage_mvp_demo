@@ -155,8 +155,7 @@ export function MetricSearchView({
 
   return (
     <div className="h-full flex flex-col bg-slate-50/50">
-      {/* Header Section */}
-      <div className="border-b bg-white px-6 py-4 sticky top-0 z-10 shadow-sm">
+      <div className="border-b border-slate-200/70 bg-white/90 px-5 py-3 sticky top-16 z-10 backdrop-blur-md supports-[backdrop-filter]:bg-white/90">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 max-w-xs">
@@ -165,12 +164,12 @@ export function MetricSearchView({
                 placeholder="Search metrics by name, description, or ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-7 h-7 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-[11px]"
+                className="pl-7 h-8 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-xs"
               />
             </div>
             <div className="flex flex-wrap items-center gap-2 ml-auto">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="h-7 text-[11px] w-[160px] bg-white">
+                <SelectTrigger className="h-8 text-xs w-[170px] bg-white">
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -182,7 +181,7 @@ export function MetricSearchView({
               </Select>
 
               <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
-                <SelectTrigger className="h-7 text-[11px] w-[150px] bg-white">
+                <SelectTrigger className="h-8 text-xs w-[160px] bg-white">
                   <SelectValue placeholder="All business owners" />
                 </SelectTrigger>
                 <SelectContent>
@@ -194,7 +193,7 @@ export function MetricSearchView({
               </Select>
 
               <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
-                <SelectTrigger className="h-7 text-[11px] w-[130px] bg-white">
+                <SelectTrigger className="h-8 text-xs w-[140px] bg-white">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -207,7 +206,7 @@ export function MetricSearchView({
                   value={selectedTagId ?? "all"}
                   onValueChange={(value) => onSelectTag(value === "all" ? null : value)}
                 >
-                  <SelectTrigger className="h-7 text-[11px] w-[140px] bg-white">
+                  <SelectTrigger className="h-8 text-xs w-[150px] bg-white">
                     <SelectValue placeholder="All tags" />
                   </SelectTrigger>
                   <SelectContent>
@@ -224,7 +223,7 @@ export function MetricSearchView({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 text-[11px] text-slate-500"
+                className="h-8 text-xs text-slate-500"
                 onClick={() => {
                   setCategoryFilter("all")
                   setBusinessOwnerFilter("all")
@@ -237,8 +236,8 @@ export function MetricSearchView({
                 Reset Filters
               </Button>
             </div>
-            <div className="flex items-center gap-2 border-l pl-3 ml-2">
-               <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+            <div className="flex items-center gap-2 border-l border-slate-200/70 pl-3 ml-2">
+              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -261,8 +260,7 @@ export function MetricSearchView({
         </div>
       </div>
 
-      {/* Results Section */}
-      <div className="flex-1 overflow-auto p-8">
+      <div className="flex-1 overflow-auto px-5 py-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-6">
           
           {hasBulkSelection && (
