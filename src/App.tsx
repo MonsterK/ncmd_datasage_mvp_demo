@@ -469,25 +469,99 @@ function App() {
     }))
   }
 
-  const handleCreateCategory = (payload: { id: string; name: string; description: string }) => {
+  const handleCreateCategory = (payload: { id: string; name: string; description: string; parentId?: string }) => {
     const newCategory: CategoryNode = {
       id: payload.id,
       name: payload.name,
+      description: payload.description,
+      children: [],
     }
 
-    setData((prev) => ({
-      ...prev,
-      categories: [...prev.categories, newCategory],
-    }))
+    if (payload.parentId) {
+      setData((prev) => {
+        const updateCategories = (categories: CategoryNode[]): CategoryNode[] => {
+          return categories.map((cat) => {
+            if (cat.id === payload.parentId) {
+              return {
+                ...cat,
+                children: [...(cat.children || []), newCategory],
+              }
+            }
+            if (cat.children) {
+              return {
+                ...cat,
+                children: updateCategories(cat.children),
+              }
+            }
+            return cat
+          })
+        }
+        return {
+          ...prev,
+          categories: updateCategories(prev.categories),
+        }
+      })
+    } else {
+      setData((prev) => ({
+        ...prev,
+        categories: [...prev.categories, newCategory],
+      }))
+    }
   }
 
-  const handleUpdateCategory = (payload: { id: string; semanticView: { name: string; hiveTables: string[] } }) => {
-    setData((prev) => ({
-      ...prev,
-      categories: prev.categories.map((category) =>
-        category.id === payload.id ? { ...category, semanticView: payload.semanticView } : category
-      ),
-    }))
+  const handleUpdateCategory = (payload: {
+    id: string
+    semanticView?: { name: string; hiveTables: string[] }
+    name?: string
+    description?: string
+  }) => {
+    setData((prev) => {
+      const updateCategories = (categories: CategoryNode[]): CategoryNode[] => {
+        return categories.map((cat) => {
+          if (cat.id === payload.id) {
+            return {
+              ...cat,
+              ...(payload.semanticView ? { semanticView: payload.semanticView } : {}),
+              ...(payload.name ? { name: payload.name } : {}),
+              ...(payload.description ? { description: payload.description } : {}),
+            }
+          }
+          if (cat.children) {
+            return {
+              ...cat,
+              children: updateCategories(cat.children),
+            }
+          }
+          return cat
+        })
+      }
+      return {
+        ...prev,
+        categories: updateCategories(prev.categories),
+      }
+    })
+  }
+
+  const handleDeleteCategory = (id: string) => {
+    setData((prev) => {
+      const deleteCategory = (categories: CategoryNode[]): CategoryNode[] => {
+        return categories
+          .filter((cat) => cat.id !== id)
+          .map((cat) => {
+            if (cat.children) {
+              return {
+                ...cat,
+                children: deleteCategory(cat.children),
+              }
+            }
+            return cat
+          })
+      }
+      return {
+        ...prev,
+        categories: deleteCategory(prev.categories),
+      }
+    })
   }
 
   const handleCreateDimension = (payload: {
@@ -855,6 +929,7 @@ function App() {
                 onUpdateTenant={handleUpdateTenant}
                 onCreateCategory={handleCreateCategory}
                 onUpdateCategory={handleUpdateCategory}
+                onDeleteCategory={handleDeleteCategory}
                 onCreateDimension={handleCreateDimension}
                 onUpdateMetric={handleUpdateMetric}
                 onDeleteMetric={handleDeleteMetric}

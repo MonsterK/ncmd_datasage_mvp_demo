@@ -25,7 +25,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
-import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces } from "lucide-react"
+import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces, Trash2 } from "lucide-react"
 
 import {
   Metric,
@@ -39,7 +39,7 @@ import {
 } from "@/types"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
 
-export type ManagementSection = "metric" | "dimension" | "datasource"
+export type ManagementSection = "metric" | "dimension" | "datasource" | "category"
 
 export interface ManagementWorkspaceViewProps {
   activeSection: ManagementSection
@@ -63,8 +63,9 @@ export interface ManagementWorkspaceViewProps {
       name: string
     }[]
   }) => void
-  onCreateCategory: (payload: { id: string; name: string; description: string }) => void
-  onUpdateCategory: (payload: { id: string; semanticView: { name: string; hiveTables: string[] } }) => void
+  onCreateCategory: (payload: { id: string; name: string; description: string; parentId?: string }) => void
+  onUpdateCategory: (payload: { id: string; semanticView?: { name: string; hiveTables: string[] }; name?: string; description?: string }) => void
+  onDeleteCategory?: (id: string) => void
   onUpdateTenant: (tenant: Tenant) => void
   onNavigateWorkspace: () => void
   onCreateDimension: (payload: {
@@ -117,6 +118,7 @@ export function ManagementWorkspaceView({
   onCreateTenant,
   onCreateCategory,
   onUpdateCategory,
+  onDeleteCategory,
   onUpdateTenant,
   onNavigateWorkspace,
   onCreateDimension,
@@ -143,6 +145,11 @@ export function ManagementWorkspaceView({
   const [semanticViewCategory, setSemanticViewCategory] = useState<CategoryNode | null>(null)
   const [semanticViewName, setSemanticViewName] = useState("")
   const [semanticViewTables, setSemanticViewTables] = useState<string[]>([])
+
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false)
+  const [categorySheetMode, setCategorySheetMode] = useState<"create" | "edit">("create")
+  const [categoryToEdit, setCategoryToEdit] = useState<CategoryNode | null>(null)
+  const [parentCategoryForCreate, setParentCategoryForCreate] = useState<CategoryNode | null>(null)
 
   const tagNameById = useMemo(() => {
     const map = new Map<string, string>()
@@ -404,6 +411,56 @@ export function ManagementWorkspaceView({
             )}
           </div>
         )
+      case "category":
+        return (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-slate-50 border-slate-100 bg-slate-50/50">
+                    <TableHead className="w-[40%] pl-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
+                    <TableHead className="w-[30%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
+                    <TableHead className="w-[15%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Subcategories</TableHead>
+                    <TableHead className="w-[15%] pr-6 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {categories.map((category) => (
+                    <CategoryRow
+                      key={category.id}
+                      category={category}
+                      level={0}
+                      onEdit={(cat) => {
+                        setCategorySheetMode("edit")
+                        setCategoryToEdit(cat)
+                        setIsCategorySheetOpen(true)
+                      }}
+                      onCreateSub={(parent) => {
+                        setCategorySheetMode("create")
+                        setParentCategoryForCreate(parent)
+                        setIsCategorySheetOpen(true)
+                      }}
+                      onDelete={(id) => onDeleteCategory?.(id)}
+                    />
+                  ))}
+                  {categories.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-32 text-center text-xs text-slate-400 italic">
+                        No categories found. Create one to get started.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )
+      case "category":
+        return {
+          title: "Category Management",
+          description: "Manage hierarchical categories for metrics and dimensions.",
+          addLabel: "New Category",
+        }
       default:
         return null
     }
@@ -429,6 +486,12 @@ export function ManagementWorkspaceView({
           description: "Manage tenant categories and their semantic view bindings.",
           addLabel: "Manage Categories",
         }
+      case "category":
+        return {
+          title: "Category Management",
+          description: "Manage hierarchical categories for metrics and dimensions.",
+          addLabel: "New Category",
+        }
       default:
         return {
           title: "Management",
@@ -443,6 +506,11 @@ export function ManagementWorkspaceView({
       onNavigateWorkspace()
     } else if (activeSection === "dimension") {
       onNavigateWorkspace()
+    } else if (activeSection === "category") {
+      setCategorySheetMode("create")
+      setCategoryToEdit(null)
+      setParentCategoryForCreate(null)
+      setIsCategorySheetOpen(true)
     }
   }
 
@@ -471,6 +539,12 @@ export function ManagementWorkspaceView({
               active={activeSection === "datasource"}
               onClick={() => onChangeSection("datasource")}
             />
+            <SidebarItem
+              icon={FolderKanban}
+              label="Categories"
+              active={activeSection === "category"}
+              onClick={() => onChangeSection("category")}
+            />
           </CardContent>
         </Card>
 
@@ -493,7 +567,7 @@ export function ManagementWorkspaceView({
               )}
             </div>
           </CardHeader>
-          <CardContent className="p-0 sm:p-4">{renderSectionContent()}</CardContent>
+          <CardContent className="p-0 sm:p-4">{renderSectionContent() as React.ReactNode}</CardContent>
         </Card>
       </div>
 
@@ -686,7 +760,126 @@ export function ManagementWorkspaceView({
         mode={dimensionSheetMode}
         onUpdateDimension={onUpdateDimension}
       />
+      <NewCategorySheet
+        open={isCategorySheetOpen}
+        onOpenChange={setIsCategorySheetOpen}
+        mode={categorySheetMode}
+        initialCategory={categoryToEdit}
+        parentCategory={parentCategoryForCreate}
+        onCreateCategory={(payload) => {
+          if (parentCategoryForCreate) {
+            onCreateCategory({ ...payload, parentId: parentCategoryForCreate.id })
+          } else {
+            onCreateCategory(payload)
+          }
+          setIsCategorySheetOpen(false)
+        }}
+        onUpdateCategory={(payload) => {
+          onUpdateCategory(payload)
+          setIsCategorySheetOpen(false)
+        }}
+      />
     </div>
+  )
+}
+
+interface NewCategorySheetProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  mode: "create" | "edit"
+  initialCategory?: CategoryNode | null
+  parentCategory?: CategoryNode | null
+  onCreateCategory: (payload: { id: string; name: string; description: string }) => void
+  onUpdateCategory: (payload: { id: string; name: string; description: string }) => void
+}
+
+function NewCategorySheet({
+  open,
+  onOpenChange,
+  mode,
+  initialCategory,
+  parentCategory,
+  onCreateCategory,
+  onUpdateCategory,
+}: NewCategorySheetProps) {
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+
+  useEffect(() => {
+    if (open) {
+      if (mode === "edit" && initialCategory) {
+        setName(initialCategory.name)
+        setDescription(initialCategory.description || "")
+      } else {
+        setName("")
+        setDescription("")
+      }
+    }
+  }, [open, mode, initialCategory])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) return
+
+    if (mode === "edit" && initialCategory) {
+      onUpdateCategory({
+        id: initialCategory.id,
+        name: name.trim(),
+        description: description.trim(),
+      })
+    } else {
+      onCreateCategory({
+        id: `cat-${Date.now()}`,
+        name: name.trim(),
+        description: description.trim(),
+      })
+    }
+    onOpenChange(false)
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full max-w-md p-0">
+        <div className="flex flex-col h-full">
+          <SheetHeader className="px-6 py-4 border-b bg-slate-50/50">
+            <SheetTitle className="text-lg font-semibold text-slate-900">
+              {mode === "edit" ? "Edit Category" : parentCategory ? `New Subcategory under ${parentCategory.name}` : "New Category"}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+            <form id="category-form" onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-slate-700">Name</label>
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. User Growth"
+                  className="h-9 text-xs"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-slate-700">Description</label>
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe this category..."
+                  className="min-h-[100px] text-xs resize-none"
+                />
+              </div>
+              <div className="p-6 border-t bg-slate-50/50 flex justify-end gap-3 absolute bottom-0 left-0 right-0">
+                <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                  {mode === "edit" ? "Update Category" : "Create Category"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -703,6 +896,101 @@ interface SidebarItemProps {
   active?: boolean
   disabled?: boolean
   onClick?: () => void
+}
+
+interface CategoryRowProps {
+  category: CategoryNode
+  level: number
+  onEdit: (cat: CategoryNode) => void
+  onCreateSub: (parent: CategoryNode) => void
+  onDelete: (id: string) => void
+}
+
+function CategoryRow({ category, level, onEdit, onCreateSub, onDelete }: CategoryRowProps) {
+  const [expanded, setExpanded] = useState(false)
+  const hasChildren = category.children && category.children.length > 0
+
+  return (
+    <>
+      <TableRow className="hover:bg-slate-50/50 border-slate-100 transition-colors group">
+        <TableCell className="py-2.5">
+          <div className="flex items-center gap-2" style={{ paddingLeft: `${level * 1.5}rem` }}>
+            {hasChildren ? (
+              <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                className="flex h-5 w-5 items-center justify-center rounded hover:bg-slate-200 text-slate-500"
+              >
+                {expanded ? <span className="text-[10px]">▼</span> : <span className="text-[10px]">▶</span>}
+              </button>
+            ) : (
+              <div className="w-5" />
+            )}
+            <div className="flex items-center gap-2">
+              <FolderKanban className="h-4 w-4 text-blue-500/70" />
+              <span className="text-sm font-medium text-slate-900">{category.name}</span>
+            </div>
+          </div>
+        </TableCell>
+        <TableCell className="text-xs text-slate-500 max-w-[200px] truncate" title={category.description}>
+          {category.description || "-"}
+        </TableCell>
+        <TableCell className="text-xs text-slate-500">
+          {hasChildren ? (
+            <Badge variant="secondary" className="text-[10px] font-normal bg-slate-100 text-slate-600 hover:bg-slate-200">
+              {category.children!.length} subcategories
+            </Badge>
+          ) : (
+            <span className="text-slate-400">-</span>
+          )}
+        </TableCell>
+        <TableCell>
+          <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+              title="Add Subcategory"
+              onClick={() => onCreateSub(category)}
+            >
+              <PlusCircle className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+              title="Edit"
+              onClick={() => onEdit(category)}
+            >
+              <Type className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-slate-500 hover:text-red-600 hover:bg-red-50"
+              title="Delete"
+              onClick={() => onDelete(category.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+      {expanded && hasChildren && category.children!.map((child) => (
+        <CategoryRow
+          key={child.id}
+          category={child}
+          level={level + 1}
+          onEdit={onEdit}
+          onCreateSub={onCreateSub}
+          onDelete={onDelete}
+        />
+      ))}
+    </>
+  )
 }
 
 function SidebarItem({ icon: Icon, label, active, disabled, onClick }: SidebarItemProps) {

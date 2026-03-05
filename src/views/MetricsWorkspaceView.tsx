@@ -430,7 +430,7 @@ export function MetricsWorkspaceView({
                 className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
                 aria-label="View metric library"
               >
-                Metric library
+                Metric Library
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="view"
@@ -690,7 +690,7 @@ export function MetricsWorkspaceView({
                             onNavigateWorkspace()
                           }}
                         >
-                          deploy
+                          delivery
                         </Button>
                         <span>{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : "-"}</span>
                       </div>

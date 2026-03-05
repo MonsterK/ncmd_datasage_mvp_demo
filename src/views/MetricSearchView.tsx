@@ -417,7 +417,7 @@ export function MetricSearchView({
                             onNavigateWorkspace()
                           }}
                         >
-                          deploy
+                          delivery
                         </Button>
                       )}
                       <span>{metric.updatedAt ? new Date(metric.updatedAt).toLocaleDateString() : "-"}</span>

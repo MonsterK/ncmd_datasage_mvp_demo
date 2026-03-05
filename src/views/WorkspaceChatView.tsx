@@ -103,7 +103,7 @@ export function WorkspaceChatView({
             <div>
               <CardTitle className="text-base font-bold text-slate-900">AI Workspace</CardTitle>
               <CardDescription className="text-xs text-slate-500">
-                Create metrics, bind categories, and deploy to target systems via chat.
+                Create metrics, bind categories, and delivery to target systems via chat.
               </CardDescription>
             </div>
             {onBack && (
