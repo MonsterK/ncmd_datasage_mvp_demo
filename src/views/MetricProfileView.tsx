@@ -2,7 +2,6 @@ import { useMemo } from "react"
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
@@ -10,16 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Flame, LineChart as LineChartIcon, Star, Database, Truck, Info } from "lucide-react"
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-} from "recharts"
+import { Flame, LineChart as LineChartIcon, Star, Database, Truck, Info, Share2, History } from "lucide-react"
 
 import { Metric, Dimension } from "@/types"
 import { MetricLineageDag } from "./MetricLineageDag"
@@ -79,14 +69,6 @@ export function MetricProfileView({
               </span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-600">Category: {metric.categoryPath.join(" › ")}</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-600 capitalize">{metric.dataType || "decimal"}</span>
-              {metric.unit && (
-                <>
-                  <span className="text-slate-300">•</span>
-                  <span className="text-slate-600">Unit: {metric.unit}</span>
-                </>
-              )}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -124,7 +106,7 @@ export function MetricProfileView({
 
       <div className="grid gap-6">
         {/* Business Information */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-1">
           <Card className="border-slate-200 shadow-sm rounded-2xl">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
               <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -144,40 +126,6 @@ export function MetricProfileView({
                 <div className="space-y-1">
                   <span className="text-slate-500">Business owner</span>
                   <p className="font-medium text-slate-900">{metric.owners.businessOwner}</p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-slate-500">Data type</span>
-                  <p className="text-slate-700 capitalize">{metric.dataType || "decimal"}</p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-slate-500">Unit</span>
-                  <p className="text-slate-700">{metric.unit || "-"}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-slate-200 shadow-sm rounded-2xl">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Flame className="h-4 w-4 text-orange-500" />
-                Usage
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-500">Heat and bound dimensions summary.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-5">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="rounded-xl border border-orange-100 bg-orange-50 p-4">
-                  <div className="text-xl font-bold text-orange-600">{metric.heat ?? 0}</div>
-                  <div className="text-[10px] font-medium text-orange-700/70 uppercase tracking-wide mt-1">
-                    Usage Heat
-                  </div>
-                </div>
-                <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
-                  <div className="text-xl font-bold text-blue-600">{boundDimensions.length}</div>
-                  <div className="text-[10px] font-medium text-blue-700/70 uppercase tracking-wide mt-1">
-                    Bound Dimensions
-                  </div>
                 </div>
               </div>
             </CardContent>
@@ -289,61 +237,58 @@ export function MetricProfileView({
           </CardContent>
         </Card>
 
-        {/* Context */}
+        {/* Lineage */}
         <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-          <CardHeader className="pb-0 border-b border-slate-100 bg-slate-50/30">
-            <Tabs defaultValue="lineage" className="w-full">
-              <div className="flex items-center justify-between px-4 py-2">
-                <CardTitle className="text-sm font-bold text-slate-900">Context</CardTitle>
-                <TabsList className="h-7 bg-slate-200/50 p-0.5 rounded-lg">
-                  <TabsTrigger value="lineage" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Lineage</TabsTrigger>
-                  <TabsTrigger value="knowledge" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Knowledge</TabsTrigger>
-                  <TabsTrigger value="history" className="h-6 text-[10px] rounded-md px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">Version History</TabsTrigger>
-                </TabsList>
-              </div>
-              <CardContent className="p-4">
-                <TabsContent value="lineage" className="mt-0">
-                  <div className="h-[200px]">
-                    <MetricLineageDag metric={metric} />
-                  </div>
-                </TabsContent>
-                <TabsContent value="knowledge" className="mt-0 text-xs text-slate-600">
-                  <ul className="space-y-2 list-disc pl-4 marker:text-slate-400">
-                    <li>Product requirement documents that define the SGI / QBR program logic.</li>
-                    <li>Runbooks explaining how to debug data issues for this metric.</li>
-                    <li>Business guidelines on how to interpret trends and thresholds.</li>
-                  </ul>
-                </TabsContent>
-                <TabsContent value="history" className="mt-0">
-                  <div className="space-y-3">
-                    {metric.history?.map((log, i) => (
-                      <div key={i} className="flex gap-3 text-xs">
-                        <div className="min-w-[40px] pt-0.5 flex flex-col items-center">
-                          <div className="h-2 w-2 rounded-full bg-blue-500 ring-4 ring-blue-50"></div>
-                          {i !== (metric.history?.length ?? 0) - 1 && <div className="w-px h-full bg-slate-200 my-1"></div>}
-                        </div>
-                        <div className="flex-1 pb-4">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-slate-900">{log.version}</span>
-                            <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleString()}</span>
-                          </div>
-                          <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="outline" className="text-[9px] bg-white px-1.5 py-0 h-4">
-                                {log.action}
-                              </Badge>
-                              <span className="font-medium text-slate-700">{log.editor}</span>
-                            </div>
-                            {log.comment && <p className="text-slate-600 italic">"{log.comment}"</p>}
-                          </div>
-                        </div>
-                      </div>
-                    )) ?? <p className="text-slate-400 italic">No history available.</p>}
-                  </div>
-                </TabsContent>
-              </CardContent>
-            </Tabs>
+          <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+            <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <Share2 className="h-4 w-4 text-blue-500" />
+              Metric Lineage
+            </CardTitle>
+            <CardDescription className="text-xs text-slate-500">Metric lineage.</CardDescription>
           </CardHeader>
+          <CardContent className="p-4">
+            <div className="h-[200px]">
+              <MetricLineageDag metric={metric} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Version History */}
+        <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+          <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+            <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <History className="h-4 w-4 text-purple-500" />
+              Version History
+            </CardTitle>
+            <CardDescription className="text-xs text-slate-500">Change logs for this metric.</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              {metric.history?.map((log, i) => (
+                <div key={i} className="flex gap-3 text-xs">
+                  <div className="min-w-[40px] pt-0.5 flex flex-col items-center">
+                    <div className="h-2 w-2 rounded-full bg-blue-500 ring-4 ring-blue-50"></div>
+                    {i !== (metric.history?.length ?? 0) - 1 && <div className="w-px h-full bg-slate-200 my-1"></div>}
+                  </div>
+                  <div className="flex-1 pb-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-slate-900">{log.version}</span>
+                      <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleString()}</span>
+                    </div>
+                    <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline" className="text-[9px] bg-white px-1.5 py-0 h-4">
+                          {log.action}
+                        </Badge>
+                        <span className="font-medium text-slate-700">{log.editor}</span>
+                      </div>
+                      {log.comment && <p className="text-slate-600 italic">"{log.comment}"</p>}
+                    </div>
+                  </div>
+                </div>
+              )) ?? <p className="text-slate-400 italic">No history available.</p>}
+            </div>
+          </CardContent>
         </Card>
       </div>
     </div>

@@ -398,6 +398,39 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             </Card>
           </div>
 
+          {/* Source Info */}
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Database className="h-4 w-4 text-blue-500" />
+                Source Info
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500">
+                Source table and field mapping.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-5 text-xs">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <span className="text-slate-500">Source Table</span>
+                    <div className="flex items-center gap-2">
+                      <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200 truncate">
+                        {dimension.sourceLink || "Not configured"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-slate-500">Source Field</span>
+                    <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                      {dimension.sourceDimensionField || "Not configured"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
               <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">

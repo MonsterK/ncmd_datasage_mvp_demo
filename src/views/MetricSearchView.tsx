@@ -320,20 +320,6 @@ export function MetricSearchView({
                   <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
                     <span className="truncate max-w-[150px]">{metric.categoryPath.join(" › ")}</span>
                     <div className="flex items-center gap-2">
-                      {onNavigateWorkspace && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-6 px-2 text-[10px]"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onNavigateWorkspace()
-                          }}
-                        >
-                          delivery
-                        </Button>
-                      )}
                       <span>{metric.updatedAt ? new Date(metric.updatedAt).toLocaleDateString() : "-"}</span>
                     </div>
                   </CardFooter>

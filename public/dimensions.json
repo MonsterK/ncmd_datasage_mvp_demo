@@ -11,6 +11,8 @@
       "scope": ["M10N Data"],
       "type": "enum",
       "category": "delivery",
+      "sourceLink": "https://data.example.com/tables/dim_agency",
+      "sourceDimensionField": "agency_id",
       "values": [
         { "code": "AGENCY_A", "label": "Agency A" },
         { "code": "AGENCY_B", "label": "Agency B" },
@@ -38,6 +40,8 @@
       "scope": ["M10N Data"],
       "type": "hierarchy",
       "category": "performance",
+      "sourceLink": "https://data.example.com/tables/dim_region",
+      "sourceDimensionField": "region_code",
       "values": [
         { "code": "NA", "label": "North America" },
         { "code": "EU", "label": "Europe" },
@@ -72,6 +76,8 @@
       "scope": ["M10N Data"],
       "type": "enum",
       "category": "creative",
+      "sourceLink": "https://data.example.com/tables/dim_platform",
+      "sourceDimensionField": "platform_name",
       "values": [
         { "code": "SHORT_VIDEO", "label": "Short Video" },
         { "code": "LIVE", "label": "Live Streaming" },
@@ -99,6 +105,8 @@
       "scope": ["M10N Data"],
       "type": "enum",
       "category": "integrity",
+      "sourceLink": "https://data.example.com/tables/dim_vertical",
+      "sourceDimensionField": "vertical_id",
       "values": [
         { "code": "E_COM", "label": "E-commerce" },
         { "code": "GAMING", "label": "Gaming" },
