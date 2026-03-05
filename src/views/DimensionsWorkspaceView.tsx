@@ -233,7 +233,9 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                   </CardContent>
 
                   <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
-                    <span className="truncate max-w-[150px]">{dim.category ?? "Uncategorized"}</span>
+                    <span className="truncate max-w-[150px]">
+                      {dim.categoryPath?.join(" › ") ?? dim.category ?? "Uncategorized"}
+                    </span>
                     <span>{dim.updatedAt ? new Date(dim.updatedAt).toLocaleDateString() : "-"}</span>
                   </CardFooter>
                 </Card>
@@ -271,7 +273,9 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">{d.tenant}</TableCell>
-                      <TableCell className="text-xs text-slate-600">{d.category ?? "-"}</TableCell>
+                      <TableCell className="text-xs text-slate-600">
+                        {d.categoryPath?.join(" › ") ?? d.category ?? "-"}
+                      </TableCell>
                       <TableCell className="text-xs text-slate-600">{d.boundMetricFieldNames.length} metrics</TableCell>
                       <TableCell className="text-xs text-slate-500 text-right">{d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : "-"}</TableCell>
                     </TableRow>
@@ -320,10 +324,12 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             </Badge>
             <span className="text-slate-300">•</span>
             <span className="text-slate-600">Tenant: {dimension.tenant}</span>
-            {dimension.category && (
+            {(dimension.categoryPath?.length || dimension.category) && (
               <>
                 <span className="text-slate-300">•</span>
-                <span className="text-slate-600">Category: {dimension.category}</span>
+                <span className="text-slate-600">
+                  Category: {dimension.categoryPath?.join(" › ") ?? dimension.category}
+                </span>
               </>
             )}
             <span className="text-slate-300">•</span>

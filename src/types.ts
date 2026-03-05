@@ -78,6 +78,7 @@ export interface Dimension {
     techOwner: string
   }
   category?: string
+  categoryPath?: string[]
   sourceLink?: string
   sourceDimensionField?: string
   technicalDefinition?: string
@@ -118,14 +119,14 @@ export interface CategoryNode {
   description?: string
   children?: CategoryNode[]
   metricFieldNames?: string[]
+  semanticView?: {
+    name: string
+    hiveTables: string[]
+  }
 }
 
 export interface TenantCategory {
   name: string
-  dataSource?: {
-    type: string
-    link: string
-  }
 }
 
 export interface Tenant {

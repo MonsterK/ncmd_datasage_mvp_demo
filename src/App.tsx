@@ -442,8 +442,6 @@ function App() {
     description: string
     categories: {
       name: string
-      sourceType: string
-      sourceLink: string
     }[]
   }) => {
     setData((prev) => ({
@@ -455,13 +453,9 @@ function App() {
           name: payload.name,
           description: payload.description,
           permitted: true,
-          categories: payload.categories.map(c => ({
-            name: c.name,
-            dataSource: {
-              type: c.sourceType,
-              link: c.sourceLink,
-            }
-          }))
+        categories: payload.categories.map((c) => ({
+          name: c.name,
+        })),
         },
       ],
     }))
@@ -494,6 +488,7 @@ function App() {
     technicalDefinition: string
     description: string
     category: string
+    categoryPath: string[]
     tenantId: string
     sourceLink: string
     sourceDimensionField: string
@@ -520,6 +515,7 @@ function App() {
       },
       technicalDefinition: payload.technicalDefinition,
       category: payload.category,
+      categoryPath: payload.categoryPath,
       sourceLink: payload.sourceLink,
       sourceDimensionField: payload.sourceDimensionField,
       createdAt: nowIso,
@@ -625,6 +621,7 @@ function App() {
     technicalDefinition: string
     description: string
     category: string
+    categoryPath: string[]
     tenantId: string
     sourceLink: string
     sourceDimensionField: string
@@ -643,6 +640,7 @@ function App() {
               description: payload.description,
               technicalDefinition: payload.technicalDefinition,
               category: payload.category,
+              categoryPath: payload.categoryPath,
               tenant: payload.tenantId || d.tenant,
               sourceLink: payload.sourceLink,
               sourceDimensionField: payload.sourceDimensionField,
@@ -788,6 +786,7 @@ function App() {
                 tenants={data.tenants}
                 dimensionTree={data.dimensionTree}
                 dimensions={data.dimensions}
+                categories={data.categories}
                 tags={tags}
                 activeGlobalTenantId={activeGlobalTenantId}
                 onOpenMetric={handleOpenMetricProfile}

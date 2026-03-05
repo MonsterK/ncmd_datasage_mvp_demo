@@ -24,6 +24,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces } from "lucide-react"
 
 import {
@@ -60,8 +61,6 @@ export interface ManagementWorkspaceViewProps {
     description: string
     categories: {
       name: string
-      sourceType: string
-      sourceLink: string
     }[]
   }) => void
   onCreateCategory: (payload: { id: string; name: string; description: string }) => void
@@ -74,6 +73,7 @@ export interface ManagementWorkspaceViewProps {
     technicalDefinition: string
     description: string
     category: string
+    categoryPath: string[]
     tenantId: string
     sourceLink: string
     sourceDimensionField: string
@@ -87,6 +87,7 @@ export interface ManagementWorkspaceViewProps {
     technicalDefinition: string
     description: string
     category: string
+    categoryPath: string[]
     tenantId: string
     sourceLink: string
     sourceDimensionField: string
@@ -295,39 +296,41 @@ export function ManagementWorkspaceView({
         )
       case "datasource":
         const activeTenant = tenants.find((t) => t.id === activeTenantId)
+        const topLevelCategories = new Map(categories.map((c) => [c.name, c]))
         return (
           <div className="space-y-4">
             {activeTenant ? (
               activeTenant.categories && activeTenant.categories.length > 0 ? (
                 <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="grid grid-cols-[minmax(0,1fr)_140px_minmax(0,1.2fr)] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-400 bg-slate-50">
+                  <div className="grid grid-cols-[minmax(0,1fr)_180px_minmax(0,1.2fr)] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-400 bg-slate-50">
                     <span>Category</span>
-                    <span>Source Type</span>
-                    <span>Datasource Link</span>
+                    <span>Semantic View</span>
+                    <span>Hive CDM Tables</span>
                   </div>
                   <div className="divide-y divide-slate-100">
-                    {activeTenant.categories.map((cat, i) => (
-                      <div key={i} className="grid grid-cols-[minmax(0,1fr)_140px_minmax(0,1.2fr)] gap-3 px-4 py-3 text-xs items-center">
-                        <div className="font-semibold text-slate-900">{cat.name}</div>
-                        <div className="text-slate-600">
-                          {cat.dataSource?.type ?? "—"}
+                    {activeTenant.categories.map((cat, i) => {
+                      const category = topLevelCategories.get(cat.name)
+                      const semanticView = category?.semanticView
+                      return (
+                        <div key={i} className="grid grid-cols-[minmax(0,1fr)_180px_minmax(0,1.2fr)] gap-3 px-4 py-3 text-xs items-center">
+                          <div className="font-semibold text-slate-900">{cat.name}</div>
+                          <div className="text-slate-500">{semanticView?.name ?? "—"}</div>
+                          <div className="text-slate-500">
+                            {semanticView?.hiveTables?.length ? (
+                              <div className="flex flex-wrap gap-1">
+                                {semanticView.hiveTables.map((table) => (
+                                  <span key={table} className="px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-[10px]">
+                                    {table}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic">No semantic view bound</span>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-slate-500">
-                          {cat.dataSource ? (
-                            <a
-                              href={cat.dataSource.link}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-blue-600 hover:underline truncate block max-w-full"
-                            >
-                              {cat.dataSource.link}
-                            </a>
-                          ) : (
-                            <span className="text-slate-400 italic">No datasource bound</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               ) : (
@@ -359,9 +362,9 @@ export function ManagementWorkspaceView({
         }
       case "datasource":
         return {
-          title: "Datasource management",
-          description: "Manage categories and data sources for the current tenant.",
-          addLabel: "Manage Categories & Datasources",
+          title: "Semantic view management",
+          description: "Manage tenant categories and their semantic view bindings.",
+          addLabel: "Manage Categories",
         }
       default:
         return {
@@ -417,7 +420,7 @@ export function ManagementWorkspaceView({
             />
             <SidebarItem
               icon={Home}
-              label="Datasources"
+              label="Semantic Views"
               active={activeSection === "datasource"}
               onClick={() => onChangeSection("datasource")}
             />
@@ -457,6 +460,7 @@ export function ManagementWorkspaceView({
         tenants={tenants}
         dimensions={dimensions}
         metrics={metrics}
+        categories={categories}
         onRegisterMetric={onRegisterMetric}
         defaultTenantId={activeTenantId}
         initialMetric={metricToEdit}
@@ -487,6 +491,7 @@ export function ManagementWorkspaceView({
           setIsNewDimensionSheetOpen(open)
         }}
         tenants={tenants}
+        categories={categories}
         defaultTenantId={activeTenantId}
         onCreateDimension={onCreateDimension}
         initialDimension={dimensionToEdit}
@@ -537,6 +542,7 @@ interface NewMetricSheetProps {
   tenants: Tenant[]
   dimensions: Dimension[]
   metrics: Metric[]
+  categories: CategoryNode[]
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric | null
   mode?: "create" | "edit"
@@ -551,6 +557,7 @@ export function NewMetricSheet({
   tenants,
   dimensions,
   metrics,
+  categories,
   onRegisterMetric,
   initialMetric,
   mode = "create",
@@ -598,6 +605,7 @@ export function NewMetricSheet({
               tenants={tenants}
               dimensions={dimensions}
               metrics={metrics}
+              categories={categories}
               defaultTenantId={defaultTenantId}
               initialMetric={isEditMode ? initialMetric ?? undefined : undefined}
               disableFieldNameEditing={Boolean(isEditMode)}
@@ -1208,8 +1216,6 @@ interface NewTenantSheetProps {
     description: string
     categories: {
       name: string
-      sourceType: string
-      sourceLink: string
     }[]
   }) => void
 }
@@ -1221,13 +1227,9 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
   
   const [categories, setCategories] = useState<{
     name: string
-    sourceType: string
-    sourceLink: string
   }[]>([
     {
-      name: "",
-      sourceType: "Fabric model",
-      sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
+      name: ""
     }
   ])
 
@@ -1238,11 +1240,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
       setId("")
       setName("")
       setDescription("")
-      setCategories([{
-        name: "",
-        sourceType: "Fabric model",
-        sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
-      }])
+      setCategories([{ name: "" }])
       setMessage(null)
     }
   }, [open])
@@ -1254,11 +1252,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
   }
 
   const handleAddCategory = () => {
-    setCategories([...categories, {
-      name: "",
-      sourceType: "Fabric model",
-      sourceLink: "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
-    }])
+    setCategories([...categories, { name: "" }])
   }
 
   const handleRemoveCategory = (index: number) => {
@@ -1278,10 +1272,10 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
       return
     }
 
-    const validCategories = categories.filter(c => c.name.trim() && c.sourceType.trim() && c.sourceLink.trim())
+    const validCategories = categories.filter(c => c.name.trim())
     
     if (validCategories.length === 0) {
-      setMessage("At least one valid category (with Name, Type and Link) is required.")
+      setMessage("At least one valid category name is required.")
       return
     }
     
@@ -1290,9 +1284,7 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
       name: trimmedName,
       description: description.trim(),
       categories: validCategories.map(c => ({
-        name: c.name.trim(),
-        sourceType: c.sourceType.trim(),
-        sourceLink: c.sourceLink.trim()
+        name: c.name.trim()
       }))
     })
     setMessage(null)
@@ -1366,26 +1358,6 @@ export function NewTenantSheet({ open, onOpenChange, onCreateTenant }: NewTenant
                         placeholder="e.g. Performance"
                        />
                      </div>
-                     <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-zinc-500">Source Type</label>
-                          <Input
-                            className="h-7 text-xs bg-white"
-                            value={cat.sourceType}
-                            onChange={(e) => handleCategoryChange(index, "sourceType", e.target.value)}
-                            placeholder="e.g. Hive"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-zinc-500">Source Link</label>
-                          <Input
-                            className="h-7 text-xs bg-white"
-                            value={cat.sourceLink}
-                            onChange={(e) => handleCategoryChange(index, "sourceLink", e.target.value)}
-                            placeholder="https://..."
-                          />
-                        </div>
-                     </div>
                    </div>
                  ))}
                </div>
@@ -1417,12 +1389,14 @@ interface NewDimensionSheetProps {
     technicalDefinition: string
     tenantId: string
     category: string
+    categoryPath: string[]
     description: string
     sourceLink: string
     sourceDimensionField: string
     values: { code: string; label: string }[]
   }) => void
   tenants?: Tenant[]
+  categories: CategoryNode[]
   defaultTenantId?: string | null
   initialDimension?: Dimension | null
   mode?: "create" | "edit"
@@ -1434,6 +1408,7 @@ interface NewDimensionSheetProps {
     technicalDefinition: string
     tenantId: string
     category: string
+    categoryPath: string[]
     description: string
     sourceLink: string
     sourceDimensionField: string
@@ -1446,6 +1421,7 @@ export function NewDimensionSheet({
   onOpenChange,
   onCreateDimension,
   tenants = [],
+  categories,
   defaultTenantId = null,
   initialDimension,
   mode = "create",
@@ -1457,7 +1433,7 @@ export function NewDimensionSheet({
   const [techOwner, setTechOwner] = useState("")
   const [technicalDefinition, setTechnicalDefinition] = useState("")
   const [selectedTenantId, setSelectedTenantId] = useState<string>("")
-  const [selectedCategoryName, setSelectedCategoryName] = useState<string>("")
+  const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([])
   const [description, setDescription] = useState("")
   const [sourceLink, setSourceLink] = useState("")
   const [sourceDimensionField, setSourceDimensionField] = useState("")
@@ -1479,7 +1455,10 @@ export function NewDimensionSheet({
       setTechOwner(initialDimension.owners?.techOwner ?? "")
       setTechnicalDefinition(initialDimension.technicalDefinition ?? "")
       setSelectedTenantId(initialDimension.tenant ?? "")
-      setSelectedCategoryName(initialDimension.category ?? "")
+      setSelectedCategoryPath(
+        initialDimension.categoryPath ??
+          (initialDimension.category ? [initialDimension.category] : [])
+      )
       setDescription(initialDimension.description)
       setSourceLink(initialDimension.sourceLink ?? "")
       setSourceDimensionField(initialDimension.sourceDimensionField ?? "")
@@ -1491,7 +1470,7 @@ export function NewDimensionSheet({
       setTechOwner("")
       setTechnicalDefinition("")
       setSelectedTenantId(defaultTenantId ?? tenants[0]?.id ?? "")
-      setSelectedCategoryName("")
+      setSelectedCategoryPath([])
       setDescription("")
       setSourceLink("")
       setSourceDimensionField("")
@@ -1508,26 +1487,19 @@ export function NewDimensionSheet({
     [tenants, selectedTenantId],
   )
 
-  const availableCategories = useMemo(
-    () => currentTenant?.categories ?? [],
-    [currentTenant],
-  )
+  const availableTopCategories = useMemo(() => {
+    const permitted = currentTenant?.categories?.map((c) => c.name) ?? []
+    if (permitted.length === 0) return categories
+    return categories.filter((category) => permitted.includes(category.name))
+  }, [categories, currentTenant])
 
   useEffect(() => {
-    if (!selectedCategoryName) return
-    const exists = availableCategories.some((c) => c.name === selectedCategoryName)
+    if (!selectedCategoryPath.length) return
+    const exists = availableTopCategories.some((c) => c.name === selectedCategoryPath[0])
     if (!exists) {
-      setSelectedCategoryName("")
+      setSelectedCategoryPath([])
     }
-  }, [availableCategories, selectedCategoryName])
-
-  useEffect(() => {
-    if (!currentTenant || !selectedCategoryName) return
-    const category = currentTenant.categories?.find((c) => c.name === selectedCategoryName)
-    if (category?.dataSource?.link && !sourceLink) {
-      setSourceLink(category.dataSource.link)
-    }
-  }, [currentTenant, selectedCategoryName, sourceLink])
+  }, [availableTopCategories, selectedCategoryPath])
 
   const fieldGroups = useMemo(
     () => ({
@@ -1583,12 +1555,13 @@ export function NewDimensionSheet({
     const trimmedBusinessName = businessName.trim()
     const trimmedDescription = description.trim()
     const trimmedTechnicalDefinition = technicalDefinition.trim()
+    const trimmedCategoryPath = selectedCategoryPath.filter(Boolean)
     if (
       !trimmedBusinessName ||
       !trimmedDescription ||
       (!isEditMode && !trimmedFieldName) ||
       !selectedTenantId ||
-      !selectedCategoryName ||
+      trimmedCategoryPath.length === 0 ||
       !trimmedTechnicalDefinition ||
       !businessOwner.trim() ||
       !techOwner.trim()
@@ -1605,7 +1578,8 @@ export function NewDimensionSheet({
         techOwner: techOwner.trim(),
         technicalDefinition: trimmedTechnicalDefinition,
         tenantId: selectedTenantId,
-        category: selectedCategoryName,
+        category: trimmedCategoryPath.join(" / "),
+        categoryPath: trimmedCategoryPath,
         description: trimmedDescription,
         sourceLink: sourceLink.trim(),
         sourceDimensionField: sourceDimensionField.trim(),
@@ -1619,7 +1593,8 @@ export function NewDimensionSheet({
         techOwner: techOwner.trim(),
         technicalDefinition: trimmedTechnicalDefinition,
         tenantId: selectedTenantId,
-        category: selectedCategoryName,
+        category: trimmedCategoryPath.join(" / "),
+        categoryPath: trimmedCategoryPath,
         description: trimmedDescription,
         sourceLink: sourceLink.trim(),
         sourceDimensionField: sourceDimensionField.trim(),
@@ -1666,20 +1641,12 @@ export function NewDimensionSheet({
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-medium text-slate-500">Category</label>
-                    <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
-                      <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableCategories.length > 0 ? (
-                          availableCategories.map((c) => (
-                            <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
-                          ))
-                        ) : (
-                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <CategoryTreeSelect
+                      categories={availableTopCategories}
+                      value={selectedCategoryPath}
+                      onChange={setSelectedCategoryPath}
+                      placeholder="Select Category"
+                    />
                   </div>
                 </div>
               </div>
@@ -2010,8 +1977,6 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
 
   // Form state
   const [name, setName] = useState("")
-  const [dataSourceType, setDataSourceType] = useState("")
-  const [dataSourceLink, setDataSourceLink] = useState("")
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -2023,8 +1988,6 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
 
   const resetForm = () => {
     setName("")
-    setDataSourceType("")
-    setDataSourceLink("")
     setIsEditing(false)
     setEditingIndex(-1)
     setError(null)
@@ -2033,8 +1996,6 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
   const handleEdit = (index: number) => {
     const cat = categories[index]
     setName(cat.name)
-    setDataSourceType(cat.dataSource?.type || "")
-    setDataSourceLink(cat.dataSource?.link || "")
     setIsEditing(true)
     setEditingIndex(index)
     setError(null)
@@ -2055,10 +2016,6 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
 
     const newCategory: TenantCategory = {
       name: name.trim(),
-      dataSource: dataSourceType || dataSourceLink ? {
-        type: dataSourceType.trim(),
-        link: dataSourceLink.trim()
-      } : undefined
     }
 
     let newCategories = [...categories]
@@ -2094,11 +2051,9 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
                    <div key={idx} className="p-3 flex items-center justify-between hover:bg-slate-50">
                      <div>
                        <div className="text-sm font-medium text-slate-900">{cat.name}</div>
-                       {cat.dataSource && (
-                         <div className="text-xs text-slate-500 mt-0.5">
-                           Bound to {cat.dataSource.type} (<a href={cat.dataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">{cat.dataSource.link}</a>)
-                         </div>
-                       )}
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        Uses semantic view from the top-level category.
+                      </div>
                      </div>
                      <div className="flex gap-2">
                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => handleEdit(idx)}>Edit</Button>
@@ -2122,16 +2077,9 @@ function TenantCategoriesSheet({ open, onOpenChange, tenant, onUpdateTenant }: T
                  <label className="text-xs font-medium text-slate-700">Name</label>
                 <Input className="h-8 text-xs" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Delivery" />
                </div>
-               <div className="grid grid-cols-2 gap-3">
-                 <div className="space-y-1">
-                   <label className="text-xs font-medium text-slate-700">Data Source Type</label>
-                   <Input className="h-8 text-xs" value={dataSourceType} onChange={e => setDataSourceType(e.target.value)} placeholder="e.g. Hive" />
-                 </div>
-                 <div className="space-y-1">
-                   <label className="text-xs font-medium text-slate-700">Data Source Link</label>
-                   <Input className="h-8 text-xs" value={dataSourceLink} onChange={e => setDataSourceLink(e.target.value)} placeholder="https://..." />
-                 </div>
-               </div>
+              <div className="text-[11px] text-slate-500">
+                Semantic view is managed on the category tree and auto-applied to tenant categories.
+              </div>
              </div>
              <div className="flex justify-between items-center pt-2">
                {error ? <p className="text-xs text-red-600">{error}</p> : <div></div>}

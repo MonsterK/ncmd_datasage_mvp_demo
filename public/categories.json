@@ -3,21 +3,101 @@
     {
       "id": "category-delivery",
       "name": "delivery",
+      "semanticView": {
+        "name": "delivery_semantic_view",
+        "hiveTables": ["cdm_delivery_daily", "cdm_ad_impressions", "cdm_order_facts"]
+      },
+      "children": [
+        {
+          "id": "category-delivery-channel",
+          "name": "channel",
+          "children": [
+            { "id": "category-delivery-channel-paid", "name": "paid" },
+            { "id": "category-delivery-channel-organic", "name": "organic" }
+          ]
+        },
+        {
+          "id": "category-delivery-region",
+          "name": "region",
+          "children": [
+            { "id": "category-delivery-region-apac", "name": "apac" },
+            { "id": "category-delivery-region-emea", "name": "emea" }
+          ]
+        }
+      ],
       "metricFieldNames": ["spp_revenue", "auto_ads_revenue"]
     },
     {
       "id": "category-performance",
       "name": "performance",
+      "semanticView": {
+        "name": "performance_semantic_view",
+        "hiveTables": ["cdm_campaign_daily", "cdm_performance_stats", "cdm_bid_strategy"]
+      },
+      "children": [
+        {
+          "id": "category-performance-objective",
+          "name": "objective",
+          "children": [
+            { "id": "category-performance-objective-roas", "name": "roas" },
+            { "id": "category-performance-objective-cpa", "name": "cpa" }
+          ]
+        },
+        {
+          "id": "category-performance-funnel",
+          "name": "funnel",
+          "children": [
+            { "id": "category-performance-funnel-upper", "name": "upper" },
+            { "id": "category-performance-funnel-lower", "name": "lower" }
+          ]
+        }
+      ],
       "metricFieldNames": ["spp_revenue_penetration", "na_spp_revenue_penetration"]
     },
     {
       "id": "category-creative",
       "name": "creative",
+      "semanticView": {
+        "name": "creative_semantic_view",
+        "hiveTables": ["cdm_creative_assets", "cdm_asset_events", "cdm_creator_profile"]
+      },
+      "children": [
+        {
+          "id": "category-creative-format",
+          "name": "format",
+          "children": [
+            { "id": "category-creative-format-video", "name": "video" },
+            { "id": "category-creative-format-image", "name": "image" }
+          ]
+        },
+        {
+          "id": "category-creative-quality",
+          "name": "quality",
+          "children": [
+            { "id": "category-creative-quality-high", "name": "high" },
+            { "id": "category-creative-quality-low", "name": "low" }
+          ]
+        }
+      ],
       "metricFieldNames": ["active_monetized_creators", "creator_rev_per_creator"]
     },
     {
       "id": "category-integrity",
       "name": "integrity",
+      "semanticView": {
+        "name": "integrity_semantic_view",
+        "hiveTables": ["cdm_integrity_flags", "cdm_risk_events"]
+      },
+      "children": [
+        {
+          "id": "category-integrity-safety",
+          "name": "safety",
+          "children": [
+            { "id": "category-integrity-safety-policy", "name": "policy" },
+            { "id": "category-integrity-safety-review", "name": "review" }
+          ]
+        }
+      ],
       "metricFieldNames": ["qbr_revenue"]
     }
   ]

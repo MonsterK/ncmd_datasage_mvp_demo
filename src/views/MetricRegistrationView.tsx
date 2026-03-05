@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 
 import { NewMetricPayload, CategoryNode, Metric, Tenant, Dimension, DispatchHistory, DispatchTargetType } from "@/types"
+import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 import { mockResolveCdm, CdmFieldRecommendation } from "@/mocks/cdm"
 import { mockValidateDispatch, CdmBindingItem, DispatchValidationResult } from "@/mocks/production"
 import { Calendar, Hash, Search, Type, Braces } from "lucide-react"
@@ -26,6 +27,7 @@ export interface MetricRegistrationViewProps {
   tenants: Tenant[]
   dimensions: Dimension[]
   metrics: Metric[]
+  categories: CategoryNode[]
   onRegisterMetric: (payload: NewMetricPayload) => void
   initialMetric?: Metric
   disableFieldNameEditing?: boolean
@@ -38,6 +40,7 @@ export function MetricRegistrationView({
   tenants,
   dimensions,
   metrics,
+  categories,
   onRegisterMetric,
   initialMetric,
   disableFieldNameEditing,
@@ -51,20 +54,27 @@ export function MetricRegistrationView({
     initialMetric?.tenant ?? defaultTenantId ?? (tenants.length > 0 ? tenants[0].id : "")
   )
 
-  const [selectedCategoryName, setSelectedCategoryName] = useState<string>(
-    initialMetric?.categoryPath?.[0] ?? ""
+  const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>(
+    initialMetric?.categoryPath ?? []
   )
-  
-  const [linkedDataSource, setLinkedDataSource] = useState<{ type: string; link: string } | null>(null)
 
   // Update available categories when tenant changes
   const currentTenant = useMemo(() => {
     return tenants.find(t => t.id === selectedTenantId)
   }, [tenants, selectedTenantId])
 
-  const availableCategories = useMemo(() => {
-    return currentTenant?.categories ?? []
-  }, [currentTenant])
+  const availableTopCategories = useMemo(() => {
+    const permitted = currentTenant?.categories?.map((c) => c.name) ?? []
+    if (permitted.length === 0) return categories
+    return categories.filter((category) => permitted.includes(category.name))
+  }, [categories, currentTenant])
+
+  const selectedTopCategory = useMemo(() => {
+    if (!selectedCategoryPath.length) return null
+    return availableTopCategories.find((category) => category.name === selectedCategoryPath[0]) ?? null
+  }, [availableTopCategories, selectedCategoryPath])
+
+  const semanticView = selectedTopCategory?.semanticView ?? null
 
   useEffect(() => {
     if (initialMetric?.tenant) return
@@ -74,31 +84,20 @@ export function MetricRegistrationView({
   }, [defaultTenantId, initialMetric?.tenant, selectedTenantId])
 
   useEffect(() => {
-    if (!currentTenant || !selectedCategoryName) return
-    const exists = currentTenant.categories?.some((c) => c.name === selectedCategoryName)
+    if (!selectedCategoryPath.length) return
+    const exists = availableTopCategories.some((c) => c.name === selectedCategoryPath[0])
     if (!exists) {
-      setSelectedCategoryName("")
+      setSelectedCategoryPath([])
     }
-  }, [currentTenant, selectedCategoryName])
+  }, [availableTopCategories, selectedCategoryPath])
 
   useEffect(() => {
-    if (!selectedCategoryName || !currentTenant) {
-      setLinkedDataSource(null)
+    if (!semanticView) {
       setQuerySource("")
       return
     }
-    const cat = currentTenant.categories?.find(c => c.name === selectedCategoryName)
-    if (cat && cat.dataSource) {
-      setLinkedDataSource(cat.dataSource)
-      const isOriginalCategory = initialMetric?.categoryPath?.[0] === selectedCategoryName
-      if (!initialMetric || !baseQuery?.source || !isOriginalCategory) {
-        setQuerySource(cat.dataSource.link ?? "")
-      }
-    } else {
-      setLinkedDataSource(null)
-      setQuerySource("")
-    }
-  }, [selectedCategoryName, currentTenant, initialMetric, baseQuery?.source])
+    setQuerySource(semanticView.name)
+  }, [semanticView])
 
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
@@ -132,7 +131,6 @@ export function MetricRegistrationView({
   )
 
   const [submittedFieldName, setSubmittedFieldName] = useState<string | null>(null)
-  const [currentStep, setCurrentStep] = useState(0)
   const [definitionErrors, setDefinitionErrors] = useState<string[]>([])
   const [cdmBindings, setCdmBindings] = useState<
     Array<CdmFieldRecommendation & { tableName: string; notFound: boolean }>
@@ -226,7 +224,6 @@ export function MetricRegistrationView({
   } as const
 
   const isEditMode = Boolean(initialMetric)
-  const isStepFlowEnabled = !isEditMode && !showLarkImport
 
   useEffect(() => {
     if (!onExpressionChange) return
@@ -246,7 +243,7 @@ export function MetricRegistrationView({
       metrics.some((m) => m.fieldName === trimmedFieldName && m.fieldName !== initialMetric?.fieldName)
 
     if (!selectedTenantId) errors.push("Tenant is required.")
-    if (!selectedCategoryName) errors.push("Category is required.")
+    if (!selectedCategoryPath.length) errors.push("Category is required.")
     if (!trimmedBusinessName) errors.push("Business name is required.")
     if (!trimmedDefinition) errors.push("Business definition is required.")
     if (!trimmedBusinessOwner) errors.push("Business owner is required.")
@@ -295,25 +292,6 @@ export function MetricRegistrationView({
           : binding,
       ),
     )
-  }
-
-  const handleNextFromDefinition = () => {
-    if (!validateDefinition()) return
-    setCurrentStep(1)
-  }
-
-  const handleNextFromCdm = () => {
-    if (!cdmBindings.length) {
-      setCdmError("Run smart analysis to generate CDM bindings.")
-      return
-    }
-    const hasMissing = cdmBindings.some((binding) => !binding.notFound && !binding.tableName.trim())
-    if (hasMissing) {
-      setCdmError("Please select a table for all parsed fields or mark them as not found.")
-      return
-    }
-    setCdmError(null)
-    setCurrentStep(2)
   }
 
   const runDispatchSimulation = (bindings: CdmBindingItem[]) => {
@@ -368,7 +346,6 @@ export function MetricRegistrationView({
               dispatchedAt: nowIso,
               fieldCount: bindings.length,
             })
-            setCurrentStep(3)
             return
           }
           setDispatchRunning(false)
@@ -381,7 +358,6 @@ export function MetricRegistrationView({
             fieldCount: bindings.length,
           }
           setDispatchResult(summary)
-          setCurrentStep(3)
           const payload: NewMetricPayload = {
             businessName: businessName.trim(),
             businessDefinition: businessDefinition.trim(),
@@ -389,7 +365,7 @@ export function MetricRegistrationView({
             technicalDefinition: technicalDefinition.trim(),
             businessOwner: businessOwner.trim(),
             techOwner: techOwner.trim(),
-            categoryPath: [selectedCategoryName],
+            categoryPath: selectedCategoryPath,
             tenantId: selectedTenantId,
             larkSheetLink: larkSheetLink.trim() || undefined,
             dispatchSummary: summary,
@@ -434,7 +410,6 @@ export function MetricRegistrationView({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (isStepFlowEnabled) return
     if (!validateDefinition()) return
 
     const payload: NewMetricPayload = {
@@ -444,7 +419,7 @@ export function MetricRegistrationView({
       technicalDefinition,
       businessOwner,
       techOwner,
-      categoryPath: [selectedCategoryName], // Flat category
+      categoryPath: selectedCategoryPath,
       tenantId: selectedTenantId,
       larkSheetLink: larkSheetLink.trim() || undefined,
       query: {
@@ -516,32 +491,101 @@ export function MetricRegistrationView({
                   </Button>
                 </div>
               </div>
+
+              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Field configuration</p>
+                  <p className="text-xs text-slate-500 mt-1">Configure data type, units, and analysis dimensions.</p>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Data type</label>
+                    <Select value={dataType} onValueChange={setDataType}>
+                      <SelectTrigger className="h-9 text-xs bg-white border-slate-200 focus:ring-blue-100">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="decimal">Decimal</SelectItem>
+                        <SelectItem value="percentage">Percentage</SelectItem>
+                        <SelectItem value="integer">Integer</SelectItem>
+                        <SelectItem value="currency">Currency</SelectItem>
+                        <SelectItem value="string">String</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-700">Unit</label>
+                    <Input
+                      placeholder="USD, %, etc."
+                      value={unit}
+                      onChange={(e) => setUnit(e.target.value)}
+                      className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700">Analysis dimensions</label>
+                  <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200 max-h-[150px] overflow-y-auto">
+                    {dimensions.map((dim) => (
+                      <div key={dim.id} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`dim-${dim.id}`}
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          checked={selectedDimensionFieldNames.includes(dim.fieldName)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedDimensionFieldNames([...selectedDimensionFieldNames, dim.fieldName])
+                            } else {
+                              setSelectedDimensionFieldNames(selectedDimensionFieldNames.filter(d => d !== dim.fieldName))
+                            }
+                          }}
+                        />
+                        <label htmlFor={`dim-${dim.id}`} className="text-xs text-slate-700 select-none cursor-pointer">
+                          {dim.name} <span className="text-slate-400 text-[10px]">({dim.fieldName})</span>
+                        </label>
+                      </div>
+                    ))}
+                    {dimensions.length === 0 && <p className="text-xs text-slate-400 col-span-2">No dimensions available.</p>}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 pt-2 border-t border-slate-200/50">
+                  <label className="text-xs font-semibold text-slate-700">Create in datasets</label>
+                  <div className="flex flex-wrap gap-4">
+                    {[
+                      { id: "dataset A", label: "Dataset A" },
+                      { id: "dataset B", label: "Dataset B" },
+                    ].map((dataset) => (
+                      <div key={dataset.id} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`dataset-${dataset.id}`}
+                          className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                          checked={createInDatasets.includes(dataset.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setCreateInDatasets([...createInDatasets, dataset.id])
+                            } else {
+                              setCreateInDatasets(createInDatasets.filter(d => d !== dataset.id))
+                            }
+                          }}
+                        />
+                        <label htmlFor={`dataset-${dataset.id}`} className="text-xs text-slate-700 select-none cursor-pointer">
+                          {dataset.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
           {!showLarkImport && (
             <>
-              {isStepFlowEnabled && (
-                <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Step</span>
-                    <span className="text-xs font-semibold text-slate-900">
-                      {currentStep + 1} / 4
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                    <span className={currentStep === 0 ? "text-slate-900 font-semibold" : ""}>Definition</span>
-                    <span>•</span>
-                    <span className={currentStep === 1 ? "text-slate-900 font-semibold" : ""}>CDM binding</span>
-                    <span>•</span>
-                    <span className={currentStep === 2 ? "text-slate-900 font-semibold" : ""}>Production</span>
-                    <span>•</span>
-                    <span className={currentStep === 3 ? "text-slate-900 font-semibold" : ""}>Result</span>
-                  </div>
-                </div>
-              )}
-
-              {definitionErrors.length > 0 && (currentStep === 0 || !isStepFlowEnabled) && (
+              {definitionErrors.length > 0 && (
                 <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
                   <div className="font-semibold text-red-800">Please resolve the following issues:</div>
                   <ul className="mt-2 space-y-1">
@@ -552,12 +596,10 @@ export function MetricRegistrationView({
                 </div>
               )}
 
-              {(!isStepFlowEnabled || currentStep === 0) && (
-                <>
                 <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
-                  <p className="text-xs text-slate-500 mt-1">Choose tenant and category to bind the default source dataset.</p>
+                  <p className="text-xs text-slate-500 mt-1">Choose tenant and category path (up to 3 levels).</p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
@@ -575,33 +617,29 @@ export function MetricRegistrationView({
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-medium text-slate-500">Category</label>
-                    <Select value={selectedCategoryName} onValueChange={setSelectedCategoryName}>
-                      <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableCategories.length > 0 ? (
-                          availableCategories.map(c => (
-                            <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
-                          ))
-                        ) : (
-                          <div className="p-2 text-[10px] text-slate-400 italic text-center">No categories for this tenant</div>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <CategoryTreeSelect
+                      categories={availableTopCategories}
+                      value={selectedCategoryPath}
+                      onChange={setSelectedCategoryPath}
+                      placeholder="Select Category"
+                    />
                   </div>
                 </div>
-                {linkedDataSource && (
-                  <div className="flex items-center gap-2 text-[10px] text-slate-500 bg-blue-50/50 p-2 rounded border border-blue-100">
-                    <Badge variant="outline" className="text-[10px] bg-white text-blue-700 border-blue-200 h-5">
-                      {linkedDataSource.type}
-                    </Badge>
-                    <span>
-                      Source dataset defaulted to{" "}
-                      <a href={linkedDataSource.link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
-                        {linkedDataSource.link}
-                      </a>
-                    </span>
+                {semanticView && (
+                  <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-[11px] text-slate-600">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-slate-800">Semantic View</span>
+                      <Badge variant="outline" className="text-[10px] bg-white text-blue-700 border-blue-200 h-5">
+                        {semanticView.name}
+                      </Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {semanticView.hiveTables.map((table) => (
+                        <span key={table} className="px-2 py-0.5 rounded-full border border-slate-200 bg-white text-[10px]">
+                          {table}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -712,11 +750,8 @@ export function MetricRegistrationView({
                   </div>
                 </div>
               </div>
-                </>
-              )}
 
-              {isStepFlowEnabled && currentStep === 1 && (
-                <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">Smart CDM recommendation</p>
@@ -811,10 +846,8 @@ export function MetricRegistrationView({
                     </div>
                   )}
                 </div>
-              )}
 
-              {isStepFlowEnabled && currentStep === 2 && (
-                <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+              <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                   <div>
                     <p className="text-sm font-semibold text-slate-900">Production dispatch</p>
                     <p className="text-xs text-slate-500 mt-1">
@@ -917,9 +950,8 @@ export function MetricRegistrationView({
                     </div>
                   )}
                 </div>
-              )}
 
-              {isStepFlowEnabled && currentStep === 3 && dispatchResult && (
+              {dispatchResult && (
                 <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
@@ -965,7 +997,6 @@ export function MetricRegistrationView({
                       size="sm"
                       className="h-8 text-xs"
                       onClick={() => {
-                        setCurrentStep(2)
                         setDispatchResult(null)
                         setDispatchSteps([])
                         setDispatchProgress(0)
@@ -980,7 +1011,6 @@ export function MetricRegistrationView({
                         size="sm"
                         className="h-8 text-xs bg-blue-600 text-white hover:bg-blue-700"
                         onClick={() => {
-                          setCurrentStep(2)
                           setDispatchResult(null)
                           setDispatchSteps([])
                           setDispatchProgress(0)
@@ -1105,66 +1135,15 @@ export function MetricRegistrationView({
           </Dialog>
 
           <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-            <div className="flex items-center gap-2">
-              {isStepFlowEnabled && currentStep > 0 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
-                >
-                  Back
-                </Button>
-              )}
-            </div>
+            <div></div>
             <div className="flex items-center gap-3">
-              {!isStepFlowEnabled && (
-                <Button
-                  type="submit"
-                  className="h-9 px-6 text-xs font-medium bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200 rounded-full"
-                >
-                  {initialMetric ? "Update Metric" : "Register Metric"}
-                </Button>
-              )}
-              {isStepFlowEnabled && currentStep === 0 && (
-                <Button
-                  type="button"
-                  className="h-9 px-6 text-xs font-medium bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200 rounded-full"
-                  onClick={handleNextFromDefinition}
-                >
-                  Continue to CDM
-                </Button>
-              )}
-              {isStepFlowEnabled && currentStep === 1 && (
-                <Button
-                  type="button"
-                  className="h-9 px-6 text-xs font-medium bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200 rounded-full"
-                  onClick={handleNextFromCdm}
-                >
-                  Continue to Production
-                </Button>
-              )}
-              {isStepFlowEnabled && currentStep === 3 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => {
-                    setCurrentStep(0)
-                    setCdmBindings([])
-                    setDispatchValidation(null)
-                    setDispatchResult(null)
-                    setDispatchProgress(0)
-                    setDispatchSteps([])
-                    setDispatchErrors([])
-                  }}
-                >
-                  Create another metric
-                </Button>
-              )}
-              {submittedFieldName && !isStepFlowEnabled && (
+              <Button
+                type="submit"
+                className="h-9 px-6 text-xs font-medium bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200 rounded-full"
+              >
+                {initialMetric ? "Update Metric" : "Register Metric"}
+              </Button>
+              {submittedFieldName && (
                 <p className="text-xs text-emerald-600 font-medium flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                   Metric <span className="font-mono font-bold">{submittedFieldName}</span> registered successfully!

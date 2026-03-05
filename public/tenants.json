@@ -7,32 +7,16 @@
       "permitted": true,
       "categories": [
         {
-          "name": "delivery",
-          "dataSource": {
-            "type": "Hive",
-            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
-          }
+          "name": "delivery"
         },
         {
-          "name": "performance",
-          "dataSource": {
-            "type": "MySQL",
-            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
-          }
+          "name": "performance"
         },
         {
-          "name": "creative",
-          "dataSource": {
-            "type": "ClickHouse",
-            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
-          }
+          "name": "creative"
         },
         {
-          "name": "integrity",
-          "dataSource": {
-            "type": "Fabric model",
-            "link": "https://aeolus-sg.tiktok-row.net/pages/dataQuery?appId=555138"
-          }
+          "name": "integrity"
         }
       ]
     }

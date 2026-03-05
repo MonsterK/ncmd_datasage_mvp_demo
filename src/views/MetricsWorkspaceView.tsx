@@ -30,6 +30,7 @@ import type {
   Tenant,
   DimensionTreeNode,
   Dimension,
+  CategoryNode,
   Tag,
   NewMetricPayload,
 } from "@/types"
@@ -49,6 +50,7 @@ export interface MetricsWorkspaceViewProps {
   tenants: Tenant[]
   dimensionTree: DimensionTreeNode[]
   dimensions: Dimension[]
+  categories: CategoryNode[]
   activeGlobalTenantId: string | null
   onOpenMetric: (fieldName: string) => void
   onRegisterMetric: (payload: NewMetricPayload) => void
@@ -61,6 +63,7 @@ export interface MetricsWorkspaceViewProps {
     technicalDefinition: string
     description: string
     category: string
+    categoryPath: string[]
     tenantId: string
     sourceLink: string
     sourceDimensionField: string
@@ -84,6 +87,7 @@ export function MetricsWorkspaceView({
   tenants,
   dimensionTree,
   dimensions,
+  categories,
   activeGlobalTenantId,
   onOpenMetric,
   onRegisterMetric,
@@ -718,6 +722,7 @@ export function MetricsWorkspaceView({
         tenants={tenants}
         dimensions={dimensions}
         metrics={metrics}
+        categories={categories}
         onRegisterMetric={onRegisterMetric}
         defaultTenantId={selectedTenantId}
       />
@@ -745,6 +750,7 @@ export function MetricsWorkspaceView({
         open={isNewDimensionSheetOpen}
         onOpenChange={setIsNewDimensionSheetOpen}
         tenants={tenants}
+        categories={categories}
         defaultTenantId={selectedTenantId}
         onCreateDimension={onCreateDimension}
       />
