@@ -5,7 +5,7 @@
       "name": "delivery",
       "semanticView": {
         "name": "delivery_semantic_view",
-        "hiveTables": ["cdm_delivery_daily", "cdm_ad_impressions", "cdm_order_facts"]
+        "hiveTables": ["dwd_delivery_daily", "dwa_ad_impressions", "dim_order"]
       },
       "children": [
         {
@@ -32,7 +32,7 @@
       "name": "performance",
       "semanticView": {
         "name": "performance_semantic_view",
-        "hiveTables": ["cdm_campaign_daily", "cdm_performance_stats", "cdm_bid_strategy"]
+        "hiveTables": ["dwd_campaign_daily", "dwa_performance_stats", "dim_bid_strategy"]
       },
       "children": [
         {
@@ -59,7 +59,7 @@
       "name": "creative",
       "semanticView": {
         "name": "creative_semantic_view",
-        "hiveTables": ["cdm_creative_assets", "cdm_asset_events", "cdm_creator_profile"]
+        "hiveTables": ["dwd_creative_assets", "dwa_asset_events", "dim_creator_profile"]
       },
       "children": [
         {
@@ -86,7 +86,7 @@
       "name": "integrity",
       "semanticView": {
         "name": "integrity_semantic_view",
-        "hiveTables": ["cdm_integrity_flags", "cdm_risk_events"]
+        "hiveTables": ["dwd_integrity_flags", "dwa_risk_events", "dim_risk_policy"]
       },
       "children": [
         {

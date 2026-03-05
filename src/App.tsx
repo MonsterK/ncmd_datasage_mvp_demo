@@ -480,6 +480,15 @@ function App() {
     }))
   }
 
+  const handleUpdateCategory = (payload: { id: string; semanticView: { name: string; hiveTables: string[] } }) => {
+    setData((prev) => ({
+      ...prev,
+      categories: prev.categories.map((category) =>
+        category.id === payload.id ? { ...category, semanticView: payload.semanticView } : category
+      ),
+    }))
+  }
+
   const handleCreateDimension = (payload: {
     fieldName: string
     businessName: string
@@ -822,6 +831,7 @@ function App() {
                 onCreateTenant={handleCreateTenant}
                 onUpdateTenant={handleUpdateTenant}
                 onCreateCategory={handleCreateCategory}
+                onUpdateCategory={handleUpdateCategory}
                 onCreateDimension={handleCreateDimension}
                 onUpdateMetric={handleUpdateMetric}
                 onDeleteMetric={handleDeleteMetric}

@@ -64,6 +64,7 @@ export interface ManagementWorkspaceViewProps {
     }[]
   }) => void
   onCreateCategory: (payload: { id: string; name: string; description: string }) => void
+  onUpdateCategory: (payload: { id: string; semanticView: { name: string; hiveTables: string[] } }) => void
   onUpdateTenant: (tenant: Tenant) => void
   onCreateDimension: (payload: {
     fieldName: string
@@ -114,6 +115,7 @@ export function ManagementWorkspaceView({
   onDeleteMetric,
   onCreateTenant,
   onCreateCategory,
+  onUpdateCategory,
   onUpdateTenant,
   onCreateDimension,
   onUpdateDimension,
@@ -129,6 +131,10 @@ export function ManagementWorkspaceView({
   const [metricToEdit, setMetricToEdit] = useState<Metric | null>(null)
   const [dimensionSheetMode, setDimensionSheetMode] = useState<"create" | "edit">("create")
   const [dimensionToEdit, setDimensionToEdit] = useState<Dimension | null>(null)
+  const [isSemanticViewDialogOpen, setIsSemanticViewDialogOpen] = useState(false)
+  const [semanticViewCategory, setSemanticViewCategory] = useState<CategoryNode | null>(null)
+  const [semanticViewName, setSemanticViewName] = useState("")
+  const [semanticViewTables, setSemanticViewTables] = useState<string[]>([])
 
   const tagNameById = useMemo(() => {
     const map = new Map<string, string>()
@@ -302,19 +308,18 @@ export function ManagementWorkspaceView({
             {activeTenant ? (
               activeTenant.categories && activeTenant.categories.length > 0 ? (
                 <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="grid grid-cols-[minmax(0,1fr)_180px_minmax(0,1.2fr)] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-400 bg-slate-50">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_120px] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-400 bg-slate-50">
                     <span>Category</span>
-                    <span>Semantic View</span>
                     <span>Hive CDM Tables</span>
+                    <span>Actions</span>
                   </div>
                   <div className="divide-y divide-slate-100">
                     {activeTenant.categories.map((cat, i) => {
                       const category = topLevelCategories.get(cat.name)
                       const semanticView = category?.semanticView
                       return (
-                        <div key={i} className="grid grid-cols-[minmax(0,1fr)_180px_minmax(0,1.2fr)] gap-3 px-4 py-3 text-xs items-center">
+                        <div key={i} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_120px] gap-3 px-4 py-3 text-xs items-center">
                           <div className="font-semibold text-slate-900">{cat.name}</div>
-                          <div className="text-slate-500">{semanticView?.name ?? "—"}</div>
                           <div className="text-slate-500">
                             {semanticView?.hiveTables?.length ? (
                               <div className="flex flex-wrap gap-1">
@@ -325,8 +330,26 @@ export function ManagementWorkspaceView({
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-slate-400 italic">No semantic view bound</span>
+                              <span className="text-slate-400 italic">No CDM tables</span>
                             )}
+                          </div>
+                          <div className="flex justify-end">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 text-[10px]"
+                              onClick={() => {
+                                if (!category) return
+                                const fallbackTables = ["dwd_ad_impressions", "dwa_campaign_perf", "dim_advertiser"]
+                                setSemanticViewCategory(category)
+                                setSemanticViewName(category.semanticView?.name ?? `${category.name}_semantic_view`)
+                                setSemanticViewTables(category.semanticView?.hiveTables?.length ? category.semanticView.hiveTables : fallbackTables)
+                                setIsSemanticViewDialogOpen(true)
+                              }}
+                            >
+                              View / Edit
+                            </Button>
                           </div>
                         </div>
                       )
@@ -384,14 +407,6 @@ export function ManagementWorkspaceView({
       setDimensionSheetMode("create")
       setDimensionToEdit(null)
       setIsNewDimensionSheetOpen(true)
-    } else if (activeSection === "datasource") {
-      if (activeTenantId) {
-        const tenant = tenants.find(t => t.id === activeTenantId)
-        if (tenant) {
-          setTenantForCategories(tenant)
-          setIsTenantCategoriesSheetOpen(true)
-        }
-      }
     }
   }
 
@@ -434,19 +449,110 @@ export function ManagementWorkspaceView({
               <CardDescription className="text-sm text-slate-500 mt-1">{header.description}</CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-xs font-medium bg-blue-600 text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:shadow-md transition-all"
-                onClick={handleAddClick}
-              >
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span>{header.addLabel}</span>
-              </Button>
+              {activeSection !== "datasource" && (
+                <Button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-xs font-medium bg-blue-600 text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:shadow-md transition-all"
+                  onClick={handleAddClick}
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  <span>{header.addLabel}</span>
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent className="p-0 sm:p-4">{renderSectionContent()}</CardContent>
         </Card>
       </div>
+
+      <Dialog open={isSemanticViewDialogOpen} onOpenChange={setIsSemanticViewDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold">
+              {semanticViewCategory ? `${semanticViewCategory.name} Semantic View` : "Semantic View"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-slate-700">Semantic View Name</label>
+              <Input
+                className="h-8 text-xs"
+                value={semanticViewName}
+                onChange={(e) => setSemanticViewName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-slate-700">Hive CDM Tables</label>
+              <div className="space-y-2">
+                {semanticViewTables.map((table, index) => (
+                  <div key={`${table}-${index}`} className="flex items-center gap-2">
+                    <Input
+                      className="h-8 text-xs"
+                      value={table}
+                      onChange={(e) => {
+                        const next = [...semanticViewTables]
+                        next[index] = e.target.value
+                        setSemanticViewTables(next)
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-xs text-red-600 hover:bg-red-50"
+                      onClick={() => {
+                        const next = semanticViewTables.filter((_, i) => i !== index)
+                        setSemanticViewTables(next)
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => setSemanticViewTables([...semanticViewTables, "dwd_"])}
+                >
+                  + Add table
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => setIsSemanticViewDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => {
+                  if (!semanticViewCategory) return
+                  const cleaned = semanticViewTables.map((t) => t.trim()).filter(Boolean)
+                  onUpdateCategory({
+                    id: semanticViewCategory.id,
+                    semanticView: {
+                      name: semanticViewName.trim() || `${semanticViewCategory.name}_semantic_view`,
+                      hiveTables: cleaned,
+                    },
+                  })
+                  setIsSemanticViewDialogOpen(false)
+                }}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <NewMetricSheet
         open={isNewMetricSheetOpen}

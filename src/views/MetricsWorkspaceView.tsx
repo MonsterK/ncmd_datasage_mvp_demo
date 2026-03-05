@@ -42,6 +42,7 @@ import {
   type HasQueryFilter,
 } from "@/views/MetricSearchView"
 import { DimensionsWorkspaceView } from "@/views/DimensionsWorkspaceView"
+import { WorkspaceChatView } from "@/views/WorkspaceChatView"
 import { NewMetricSheet, NewMetricSetSheet, NewDimensionSheet } from "@/views/ManagementWorkspaceView"
 
 export interface MetricsWorkspaceViewProps {
@@ -101,7 +102,7 @@ export function MetricsWorkspaceView({
   const selectedTenantId = activeGlobalTenantId
 
   const [selectedMetricSetId, setSelectedMetricSetId] = useState<string | null>(null)
-  const [workspaceMode, setWorkspaceMode] = useState<"metrics" | "dimensions">("metrics")
+  const [workspaceMode, setWorkspaceMode] = useState<"metrics" | "dimensions" | "workspace">("metrics")
   const [metricsViewMode, setMetricsViewMode] = useState<"view" | "library">("view")
   const [metricSetSearch, setMetricSetSearch] = useState("")
   const [metricSetSortField, setMetricSetSortField] = useState<MetricSortField>("updatedAt")
@@ -344,7 +345,7 @@ export function MetricsWorkspaceView({
                 value={workspaceMode}
                 onValueChange={(value) => {
                   if (!value) return
-                  setWorkspaceMode(value as "metrics" | "dimensions")
+                  setWorkspaceMode(value as "metrics" | "dimensions" | "workspace")
                   setSelectedMetricSetId(null)
                 }}
                 className="bg-slate-100/50 p-1 rounded-full border border-slate-200"
@@ -363,6 +364,13 @@ export function MetricsWorkspaceView({
                 aria-label="View dimensions"
               >
                 Dimensions
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="workspace"
+                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+                aria-label="View workspace"
+              >
+                Workspace
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -424,18 +432,18 @@ export function MetricsWorkspaceView({
               aria-label="Toggle metrics view mode"
             >
               <ToggleGroupItem
-                value="view"
-                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
-                aria-label="View Metric View"
-              >
-                Metric View
-              </ToggleGroupItem>
-              <ToggleGroupItem
                 value="library"
                 className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
                 aria-label="View metric library"
               >
                 Metric library
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="view"
+                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-blue-600 data-[state=on]:text-white data-[state=on]:shadow-sm"
+                aria-label="View Metric View"
+              >
+                Metric View
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -712,6 +720,13 @@ export function MetricsWorkspaceView({
           <DimensionsWorkspaceView
             dimensionTree={selectedTenantId ? filteredDimensionTree : dimensionTree}
             dimensions={dimensionsForTenant}
+          />
+        )}
+        {workspaceMode === "workspace" && (
+          <WorkspaceChatView
+            metrics={metrics}
+            tenants={tenants}
+            categories={categories}
           />
         )}
       </div>
