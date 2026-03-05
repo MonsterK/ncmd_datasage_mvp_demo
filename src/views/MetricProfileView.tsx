@@ -49,19 +49,9 @@ export function MetricProfileView({
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <CardTitle className="text-xl font-bold text-slate-900">{metric.businessName}</CardTitle>
-              <Select
-                value={metric.status}
-                onValueChange={(val) => onUpdateMetricStatus?.(metric.fieldName, val as "Active" | "Draft")}
-                disabled={!onUpdateMetricStatus}
-              >
-                <SelectTrigger className={`h-6 text-[10px] w-[80px] border-0 px-2 rounded-full ${metric.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Draft">Draft</SelectItem>
-                </SelectContent>
-              </Select>
+              <Badge variant={metric.status === "Active" ? "default" : "secondary"} className={`h-6 text-[10px] px-2 rounded-full ${metric.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50' : 'bg-slate-100 text-slate-600 hover:bg-slate-100'}`}>
+                {metric.status}
+              </Badge>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
               <span className="font-mono bg-white px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">
@@ -97,7 +87,7 @@ export function MetricProfileView({
                 className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-slate-600 hover:border-blue-200 hover:text-blue-700"
                 onClick={onNavigateWorkspace}
               >
-                delivery
+                Deploy
               </button>
             )}
           </div>
@@ -198,15 +188,15 @@ export function MetricProfileView({
           </CardContent>
         </Card>
 
-        {/* Delivery Scenario */}
+        {/* Deploy Scenario */}
         <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Truck className="h-4 w-4 text-emerald-500" />
-                Delivery Scenario
+                Deploy Scenario
               </CardTitle>
             <CardDescription className="text-xs text-slate-500">
-              Configure target and run preflight validation before delivery.
+              Configure target and run preflight validation before deploy.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 text-xs">

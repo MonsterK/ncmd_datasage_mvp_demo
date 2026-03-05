@@ -81,6 +81,7 @@ export interface Dimension {
   categoryPath?: string[]
   sourceLink?: string
   sourceDimensionField?: string
+  status?: MetricStatus
   technicalDefinition?: string
   createdAt?: string
   updatedAt?: string

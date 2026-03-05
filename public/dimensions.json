@@ -11,6 +11,11 @@
       "scope": ["M10N Data"],
       "type": "enum",
       "category": "delivery",
+      "status": "Active",
+      "owners": {
+        "businessOwner": "PM",
+        "techOwner": "DE"
+      },
       "sourceLink": "https://data.example.com/tables/dim_agency",
       "sourceDimensionField": "agency_id",
       "values": [
@@ -40,6 +45,11 @@
       "scope": ["M10N Data"],
       "type": "hierarchy",
       "category": "performance",
+      "status": "Active",
+      "owners": {
+        "businessOwner": "PM",
+        "techOwner": "DE"
+      },
       "sourceLink": "https://data.example.com/tables/dim_region",
       "sourceDimensionField": "region_code",
       "values": [
@@ -76,6 +86,11 @@
       "scope": ["M10N Data"],
       "type": "enum",
       "category": "creative",
+      "status": "Draft",
+      "owners": {
+        "businessOwner": "DS",
+        "techOwner": "DE"
+      },
       "sourceLink": "https://data.example.com/tables/dim_platform",
       "sourceDimensionField": "platform_name",
       "values": [
@@ -105,6 +120,11 @@
       "scope": ["M10N Data"],
       "type": "enum",
       "category": "integrity",
+      "status": "Active",
+      "owners": {
+        "businessOwner": "PM",
+        "techOwner": "DE"
+      },
       "sourceLink": "https://data.example.com/tables/dim_vertical",
       "sourceDimensionField": "vertical_id",
       "values": [

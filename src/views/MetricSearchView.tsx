@@ -301,6 +301,10 @@ export function MetricSearchView({
                         <User className="h-3.5 w-3.5 text-slate-400" />
                         <span className="truncate">{metric.owners.businessOwner}</span>
                       </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        <User className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="truncate">{metric.owners.techOwner}</span>
+                      </div>
                       <div className="text-[11px] text-slate-500">
                         Deploy:{" "}
                         {metric.deployHistory && metric.deployHistory.length > 0
@@ -335,7 +339,8 @@ export function MetricSearchView({
                     <TableHead>Metric Name</TableHead>
                     <TableHead>Field Name</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Owner</TableHead>
+                    <TableHead>Business Owner</TableHead>
+                    <TableHead>Tech Owner</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Deploy</TableHead>
                     <TableHead className="text-right">Updated</TableHead>
@@ -374,6 +379,7 @@ export function MetricSearchView({
                         {m.categoryPath.join(" › ")}
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">{m.owners.businessOwner}</TableCell>
+                      <TableCell className="text-xs text-slate-600">{m.owners.techOwner}</TableCell>
                       <TableCell>
                         <div onClick={(e) => e.stopPropagation()}>
                           <Badge

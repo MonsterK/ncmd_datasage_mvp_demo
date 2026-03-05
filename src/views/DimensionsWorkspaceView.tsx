@@ -33,7 +33,9 @@ import {
   History,
   FileText,
   Flame,
-  ArrowRight
+  ArrowRight,
+  User,
+  Info
 } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
@@ -199,10 +201,10 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                         </div>
                       </div>
                       <Badge 
-                        variant="secondary"
-                        className="shrink-0 bg-slate-100 text-slate-600 border-slate-200"
+                        variant={dim.status === "Active" ? "default" : "secondary"}
+                        className={`shrink-0 ${dim.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}
                       >
-                        {dim.type}
+                        {dim.status || "Active"}
                       </Badge>
                     </div>
                     <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10">
@@ -213,8 +215,8 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                   <CardContent className="pb-4 flex-1">
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 text-xs text-slate-600">
-                        <Database className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="truncate">{dim.type}</span>
+                        <User className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="truncate">{dim.owners?.techOwner || "DE"}</span>
                       </div>
                       
                       <div className="flex items-end justify-between gap-2 pt-2">
@@ -250,6 +252,8 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                     <TableHead>Field Name</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Category</TableHead>
+                    <TableHead>Tech Owner</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Usage</TableHead>
                     <TableHead className="text-right">Updated</TableHead>
                   </TableRow>
@@ -273,6 +277,15 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">
                         {d.categoryPath?.join(" › ") ?? d.category ?? "-"}
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-600">{d.owners?.techOwner || "DE"}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={d.status === "Active" ? "default" : "secondary"}
+                          className={`shrink-0 ${d.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}
+                        >
+                          {d.status || "Active"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">{d.boundMetricFieldNames.length} metrics</TableCell>
                       <TableCell className="text-xs text-slate-500 text-right">{d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : "-"}</TableCell>
@@ -306,97 +319,82 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl p-0">
-        <SheetHeader className="px-6 py-4 border-b bg-slate-50/50">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <Tag className="h-5 w-5" />
-            </div>
-            <div className="space-y-1">
-              <SheetTitle className="text-lg font-bold text-slate-900">{dimension.name}</SheetTitle>
-              <p className="font-mono text-xs text-slate-500">{dimension.fieldName}</p>
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-            <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700">
-              {dimension.type}
-            </Badge>
-            {(dimension.categoryPath?.length || dimension.category) && (
-              <>
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between bg-white/80 border-b border-slate-200/70 p-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl font-bold text-slate-900">{dimension.name}</CardTitle>
+                <Badge variant={dimension.status === "Active" ? "default" : "secondary"} className={`h-6 text-[10px] px-2 rounded-full ${dimension.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50' : 'bg-slate-100 text-slate-600 hover:bg-slate-100'}`}>
+                  {dimension.status || "Active"}
+                </Badge>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                <span className="font-mono bg-white px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">
+                  {dimension.fieldName}
+                </span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-600">
                   Category: {dimension.categoryPath?.join(" › ") ?? dimension.category}
                 </span>
-              </>
-            )}
-            <span className="text-slate-300">•</span>
-            <span className="text-slate-600">{dimension.boundMetricFieldNames.length} bound metrics</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
+                {dimension.type}
+              </Badge>
+            </div>
           </div>
         </SheetHeader>
 
         <div className="px-6 py-6 space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-1">
             <Card className="border-slate-200 shadow-sm rounded-2xl">
-              <CardHeader className="pb-3 border-b border-slate-50">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
                 <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-slate-500" />
-                  Overview
+                  <Info className="h-4 w-4 text-slate-500" />
+                  Business Information
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-500">
-                  Tenant, type, and description details.
+                  Business definition and ownership details.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 p-5 text-xs">
+                <div className="space-y-1.5">
+                  <p className="font-semibold text-slate-800">Description</p>
+                  <p className="text-slate-600 leading-relaxed">{dimension.description || "No description provided."}</p>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <span className="text-slate-500">Type</span>
-                    <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-700">
-                      {dimension.type}
-                    </Badge>
-                  </div>
-                  <div className="space-y-1">
                     <span className="text-slate-500">Business owner</span>
-                    <p className="font-medium text-slate-900">{dimension.owners?.businessOwner || "TBD"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-slate-500">Tech owner</span>
-                    <p className="font-medium text-slate-900">{dimension.owners?.techOwner || "TBD"}</p>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-slate-500">Description</span>
-                  <p className="text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    {dimension.description || "No description provided."}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200 shadow-sm rounded-2xl">
-              <CardHeader className="pb-3 border-b border-slate-50">
-                <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Flame className="h-4 w-4 text-orange-500" />
-                  Usage
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-500">Adoption and binding overview.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-5">
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div className="rounded-xl border border-orange-100 bg-orange-50 p-4">
-                    <div className="text-xl font-bold text-orange-600">High</div>
-                    <div className="text-[10px] font-medium text-orange-700/70 uppercase tracking-wide mt-1">
-                      Usage Heat
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
-                    <div className="text-xl font-bold text-blue-600">{dimension.boundMetricFieldNames.length}</div>
-                    <div className="text-[10px] font-medium text-blue-700/70 uppercase tracking-wide mt-1">
-                      Bound Metrics
-                    </div>
+                    <p className="font-medium text-slate-900">{dimension.owners?.businessOwner || "PM"}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
+              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-slate-500" />
+                Technical Information
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500">
+                Technical definition and configurations.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5 p-5 text-xs">
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                    <span className="text-slate-500">Tech owner</span>
+                    <p className="font-medium text-slate-900">{dimension.owners?.techOwner || "DE"}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-slate-500">Type</span>
+                    <p className="font-mono text-slate-900">{dimension.type}</p>
+                  </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Source Info */}
           <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
@@ -428,34 +426,6 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
-              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Share2 className="h-4 w-4 text-blue-500" />
-                Metric Lineage
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-500">Metrics using this dimension.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-4">
-              {dimension.boundMetricFieldNames.length > 0 ? (
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                  <ul className="divide-y divide-slate-100">
-                    {dimension.boundMetricFieldNames.map((fieldName) => (
-                      <li key={fieldName} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors text-xs">
-                        <span className="font-medium text-slate-700">{fieldName}</span>
-                        <ArrowRight className="h-3 w-3 text-slate-300" />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs text-slate-400">
-                  No metrics are currently bound to this dimension.
-                </div>
-              )}
             </CardContent>
           </Card>
 
