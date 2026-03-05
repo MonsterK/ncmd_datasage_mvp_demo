@@ -27,11 +27,9 @@ import { Flame, Search, Filter, ArrowUpDown, Plus } from "lucide-react"
 import type {
   Metric,
   Album,
-  Tenant,
   DimensionTreeNode,
   Dimension,
   CategoryNode,
-  Tag,
   NewMetricPayload,
 } from "@/types"
 import { getMetricTimestamp } from "@/lib/utils"
@@ -42,7 +40,7 @@ import {
   type HasQueryFilter,
 } from "@/views/MetricSearchView"
 import { DimensionsWorkspaceView } from "@/views/DimensionsWorkspaceView"
-import { NewMetricSheet, NewMetricSetSheet, NewDimensionSheet } from "@/views/ManagementWorkspaceView"
+import { NewMetricSheet, NewDimensionSheet } from "@/views/ManagementWorkspaceView"
 
 export interface MetricsWorkspaceViewProps {
   metrics: Metric[]
@@ -62,7 +60,6 @@ export interface MetricsWorkspaceViewProps {
     description: string
     category: string
     categoryPath: string[]
-    tenantId: string
     sourceLink: string
     sourceDimensionField: string
     values: { code: string; label: string }[]
@@ -550,23 +547,19 @@ export function MetricsWorkspaceView({
 
         {workspaceMode === "metrics" && metricsViewMode === "library" && (
           <MetricSearchView
-            metrics={metricsForTenantWithTagFilter}
+            metrics={metrics}
             onOpenMetric={onOpenMetric}
             initialViewMode="card"
             favoriteMetricFieldNames={favoriteMetricFieldNames}
             onToggleFavoriteMetric={onToggleFavoriteMetric}
-            tags={tags}
-            selectedTagId={selectedTagId}
-            onSelectTag={(tagId) => setSelectedTagId(tagId)}
             onNavigateWorkspace={onNavigateWorkspace}
-            onUpdateMetricStatus={onUpdateMetricStatus}
           />
         )}
 
         {workspaceMode === "dimensions" && (
           <DimensionsWorkspaceView
-            dimensionTree={selectedTenantId ? filteredDimensionTree : dimensionTree}
-            dimensions={dimensionsForTenant}
+            dimensionTree={dimensionTree}
+            dimensions={dimensions}
           />
         )}
       </div>
@@ -574,39 +567,16 @@ export function MetricsWorkspaceView({
       <NewMetricSheet
         open={isNewMetricSheetOpen}
         onOpenChange={setIsNewMetricSheetOpen}
-        tenants={tenants}
         dimensions={dimensions}
         metrics={metrics}
         categories={categories}
         onRegisterMetric={onRegisterMetric}
-        defaultTenantId={selectedTenantId}
-      />
-
-      <NewMetricSetSheet
-        open={isNewMetricSetSheetOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setMetricSetToEdit(null)
-            setMetricSetSheetMode("create")
-          }
-          setIsNewMetricSetSheetOpen(open)
-        }}
-        metrics={metrics}
-        metricSets={metricSets}
-        onMetricSetsChange={onMetricSetsChange}
-        tenants={tenants}
-        initialTenantId={selectedTenantId ?? undefined}
-        tags={tags}
-        mode={metricSetSheetMode}
-        initialMetricSet={metricSetToEdit}
       />
 
       <NewDimensionSheet
         open={isNewDimensionSheetOpen}
         onOpenChange={setIsNewDimensionSheetOpen}
-        tenants={tenants}
         categories={categories}
-        defaultTenantId={selectedTenantId}
         onCreateDimension={onCreateDimension}
       />
 
@@ -615,9 +585,7 @@ export function MetricsWorkspaceView({
         onOpenChange={setIsAddToMetricSetSheetOpen}
         metricSets={metricSets}
         onMetricSetsChange={onMetricSetsChange}
-        tenants={tenants}
         selectedFieldNames={selectedFieldNamesForAddToMetricSet}
-        selectedTenantId={selectedTenantId ?? undefined}
       />
 
       {workspaceMode === "metrics" && metricsViewMode === "view" && selectedMetricSet && (
@@ -748,9 +716,7 @@ interface AddToMetricSetSheetProps {
   onOpenChange: (open: boolean) => void
   metricSets: Album[]
   onMetricSetsChange: (sets: Album[]) => void
-  tenants: Tenant[]
   selectedFieldNames: string[]
-  selectedTenantId?: string
 }
 
 function AddToMetricSetSheet({
@@ -758,20 +724,13 @@ function AddToMetricSetSheet({
   onOpenChange,
   metricSets,
   onMetricSetsChange,
-  tenants,
   selectedFieldNames,
-  selectedTenantId,
 }: AddToMetricSetSheetProps) {
   const [selectedMetricSetId, setSelectedMetricSetId] = useState<string | undefined>(undefined)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [visibility, setVisibility] = useState<"team" | "private">("team")
   const [message, setMessage] = useState<string | null>(null)
-
-  const metricSetsForTenant = useMemo(() => {
-    if (!selectedTenantId) return metricSets
-    return metricSets.filter((set) => set.tenant === selectedTenantId)
-  }, [metricSets, selectedTenantId])
 
   useEffect(() => {
     if (!open) return
@@ -780,11 +739,11 @@ function AddToMetricSetSheet({
     setDescription("")
     setVisibility("team")
 
-    const defaultSetId = metricSetsForTenant[0]?.id ?? metricSets[0]?.id ?? undefined
+    const defaultSetId = metricSets[0]?.id ?? undefined
     setSelectedMetricSetId(defaultSetId)
 
     setMessage(null)
-  }, [open, metricSetsForTenant, metricSets])
+  }, [open, metricSets])
 
   const handleAddSelectionToSet = () => {
     if (!selectedMetricSetId || selectedFieldNames.length === 0) {
@@ -831,11 +790,9 @@ function AddToMetricSetSheet({
       description: description.trim(),
       scope: "",
       visibility,
-      tenant: selectedTenantId || tenants[0]?.id || "Custom",
       metricFieldNames: selectedFieldNames,
       metricRefs: selectedFieldNames.map(fieldName => ({ fieldName, version: "latest" })),
       dimensionRefs: [],
-      tags: [],
       createdAt: new Date(now).toISOString(),
       updatedAt: new Date(now).toISOString(),
       history: [
@@ -870,7 +827,7 @@ function AddToMetricSetSheet({
             </div>
             <div className="grid gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-zinc-700">Metric View (filtered by tenant)</label>
+                <label className="text-[11px] font-medium text-zinc-700">Metric View</label>
                 <Select
                   value={selectedMetricSetId ?? ""}
                   onValueChange={(value) => setSelectedMetricSetId(value)}
@@ -879,7 +836,7 @@ function AddToMetricSetSheet({
                     <SelectValue placeholder="Select Metric View" />
                   </SelectTrigger>
                   <SelectContent>
-                    {metricSetsForTenant.map((set) => (
+                    {metricSets.map((set) => (
                       <SelectItem key={set.id} value={set.id}>
                         {set.name}
                       </SelectItem>
@@ -893,7 +850,7 @@ function AddToMetricSetSheet({
                   size="sm"
                   className="w-full text-xs"
                   variant="outline"
-                  disabled={selectedFieldNames.length === 0 || metricSetsForTenant.length === 0}
+                  disabled={selectedFieldNames.length === 0 || metricSets.length === 0}
                   onClick={handleAddSelectionToSet}
                 >
                   Add
