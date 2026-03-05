@@ -104,7 +104,7 @@ export function MetricsWorkspaceView({
 
   const [selectedMetricSetId, setSelectedMetricSetId] = useState<string | null>(null)
   const [workspaceMode, setWorkspaceMode] = useState<"metrics" | "dimensions">("metrics")
-  const [metricsViewMode, setMetricsViewMode] = useState<"view" | "library">("view")
+  const [metricsViewMode, setMetricsViewMode] = useState<"view" | "library">("library")
   const [metricSetSearch, setMetricSetSearch] = useState("")
   const [metricSetSortField, setMetricSetSortField] = useState<MetricSortField>("updatedAt")
   const [metricSetSortDirection, setMetricSetSortDirection] = useState<MetricSortDirection>("desc")
@@ -386,16 +386,6 @@ export function MetricsWorkspaceView({
                   className="text-sm"
                 >
                   New metric
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setMetricSetSheetMode("create")
-                    setMetricSetToEdit(null)
-                    setIsNewMetricSetSheetOpen(true)
-                  }}
-                  className="text-sm"
-                >
-                  New Metric View
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={onNavigateWorkspace}
