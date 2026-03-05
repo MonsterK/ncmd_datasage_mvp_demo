@@ -6,7 +6,7 @@
       "fieldName": "spp_revenue",
       "categoryPath": ["delivery"],
       "businessDefinition": "Total S++ revenue for qualifying agencies within the selected period.",
-      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) AS spp_revenue FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
+      "technicalDefinition": "SUM(payout_amount)",
       "status": "Active",
       "tenant": "M10N Data",
       "owners": {
@@ -20,7 +20,8 @@
         {
           "id": "q1",
           "type": "Aeolus Visual Query",
-          "source": "fabric_sgi_payout_daily",
+          "source": "dwd_item_payout",
+          "fields": ["biz_date", "payout_amount"],
           "originField": "payout_amount",
           "aggregate": "SUM",
           "businessDate": "biz_date",
@@ -70,7 +71,7 @@
       "fieldName": "qbr_revenue",
       "categoryPath": ["integrity"],
       "businessDefinition": "Net revenue recognized for quarterly business review scope.",
-      "technicalDefinition": "SELECT biz_date, SUM(net_revenue) AS qbr_revenue FROM fact_qbr_revenue WHERE is_qbr = 1 GROUP BY biz_date",
+      "technicalDefinition": "SUM(net_revenue)",
       "status": "Active",
       "tenant": "M10N Data",
       "owners": {
@@ -126,7 +127,7 @@
       "fieldName": "active_monetized_creators",
       "categoryPath": ["creative"],
       "businessDefinition": "Number of creators with at least one monetization event in the selected period.",
-      "technicalDefinition": "SELECT biz_date, COUNT(DISTINCT creator_id) AS active_monetized_creators FROM fact_creator_monetization WHERE biz_date BETWEEN :start_date AND :end_date",
+      "technicalDefinition": "COUNT(DISTINCT creator_id)",
       "status": "Draft",
       "tenant": "M10N Data",
       "owners": {
@@ -182,7 +183,7 @@
       "fieldName": "spp_revenue_penetration",
       "categoryPath": ["performance"],
       "businessDefinition": "S++ Revenue as a percentage of Total Revenue (or similar penetration logic).",
-      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / SUM(total_revenue) AS spp_revenue_penetration FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date GROUP BY biz_date",
+      "technicalDefinition": "SUM(payout_amount) / SUM(total_revenue)",
       "status": "Draft",
       "tenant": "M10N Data",
       "owners": {
@@ -238,7 +239,7 @@
       "fieldName": "creator_rev_per_creator",
       "categoryPath": ["creative"],
       "businessDefinition": "Average monetization revenue per active monetized creator.",
-      "technicalDefinition": "SELECT biz_date, SUM(revenue) / COUNT(DISTINCT creator_id) AS creator_rev_per_creator FROM fact_creator_monetization WHERE biz_date BETWEEN :start_date AND :end_date",
+      "technicalDefinition": "SUM(revenue) / COUNT(DISTINCT creator_id)",
       "status": "Active",
       "tenant": "M10N Data",
       "owners": {
@@ -294,7 +295,7 @@
       "fieldName": "na_spp_revenue_penetration",
       "categoryPath": ["performance"],
       "businessDefinition": "S++ Revenue Penetration for North America region.",
-      "technicalDefinition": "SELECT biz_date, SUM(payout_amount) / SUM(total_revenue) AS na_spp_revenue_penetration FROM fact_sgi_payout WHERE biz_date BETWEEN :start_date AND :end_date AND region = 'NA' GROUP BY biz_date",
+      "technicalDefinition": "SUM(payout_amount) / SUM(total_revenue)",
       "status": "Active",
       "tenant": "M10N Data",
       "owners": {
@@ -350,7 +351,7 @@
       "fieldName": "auto_ads_revenue",
       "categoryPath": ["delivery"],
       "businessDefinition": "Revenue from Auto Ads.",
-      "technicalDefinition": "CASE WHEN l3_product_tag='Auto Ads' THEN dollar_revenue_real ELSE 0 END",
+      "technicalDefinition": "SUM(dollar_revenue_real)",
       "status": "Active",
       "tenant": "M10N Data",
       "owners": {

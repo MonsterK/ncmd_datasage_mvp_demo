@@ -35,7 +35,8 @@ import {
   Flame,
   ArrowRight,
   User,
-  Info
+  Info,
+  Truck
 } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
@@ -396,6 +397,25 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
           </Card>
 
           {/* Source Info */}
+          {/* Deploy Scenario */}
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
+               <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-emerald-500" />
+                  Deploy Scenario
+                </CardTitle>
+              <CardDescription className="text-xs text-slate-500">
+                Configure target and run preflight validation before deploy.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-5 text-xs">
+               <div className="space-y-1.5">
+                  <p className="font-semibold text-slate-800">Deploy status</p>
+                  <p className="text-xs text-slate-500">No deploy history yet.</p>
+                </div>
+            </CardContent>
+          </Card>
+
           <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
               <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">

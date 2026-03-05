@@ -3,6 +3,7 @@ export interface MetricQueryDefinition {
   id: string
   type: string
   source: string
+  fields?: string[]
   expression?: string
   businessDate: string
   analysisDimensions: string[]

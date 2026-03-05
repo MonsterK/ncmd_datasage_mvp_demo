@@ -172,7 +172,11 @@ export function MetricProfileView({
                       <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
                         {q.type}
                       </Badge>
-                      <span className="font-mono text-[11px] text-slate-500">{q.source}</span>
+                      <span className="font-mono text-[11px] text-slate-500">
+                        {q.fields && q.fields.length > 0
+                          ? `${q.fields.join(", ")} from ${q.source}`
+                          : q.source}
+                      </span>
                     </div>
                     {q.expression && (
                       <div className="mb-3">
