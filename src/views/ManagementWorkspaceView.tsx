@@ -25,7 +25,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
-import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces, Trash2 } from "lucide-react"
+import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces, Trash2, Database } from "lucide-react"
 
 import {
   Metric,
@@ -39,7 +39,7 @@ import {
 } from "@/types"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
 
-export type ManagementSection = "metric" | "dimension" | "datasource" | "category"
+export type ManagementSection = "metric" | "dimension" | "category"
 
 export interface ManagementWorkspaceViewProps {
   activeSection: ManagementSection
@@ -328,89 +328,7 @@ export function ManagementWorkspaceView({
             </Table>
           </div>
         )
-      case "datasource":
-        const activeTenant = tenants.find((t) => t.id === activeTenantId)
-        const topLevelCategories = new Map(categories.map((c) => [c.name, c]))
-        return (
-          <div className="space-y-4">
-            {activeTenant ? (
-              activeTenant.categories && activeTenant.categories.length > 0 ? (
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_120px] gap-3 px-4 py-2 text-[10px] uppercase tracking-wider text-slate-400 bg-slate-50">
-                    <span>Category</span>
-                    <span>Hive CDM Tables</span>
-                    <span>Actions</span>
-                  </div>
-                  <div className="divide-y divide-slate-100">
-                    {activeTenant.categories.map((cat, i) => {
-                      const category = topLevelCategories.get(cat.name)
-                      const semanticView = category?.semanticView
-                      return (
-                        <div key={i} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_120px] gap-3 px-4 py-3 text-xs items-center">
-                          <div className="font-semibold text-slate-900">{cat.name}</div>
-                          <div className="text-slate-500">
-                            {semanticView?.hiveTables?.length ? (
-                              <div className="flex flex-wrap gap-1">
-                                {semanticView.hiveTables.map((table) => (
-                                  <span key={table} className="px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-[10px]">
-                                    {table}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="text-slate-400 italic">No CDM tables</span>
-                            )}
-                          </div>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="h-7 px-2 text-[10px]"
-                              onClick={() => {
-                                if (!category) return
-                                const fallbackTables = ["dwd_ad_impressions", "dwa_campaign_perf", "dim_advertiser"]
-                                const tables = category.semanticView?.hiveTables?.length ? category.semanticView.hiveTables : fallbackTables
-                                setSemanticViewPreview({
-                                  name: category.semanticView?.name ?? `${category.name}_semantic_view`,
-                                  tables,
-                                  categoryName: category.name,
-                                })
-                                setIsSemanticViewPreviewOpen(true)
-                              }}
-                            >
-                              View
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="h-7 px-2 text-[10px]"
-                              onClick={() => {
-                                if (!category) return
-                                const fallbackTables = ["dwd_ad_impressions", "dwa_campaign_perf", "dim_advertiser"]
-                                setSemanticViewCategory(category)
-                                setSemanticViewName(category.semanticView?.name ?? `${category.name}_semantic_view`)
-                                setSemanticViewTables(category.semanticView?.hiveTables?.length ? category.semanticView.hiveTables : fallbackTables)
-                                setIsSemanticViewDialogOpen(true)
-                              }}
-                            >
-                              Edit
-                            </Button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400 italic">No categories defined yet.</p>
-              )
-            ) : (
-              <p className="text-xs text-slate-500">No active tenant selected.</p>
-            )}
-          </div>
-        )
+
       case "category":
         return (
           <div className="space-y-4">
@@ -420,8 +338,9 @@ export function ManagementWorkspaceView({
                   <TableRow className="hover:bg-slate-50 border-slate-100 bg-slate-50/50">
                     <TableHead className="w-[40%] pl-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
                     <TableHead className="w-[30%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
-                    <TableHead className="w-[15%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Subcategories</TableHead>
-                    <TableHead className="w-[15%] pr-6 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
+                    <TableHead className="w-[20%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Semantic View</TableHead>
+                    <TableHead className="w-[10%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Subcategories</TableHead>
+                    <TableHead className="w-[10%] pr-6 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -441,6 +360,12 @@ export function ManagementWorkspaceView({
                         setIsCategorySheetOpen(true)
                       }}
                       onDelete={(id) => onDeleteCategory?.(id)}
+                      onConfigSemanticView={(cat) => {
+                        setSemanticViewCategory(cat)
+                        setSemanticViewName(cat.semanticView?.name || "")
+                        setSemanticViewTables(cat.semanticView?.hiveTables || [])
+                        setIsSemanticViewDialogOpen(true)
+                      }}
                     />
                   ))}
                   {categories.length === 0 && (
@@ -479,12 +404,6 @@ export function ManagementWorkspaceView({
           title: "Dimension management",
           description: "Manage dimension terms, values dictionary and bindings.",
           addLabel: "New dimension",
-        }
-      case "datasource":
-        return {
-          title: "Semantic view management",
-          description: "Manage tenant categories and their semantic view bindings.",
-          addLabel: "Manage Categories",
         }
       case "category":
         return {
@@ -534,12 +453,6 @@ export function ManagementWorkspaceView({
               onClick={() => onChangeSection("dimension")}
             />
             <SidebarItem
-              icon={Home}
-              label="Semantic Views"
-              active={activeSection === "datasource"}
-              onClick={() => onChangeSection("datasource")}
-            />
-            <SidebarItem
               icon={FolderKanban}
               label="Categories"
               active={activeSection === "category"}
@@ -555,16 +468,14 @@ export function ManagementWorkspaceView({
               <CardDescription className="text-sm text-slate-500 mt-1">{header.description}</CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {activeSection !== "datasource" && (
-                <Button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-xs font-medium bg-blue-600 text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:shadow-md transition-all"
-                  onClick={handleAddClick}
-                >
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span>{header.addLabel}</span>
-                </Button>
-              )}
+              <Button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-xs font-medium bg-blue-600 text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:shadow-md transition-all"
+                onClick={handleAddClick}
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span>{header.addLabel}</span>
+              </Button>
             </div>
           </CardHeader>
           <CardContent className="p-0 sm:p-4">{renderSectionContent() as React.ReactNode}</CardContent>
@@ -904,9 +815,10 @@ interface CategoryRowProps {
   onEdit: (cat: CategoryNode) => void
   onCreateSub: (parent: CategoryNode) => void
   onDelete: (id: string) => void
+  onConfigSemanticView: (cat: CategoryNode) => void
 }
 
-function CategoryRow({ category, level, onEdit, onCreateSub, onDelete }: CategoryRowProps) {
+function CategoryRow({ category, level, onEdit, onCreateSub, onDelete, onConfigSemanticView }: CategoryRowProps) {
   const [expanded, setExpanded] = useState(false)
   const hasChildren = category.children && category.children.length > 0
 
@@ -935,6 +847,17 @@ function CategoryRow({ category, level, onEdit, onCreateSub, onDelete }: Categor
         <TableCell className="text-xs text-slate-500 max-w-[200px] truncate" title={category.description}>
           {category.description || "-"}
         </TableCell>
+        <TableCell className="text-xs">
+          {category.semanticView ? (
+             <div className="flex items-center gap-1.5">
+               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+               <span className="text-slate-700 font-medium">{category.semanticView.name}</span>
+               <span className="text-slate-400">({category.semanticView.hiveTables.length} tables)</span>
+             </div>
+          ) : (
+             <span className="text-slate-400 italic">-</span>
+          )}
+        </TableCell>
         <TableCell className="text-xs text-slate-500">
           {hasChildren ? (
             <Badge variant="secondary" className="text-[10px] font-normal bg-slate-100 text-slate-600 hover:bg-slate-200">
@@ -946,6 +869,16 @@ function CategoryRow({ category, level, onEdit, onCreateSub, onDelete }: Categor
         </TableCell>
         <TableCell>
           <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+              title="Configure Semantic View"
+              onClick={() => onConfigSemanticView(category)}
+            >
+              <Database className="h-4 w-4" />
+            </Button>
             <Button
               type="button"
               variant="ghost"
@@ -987,6 +920,7 @@ function CategoryRow({ category, level, onEdit, onCreateSub, onDelete }: Categor
           onEdit={onEdit}
           onCreateSub={onCreateSub}
           onDelete={onDelete}
+          onConfigSemanticView={onConfigSemanticView}
         />
       ))}
     </>
