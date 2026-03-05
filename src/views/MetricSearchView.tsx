@@ -38,6 +38,7 @@ export interface MetricSearchViewProps {
   selectedTagId?: string | null
   onSelectTag?: (tagId: string | null) => void
   onNavigateWorkspace?: () => void
+  onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Offline") => void
 }
 
 export type MetricViewMode = "card" | "list"
@@ -57,6 +58,7 @@ export function MetricSearchView({
   selectedTagId,
   onSelectTag,
   onNavigateWorkspace,
+  onUpdateMetricStatus,
 }: MetricSearchViewProps) {
   const [search, setSearch] = useState("")
   const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "card")
@@ -66,9 +68,6 @@ export function MetricSearchView({
   const [hasQueryFilter, setHasQueryFilter] = useState<HasQueryFilter>("all")
   const [sortField, setSortField] = useState<MetricSortField>("updatedAt")
   const [sortDirection, setSortDirection] = useState<MetricSortDirection>("desc")
-  const [selectedMetricFieldNames, setSelectedMetricFieldNames] = useState<string[]>([])
-
-  const hasBulkSelection = typeof onAddToMetricSetFromSelection === "function"
 
   const categoryOptions = useMemo(() => {
     const set = new Set<string>()
@@ -150,10 +149,6 @@ export function MetricSearchView({
     sortField,
     sortDirection,
   ])
-
-  useEffect(() => {
-    setSelectedMetricFieldNames((prev) => prev.filter((fieldName) => metrics.some((m) => m.fieldName === fieldName)))
-  }, [metrics])
 
   return (
     <div className="h-full flex flex-col bg-slate-50/50">
@@ -265,32 +260,6 @@ export function MetricSearchView({
       <div className="flex-1 overflow-auto px-5 py-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-6">
           
-          {hasBulkSelection && (
-             <div className="flex items-center justify-between bg-blue-50 border border-blue-100 px-4 py-3 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-1.5 rounded-full">
-                  <BarChart2 className="h-4 w-4 text-blue-600" />
-                </div>
-                <span className="text-sm text-blue-900 font-medium">
-                  {selectedMetricFieldNames.length
-                    ? `${selectedMetricFieldNames.length} metrics selected`
-                    : "Select metrics to add to your set"}
-                </span>
-              </div>
-              <Button
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-                disabled={selectedMetricFieldNames.length === 0}
-                onClick={() => {
-                  if (!onAddToMetricSetFromSelection || selectedMetricFieldNames.length === 0) return
-                  onAddToMetricSetFromSelection(selectedMetricFieldNames)
-                }}
-              >
-                Add to Metric View
-              </Button>
-            </div>
-          )}
-
           {filtered.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-xl border border-dashed border-slate-200">
               <div className="bg-slate-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -306,26 +275,12 @@ export function MetricSearchView({
               {filtered.map(metric => (
                 <Card 
                   key={metric.id} 
-                  className={`group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col ${selectedMetricFieldNames.includes(metric.fieldName) ? 'ring-2 ring-blue-500 border-transparent' : 'hover:border-blue-200'}`}
+                  className="group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col hover:border-blue-200"
                   onClick={() => onOpenMetric(metric.fieldName)}
                 >
                   <CardHeader className="space-y-3 pb-4">
                     <div className="flex justify-between items-start gap-4">
                       <div className="space-y-1 flex-1 min-w-0">
-                         {hasBulkSelection && (
-                          <div className="mb-2" onClick={(e) => e.stopPropagation()}>
-                            <Checkbox
-                              checked={selectedMetricFieldNames.includes(metric.fieldName)}
-                              onCheckedChange={(checked) => {
-                                setSelectedMetricFieldNames(prev => 
-                                  checked 
-                                    ? [...prev, metric.fieldName]
-                                    : prev.filter(s => s !== metric.fieldName)
-                                )
-                              }}
-                            />
-                          </div>
-                        )}
                         <CardTitle className="text-lg font-semibold leading-tight group-hover:text-blue-600 transition-colors truncate">
                           {metric.businessName}
                         </CardTitle>
@@ -352,12 +307,21 @@ export function MetricSearchView({
                             />
                           </button>
                         )}
-                        <Badge 
-                          variant={metric.status === 'Active' ? 'default' : 'secondary'}
-                          className={`shrink-0 ${metric.status === 'Active' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200' : ''}`}
-                        >
-                          {metric.status}
-                        </Badge>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Select
+                            value={metric.status}
+                            onValueChange={(val) => onUpdateMetricStatus?.(metric.fieldName, val as "Active" | "Offline")}
+                            disabled={!onUpdateMetricStatus}
+                          >
+                            <SelectTrigger className={`h-6 text-[10px] w-[75px] border-0 px-2 ${metric.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Active">Active</SelectItem>
+                              <SelectItem value="Offline">Offline</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
                     <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10">
@@ -383,22 +347,6 @@ export function MetricSearchView({
                           <Flame className="h-3 w-3 text-orange-500" />
                           <span>{metric.heat ?? 0} Heat</span>
                         </div>
-                        
-                        {metric.trend30d && metric.trend30d.length > 0 && (
-                          <div className="h-8 w-20 opacity-70 group-hover:opacity-100 transition-opacity">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart data={metric.trend30d}>
-                                <Line
-                                  type="monotone"
-                                  dataKey="value"
-                                  stroke="#3b82f6"
-                                  strokeWidth={2}
-                                  dot={false}
-                                />
-                              </LineChart>
-                            </ResponsiveContainer>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -432,7 +380,6 @@ export function MetricSearchView({
                 <TableHeader className="bg-slate-50">
                   <TableRow>
                     {onToggleFavoriteMetric && <TableHead className="w-10"></TableHead>}
-                    {hasBulkSelection && <TableHead className="w-12"></TableHead>}
                     <TableHead>Metric Name</TableHead>
                     <TableHead>Field Name</TableHead>
                     <TableHead>Category</TableHead>
@@ -469,20 +416,6 @@ export function MetricSearchView({
                         </button>
                       </TableCell>
                     )}
-                    {hasBulkSelection && (
-                        <TableCell onClick={(e) => e.stopPropagation()}>
-                          <Checkbox
-                            checked={selectedMetricFieldNames.includes(m.fieldName)}
-                            onCheckedChange={(checked) => {
-                              setSelectedMetricFieldNames(prev => 
-                                checked 
-                                  ? [...prev, m.fieldName]
-                                  : prev.filter(s => s !== m.fieldName)
-                              )
-                            }}
-                          />
-                        </TableCell>
-                      )}
                     <TableCell className="font-medium text-slate-900">{m.businessName}</TableCell>
                       <TableCell className="font-mono text-xs text-slate-500">{m.fieldName}</TableCell>
                       <TableCell className="text-xs text-slate-600 max-w-[200px] truncate" title={m.categoryPath.join(" > ")}>
@@ -490,12 +423,21 @@ export function MetricSearchView({
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">{m.owners.businessOwner}</TableCell>
                       <TableCell>
-                         <Badge 
-                          variant="outline" 
-                          className={`text-[10px] ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}`}
-                        >
-                          {m.status}
-                        </Badge>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Select
+                            value={m.status}
+                            onValueChange={(val) => onUpdateMetricStatus?.(m.fieldName, val as "Active" | "Offline")}
+                            disabled={!onUpdateMetricStatus}
+                          >
+                            <SelectTrigger className={`h-6 text-[10px] w-[75px] border-0 px-2 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600'}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Active">Active</SelectItem>
+                              <SelectItem value="Offline">Offline</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">
                         {m.dispatchHistory && m.dispatchHistory.length > 0

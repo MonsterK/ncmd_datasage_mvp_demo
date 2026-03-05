@@ -11,6 +11,7 @@ export interface MetricProfileSheetProps {
   isFavorite?: boolean
   onToggleFavorite?: (fieldName: string) => void
   onNavigateWorkspace?: () => void
+  onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Offline") => void
 }
 
 export function MetricProfileSheet({
@@ -22,6 +23,7 @@ export function MetricProfileSheet({
   isFavorite,
   onToggleFavorite,
   onNavigateWorkspace,
+  onUpdateMetricStatus,
 }: MetricProfileSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -34,6 +36,7 @@ export function MetricProfileSheet({
             isFavorite={isFavorite}
             onToggleFavorite={onToggleFavorite}
             onNavigateWorkspace={onNavigateWorkspace}
+            onUpdateMetricStatus={onUpdateMetricStatus}
           />
         </div>
       </SheetContent>

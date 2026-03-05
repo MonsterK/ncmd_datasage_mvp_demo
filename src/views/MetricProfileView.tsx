@@ -3,17 +3,22 @@ import { useMemo } from "react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Flame, LineChart as LineChartIcon, Star } from "lucide-react"
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
 } from "recharts"
 
 import { Metric, Dimension } from "@/types"
@@ -26,6 +31,7 @@ export interface MetricProfileViewProps {
   isFavorite?: boolean
   onToggleFavorite?: (fieldName: string) => void
   onNavigateWorkspace?: () => void
+  onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Offline") => void
 }
 
 export function MetricProfileView({
@@ -35,6 +41,7 @@ export function MetricProfileView({
   isFavorite,
   onToggleFavorite,
   onNavigateWorkspace,
+  onUpdateMetricStatus,
 }: MetricProfileViewProps) {
   const boundDimensions = useMemo(
     () => dimensions.filter((d) => metric.boundDimensionFieldNames.includes(d.fieldName)),
@@ -52,9 +59,19 @@ export function MetricProfileView({
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <CardTitle className="text-xl font-bold text-slate-900">{metric.businessName}</CardTitle>
-              <Badge variant="outline" className={`text-[10px] px-2 py-0.5 rounded-full border-slate-200 ${metric.status === "Active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-600"}`}>
-                {metric.status}
-              </Badge>
+              <Select
+                value={metric.status}
+                onValueChange={(val) => onUpdateMetricStatus?.(metric.fieldName, val as "Active" | "Offline")}
+                disabled={!onUpdateMetricStatus}
+              >
+                <SelectTrigger className={`h-6 text-[10px] w-[80px] border-0 px-2 rounded-full ${metric.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Offline">Offline</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
               <span className="font-mono bg-white px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">
@@ -276,38 +293,6 @@ export function MetricProfileView({
         </Card>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-              <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                <LineChartIcon className="h-4 w-4 text-blue-500" />
-                30 day trend
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="h-52">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={metric.trend30d} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} dy={10} />
-                    <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                    <RechartsTooltip
-                      contentStyle={{ fontSize: 11, borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-                      cursor={{ stroke: "#cbd5e1", strokeWidth: 1, strokeDasharray: "4 4" }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#2563eb"
-                      strokeWidth={2}
-                      dot={{ r: 3, fill: "#2563eb", strokeWidth: 0 }}
-                      activeDot={{ r: 6, stroke: "#dbeafe", strokeWidth: 4 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
               <CardTitle className="text-sm font-bold text-slate-900">Top dimensions</CardTitle>

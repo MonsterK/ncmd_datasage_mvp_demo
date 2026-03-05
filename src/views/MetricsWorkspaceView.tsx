@@ -73,6 +73,7 @@ export interface MetricsWorkspaceViewProps {
   favoriteMetricFieldNames?: string[]
   onToggleFavoriteMetric?: (fieldName: string) => void
   onNavigateWorkspace: () => void
+  onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Offline") => void
 }
 
 function getMetricSetTimestamp(metricSet: Album, key: "createdAt" | "updatedAt"): number {
@@ -98,6 +99,7 @@ export function MetricsWorkspaceView({
   favoriteMetricFieldNames,
   onToggleFavoriteMetric,
   onNavigateWorkspace,
+  onUpdateMetricStatus,
 }: MetricsWorkspaceViewProps) {
 
   const selectedTenantId = activeGlobalTenantId
@@ -369,32 +371,15 @@ export function MetricsWorkspaceView({
             </ToggleGroup>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="h-9 w-9 rounded-full bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
-                  aria-label="New"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                <DropdownMenuItem
-                  onClick={onNavigateWorkspace}
-                  className="text-sm"
-                >
-                  New metric
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={onNavigateWorkspace}
-                  className="text-sm"
-                >
-                  New dimension
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              type="button"
+              size="sm"
+              className="h-9 w-9 rounded-full bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
+              aria-label="New"
+              onClick={onNavigateWorkspace}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -618,22 +603,6 @@ export function MetricsWorkspaceView({
                             <Flame className="h-3 w-3 text-orange-500" />
                             <span>{m.heat ?? 0} Heat</span>
                           </div>
-
-                          {m.trend30d && m.trend30d.length > 0 && (
-                            <div className="h-8 w-20 opacity-70 group-hover:opacity-100 transition-opacity">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={m.trend30d}>
-                                  <Line
-                                    type="monotone"
-                                    dataKey="value"
-                                    stroke="#3b82f6"
-                                    strokeWidth={2}
-                                    dot={false}
-                                  />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -673,16 +642,13 @@ export function MetricsWorkspaceView({
             metrics={metricsForTenantWithTagFilter}
             onOpenMetric={onOpenMetric}
             initialViewMode="card"
-            onAddToMetricSetFromSelection={(fieldNames) => {
-              setSelectedFieldNamesForAddToMetricSet(fieldNames)
-              setIsAddToMetricSetSheetOpen(true)
-            }}
             favoriteMetricFieldNames={favoriteMetricFieldNames}
             onToggleFavoriteMetric={onToggleFavoriteMetric}
             tags={tags}
             selectedTagId={selectedTagId}
             onSelectTag={(tagId) => setSelectedTagId(tagId)}
             onNavigateWorkspace={onNavigateWorkspace}
+            onUpdateMetricStatus={onUpdateMetricStatus}
           />
         )}
 

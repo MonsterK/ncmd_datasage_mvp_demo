@@ -678,6 +678,21 @@ function App() {
     }))
   }
 
+  const handleUpdateMetricStatus = (fieldName: string, status: "Active" | "Offline") => {
+    const nowIso = new Date().toISOString()
+    setData((prev) => ({
+      ...prev,
+      metrics: prev.metrics.map((m) => {
+        if (m.fieldName !== fieldName) return m
+        return {
+          ...m,
+          status,
+          updatedAt: nowIso,
+        }
+      }),
+    }))
+  }
+
   const handleDeleteMetric = (fieldName: string) => {
     setData((prev) => ({
       ...prev,
@@ -884,6 +899,7 @@ function App() {
                 onRegisterMetric={handleRegisterMetric}
                 onMetricSetsChange={setMetricSetsState}
                 onCreateDimension={handleCreateDimension}
+                onUpdateMetricStatus={handleUpdateMetricStatus}
                 favoriteMetricFieldNames={favoriteMetricFieldNames}
                 onToggleFavoriteMetric={handleToggleFavoriteMetric}
                 onNavigateWorkspace={() => setActiveTopNav("workspace")}
@@ -937,6 +953,7 @@ function App() {
             isFavorite={favoriteMetricFieldNames.includes(selectedMetric.fieldName)}
             onToggleFavorite={handleToggleFavoriteMetric}
             onNavigateWorkspace={() => setActiveTopNav("workspace")}
+            onUpdateMetricStatus={handleUpdateMetricStatus}
           />
         )}
       </main>
