@@ -319,8 +319,8 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full max-w-full overflow-y-auto sm:max-w-xl p-0">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between bg-white/80 border-b border-slate-200/70 p-6">
-            <div className="space-y-2">
+        <SheetHeader className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between bg-white/80 border-b border-slate-200/70 p-6">
+          <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl font-bold text-slate-900">{dimension.name}</CardTitle>
                 <Badge variant={dimension.status === "Active" ? "default" : "secondary"} className={`h-6 text-[10px] px-2 rounded-full ${dimension.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50' : 'bg-slate-100 text-slate-600 hover:bg-slate-100'}`}>
@@ -342,7 +342,6 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                 {dimension.type}
               </Badge>
             </div>
-          </div>
         </SheetHeader>
 
         <div className="px-6 py-6 space-y-6">
