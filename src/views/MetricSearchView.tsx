@@ -34,11 +34,7 @@ export interface MetricSearchViewProps {
   onAddToMetricSetFromSelection?: (metricFieldNames: string[]) => void
   favoriteMetricFieldNames?: string[]
   onToggleFavoriteMetric?: (fieldName: string) => void
-  tags?: Tag[]
-  selectedTagId?: string | null
-  onSelectTag?: (tagId: string | null) => void
   onNavigateWorkspace?: () => void
-  onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Offline") => void
 }
 
 export type MetricViewMode = "card" | "list"
@@ -54,11 +50,7 @@ export function MetricSearchView({
   onAddToMetricSetFromSelection,
   favoriteMetricFieldNames,
   onToggleFavoriteMetric,
-  tags,
-  selectedTagId,
-  onSelectTag,
   onNavigateWorkspace,
-  onUpdateMetricStatus,
 }: MetricSearchViewProps) {
   const [search, setSearch] = useState("")
   const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "card")
@@ -198,24 +190,6 @@ export function MetricSearchView({
                   <SelectItem value="updatedAt">Updated Date</SelectItem>
                 </SelectContent>
               </Select>
-              {tags && tags.length > 0 && onSelectTag && (
-                <Select
-                  value={selectedTagId ?? "all"}
-                  onValueChange={(value) => onSelectTag(value === "all" ? null : value)}
-                >
-                  <SelectTrigger className="h-8 text-xs w-[150px] bg-white">
-                    <SelectValue placeholder="All tags" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All tags</SelectItem>
-                    {tags.map((tag) => (
-                      <SelectItem key={tag.id} value={tag.id}>
-                        {tag.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
 
               <Button
                 variant="ghost"
@@ -227,7 +201,6 @@ export function MetricSearchView({
                   setTechOwnerFilter("all")
                   setHasQueryFilter("all")
                   setSearch("")
-                  onSelectTag?.(null)
                 }}
               >
                 Reset Filters
@@ -308,19 +281,12 @@ export function MetricSearchView({
                           </button>
                         )}
                         <div onClick={(e) => e.stopPropagation()}>
-                          <Select
-                            value={metric.status}
-                            onValueChange={(val) => onUpdateMetricStatus?.(metric.fieldName, val as "Active" | "Offline")}
-                            disabled={!onUpdateMetricStatus}
+                          <Badge
+                            variant={metric.status === "Active" ? "default" : "secondary"}
+                            className={`shrink-0 ${metric.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : ""}`}
                           >
-                            <SelectTrigger className={`h-6 text-[10px] w-[75px] border-0 px-2 ${metric.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Active">Active</SelectItem>
-                              <SelectItem value="Offline">Offline</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            {metric.status}
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -424,19 +390,12 @@ export function MetricSearchView({
                       <TableCell className="text-xs text-slate-600">{m.owners.businessOwner}</TableCell>
                       <TableCell>
                         <div onClick={(e) => e.stopPropagation()}>
-                          <Select
-                            value={m.status}
-                            onValueChange={(val) => onUpdateMetricStatus?.(m.fieldName, val as "Active" | "Offline")}
-                            disabled={!onUpdateMetricStatus}
+                          <Badge
+                            variant={m.status === "Active" ? "default" : "secondary"}
+                            className={`shrink-0 ${m.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : ""}`}
                           >
-                            <SelectTrigger className={`h-6 text-[10px] w-[75px] border-0 px-2 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600'}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Active">Active</SelectItem>
-                              <SelectItem value="Offline">Offline</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            {m.status}
+                          </Badge>
                         </div>
                       </TableCell>
                       <TableCell className="text-xs text-slate-600">

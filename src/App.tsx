@@ -3,13 +3,6 @@ import { useMemo, useState, useEffect } from "react"
 import "./App.css"
 
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 import { HomeView } from "@/views/HomeView"
 import { MetricsWorkspaceView } from "@/views/MetricsWorkspaceView"
@@ -31,8 +24,6 @@ import {
   DerivedMetricSpec,
   CategoryNode,
   Dimension,
-  Tag,
-  Tenant
 } from "@/types"
 
 // ---- Types ----
@@ -49,13 +40,6 @@ export type AppViewsRegistry =
   | typeof MetricRegistrationView
   | typeof MetricLineageDag
   | typeof MetricProfileSheet
-
-const INITIAL_TAGS: Tag[] = [
-  { id: "tag-global", name: "Global" },
-  { id: "tag-us", name: "US" },
-  { id: "tag-eu", name: "EU" },
-  { id: "tag-apac", name: "APAC" },
-]
 
 // ---- Helpers ----
 
@@ -83,41 +67,14 @@ function App() {
     error,
   } = useDataSage()
 
-  const [tags, setTags] = useState<Tag[]>(INITIAL_TAGS)
   const [activeTopNav, setActiveTopNav] = useState<AppTopNav>("home")
   const [activeManagementSection, setActiveManagementSection] = useState<ManagementSection>("metric")
   const [selectedMetricFieldName, setSelectedMetricFieldName] = useState<string | null>(null)
   const [isMetricProfileOpen, setIsMetricProfileOpen] = useState(false)
-  const [activeGlobalTenantId, setActiveGlobalTenantId] = useState<string | null>(null)
   const [isDerivedMetricSheetOpen, setIsDerivedMetricSheetOpen] = useState(false)
   const [derivedMetricBaseFieldName, setDerivedMetricBaseFieldName] = useState<string | null>(null)
   const [favoriteMetricFieldNames, setFavoriteMetricFieldNames] = useState<string[]>([])
   const [recentMetricFieldNames, setRecentMetricFieldNames] = useState<string[]>([])
-
-  const uniqueTenants = useMemo(() => {
-    const map = new Map<string, Tenant>()
-    for (const tenant of data.tenants) {
-      if (!map.has(tenant.id)) {
-        map.set(tenant.id, tenant)
-      }
-    }
-    return Array.from(map.values())
-  }, [data.tenants])
-
-  const permittedTenants = useMemo(
-    () => uniqueTenants.filter((d) => d.permitted !== false),
-    [uniqueTenants],
-  )
-
-  useEffect(() => {
-    if (!uniqueTenants.length) return
-
-    setActiveGlobalTenantId((current) => {
-      if (current) return current
-      const fallbackId = permittedTenants[0]?.id ?? uniqueTenants[0]?.id ?? null
-      return fallbackId
-    })
-  }, [uniqueTenants, permittedTenants])
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -212,7 +169,7 @@ function App() {
   const handleRegisterMetric = (payload: NewMetricPayload) => {
     const now = Date.now()
     const nowIso = new Date(now).toISOString()
-    const dispatchHistory = payload.dispatchSummary ? [payload.dispatchSummary] : []
+    const deployHistory = payload.deploySummary ? [payload.deploySummary] : []
     const newMetric: Metric = {
       id: `m-${now}`,
       businessName: payload.businessName,
@@ -221,7 +178,6 @@ function App() {
       businessDefinition: payload.businessDefinition,
       technicalDefinition: payload.technicalDefinition,
       status: "Offline",
-      tenant: payload.tenantId ?? payload.categoryPath[0] ?? "M10N Data",
       dataType: payload.query.dataType,
       unit: payload.query.unit,
       owners: {
@@ -247,8 +203,8 @@ function App() {
       createdAt: nowIso,
       updatedAt: nowIso,
       heat: 0,
-      dispatchHistory,
-      lastDispatchAt: payload.dispatchSummary?.dispatchedAt,
+      deployHistory,
+      lastDeployAt: payload.deploySummary?.deployedAt,
       history: [
         {
           version: "v1",
@@ -342,7 +298,6 @@ function App() {
         businessDefinition,
         technicalDefinition,
         status: "Offline",
-        tenant: base.tenant,
         owners: base.owners,
         queryDefinitions: [newQuery],
         trend30d: createFlatTrend(),
@@ -362,7 +317,7 @@ function App() {
         ],
       }
     } else {
-      const other = data.metrics.find((m) => m.fieldName === spec.otherMetricFieldName && m.tenant === base.tenant)
+      const other = data.metrics.find((m) => m.fieldName === spec.otherMetricFieldName)
       if (!other) return
 
       const opSymbol =
@@ -407,7 +362,6 @@ function App() {
         businessDefinition,
         technicalDefinition,
         status: "Offline",
-        tenant: base.tenant,
         owners: base.owners,
         queryDefinitions: [query],
         trend30d: createFlatTrend(),
@@ -435,38 +389,6 @@ function App() {
     setIsDerivedMetricSheetOpen(false)
     setIsMetricProfileOpen(false)
     setDerivedMetricBaseFieldName(null)
-  }
-
-  const handleCreateTenant = (payload: {
-    id: string
-    name: string
-    description: string
-    categories: {
-      name: string
-    }[]
-  }) => {
-    setData((prev) => ({
-      ...prev,
-      tenants: [
-        ...prev.tenants,
-        {
-          id: payload.id,
-          name: payload.name,
-          description: payload.description,
-          permitted: true,
-        categories: payload.categories.map((c) => ({
-          name: c.name,
-        })),
-        },
-      ],
-    }))
-  }
-
-  const handleUpdateTenant = (tenant: Tenant) => {
-    setData((prev) => ({
-      ...prev,
-      tenants: prev.tenants.map((t) => (t.id === tenant.id ? tenant : t)),
-    }))
   }
 
   const handleCreateCategory = (payload: { id: string; name: string; description: string; parentId?: string }) => {
@@ -573,7 +495,6 @@ function App() {
     description: string
     category: string
     categoryPath: string[]
-    tenantId: string
     sourceLink: string
     sourceDimensionField: string
     values: { code: string; label: string }[]
@@ -587,7 +508,6 @@ function App() {
       fieldName: payload.fieldName,
       aliases: [],
       description: payload.description,
-      tenant: payload.tenantId || "M10N Data",
       version: "v1",
       scope: [],
       type: "enum",
@@ -629,9 +549,9 @@ function App() {
       ...prev,
       metrics: prev.metrics.map((m) => {
         if (m.fieldName !== fieldName) return m
-        const nextDispatchHistory = payload.dispatchSummary
-          ? [...(m.dispatchHistory ?? []), payload.dispatchSummary]
-          : m.dispatchHistory
+        const nextDeployHistory = payload.deploySummary
+          ? [...(m.deployHistory ?? []), payload.deploySummary]
+          : m.deployHistory
         return {
           ...m,
           businessName: payload.businessName,
@@ -639,7 +559,6 @@ function App() {
           categoryPath: payload.categoryPath.length ? payload.categoryPath : ["performance"],
           businessDefinition: payload.businessDefinition,
           technicalDefinition: payload.technicalDefinition,
-          tenant: payload.tenantId ?? payload.categoryPath[0] ?? m.tenant,
           owners: {
             businessOwner: payload.businessOwner?.trim() || m.owners.businessOwner,
             techOwner: payload.techOwner?.trim() || m.owners.techOwner,
@@ -660,8 +579,8 @@ function App() {
             },
           ],
           boundDimensionFieldNames: payload.query.analysisDimensions,
-          dispatchHistory: nextDispatchHistory,
-          lastDispatchAt: payload.dispatchSummary?.dispatchedAt ?? m.lastDispatchAt,
+          deployHistory: nextDeployHistory,
+          lastDeployAt: payload.deploySummary?.deployedAt ?? m.lastDeployAt,
           updatedAt: nowIso,
           history: [
             ...(m.history ?? []),
@@ -721,7 +640,6 @@ function App() {
     description: string
     category: string
     categoryPath: string[]
-    tenantId: string
     sourceLink: string
     sourceDimensionField: string
     values: { code: string; label: string }[]
@@ -740,7 +658,6 @@ function App() {
               technicalDefinition: payload.technicalDefinition,
               category: payload.category,
               categoryPath: payload.categoryPath,
-              tenant: payload.tenantId || d.tenant,
               sourceLink: payload.sourceLink,
               sourceDimensionField: payload.sourceDimensionField,
               values: payload.values ?? d.values,
@@ -776,8 +693,6 @@ function App() {
     setActiveTopNav(nav)
   }
 
-  const tenantSelectValue =
-    activeGlobalTenantId ?? permittedTenants[0]?.id ?? uniqueTenants[0]?.id ?? ""
   const isWorkspace = activeTopNav === "workspace"
 
   return (
@@ -844,7 +759,6 @@ function App() {
         <div className="fixed inset-0 bg-slate-50">
           <WorkspaceChatView
             metrics={data.metrics}
-            tenants={data.tenants}
             categories={data.categories}
             onBack={() => setActiveTopNav("home")}
             fullScreen
@@ -889,17 +803,13 @@ function App() {
               <MetricsWorkspaceView
                 metrics={data.metrics}
                 metricSets={metricSetsState}
-                tenants={data.tenants}
                 dimensionTree={data.dimensionTree}
                 dimensions={data.dimensions}
                 categories={data.categories}
-                tags={tags}
-                activeGlobalTenantId={activeGlobalTenantId}
                 onOpenMetric={handleOpenMetricProfile}
                 onRegisterMetric={handleRegisterMetric}
                 onMetricSetsChange={setMetricSetsState}
                 onCreateDimension={handleCreateDimension}
-                onUpdateMetricStatus={handleUpdateMetricStatus}
                 favoriteMetricFieldNames={favoriteMetricFieldNames}
                 onToggleFavoriteMetric={handleToggleFavoriteMetric}
                 onNavigateWorkspace={() => setActiveTopNav("workspace")}
@@ -920,15 +830,10 @@ function App() {
                 metrics={data.metrics}
                 metricSets={metricSetsState}
                 setMetricSets={setMetricSetsState}
-                tags={tags}
                 dimensions={data.dimensions}
                 categories={data.categories}
-                tenants={data.tenants}
-                activeTenantId={activeGlobalTenantId}
                 onOpenMetricProfile={handleOpenMetricProfile}
                 onRegisterMetric={handleRegisterMetric}
-                onCreateTenant={handleCreateTenant}
-                onUpdateTenant={handleUpdateTenant}
                 onCreateCategory={handleCreateCategory}
                 onUpdateCategory={handleUpdateCategory}
                 onDeleteCategory={handleDeleteCategory}
@@ -937,8 +842,8 @@ function App() {
                 onDeleteMetric={handleDeleteMetric}
                 onUpdateDimension={handleUpdateDimension}
                 onDeleteDimension={handleDeleteDimension}
-                setTags={setTags}
                 onNavigateWorkspace={() => setActiveTopNav("workspace")}
+                onUpdateMetricStatus={handleUpdateMetricStatus}
               />
             )}
           </div>
@@ -953,7 +858,18 @@ function App() {
             isFavorite={favoriteMetricFieldNames.includes(selectedMetric.fieldName)}
             onToggleFavorite={handleToggleFavoriteMetric}
             onNavigateWorkspace={() => setActiveTopNav("workspace")}
-            onUpdateMetricStatus={handleUpdateMetricStatus}
+            onUpdateMetricStatus={activeTopNav === "management" ? handleUpdateMetricStatus : undefined}
+          />
+        )}
+        
+        {derivedBaseMetric && (
+          <DerivedMetricSheet
+            baseMetric={derivedBaseMetric}
+            metrics={data.metrics}
+            dimensions={data.dimensions}
+            open={isDerivedMetricSheetOpen}
+            onOpenChange={setIsDerivedMetricSheetOpen}
+            onCreate={handleCreateDerivedMetric}
           />
         )}
       </main>

@@ -1,4 +1,4 @@
-import { DispatchTargetType } from "@/types"
+import { DeployTargetType } from "@/types"
 
 export interface CdmBindingItem {
   fieldName: string
@@ -7,22 +7,22 @@ export interface CdmBindingItem {
   notFound: boolean
 }
 
-export interface DispatchValidationResult {
+export interface DeployValidationResult {
   ok: boolean
   errors: { fieldName?: string; message: string }[]
   existingFields: string[]
 }
 
-const targetFieldSeeds: Record<DispatchTargetType, string[]> = {
+const targetFieldSeeds: Record<DeployTargetType, string[]> = {
   "Aeolus Dataset": ["spp_revenue", "auto_ads_revenue", "active_monetized_creators"],
   "Hive Table": ["ad_id", "campaign_id", "p_date"],
 }
 
-export const mockValidateDispatch = (params: {
+export const mockValidateDeploy = (params: {
   bindings: CdmBindingItem[]
-  targetType: DispatchTargetType
+  targetType: DeployTargetType
   targetId: string
-}): Promise<DispatchValidationResult> => {
+}): Promise<DeployValidationResult> => {
   const errors: { fieldName?: string; message: string }[] = []
   const existingFields = targetFieldSeeds[params.targetType] ?? []
 

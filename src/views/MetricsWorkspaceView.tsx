@@ -47,11 +47,9 @@ import { NewMetricSheet, NewMetricSetSheet, NewDimensionSheet } from "@/views/Ma
 export interface MetricsWorkspaceViewProps {
   metrics: Metric[]
   metricSets: Album[]
-  tenants: Tenant[]
   dimensionTree: DimensionTreeNode[]
   dimensions: Dimension[]
   categories: CategoryNode[]
-  activeGlobalTenantId: string | null
   onOpenMetric: (fieldName: string) => void
   onRegisterMetric: (payload: NewMetricPayload) => void
   onMetricSetsChange: (sets: Album[]) => void
@@ -69,11 +67,9 @@ export interface MetricsWorkspaceViewProps {
     sourceDimensionField: string
     values: { code: string; label: string }[]
   }) => void
-  tags: Tag[]
   favoriteMetricFieldNames?: string[]
   onToggleFavoriteMetric?: (fieldName: string) => void
   onNavigateWorkspace: () => void
-  onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Offline") => void
 }
 
 function getMetricSetTimestamp(metricSet: Album, key: "createdAt" | "updatedAt"): number {
@@ -86,23 +82,17 @@ function getMetricSetTimestamp(metricSet: Album, key: "createdAt" | "updatedAt")
 export function MetricsWorkspaceView({
   metrics,
   metricSets,
-  tenants,
   dimensionTree,
   dimensions,
   categories,
-  activeGlobalTenantId,
   onOpenMetric,
   onRegisterMetric,
   onMetricSetsChange,
   onCreateDimension,
-  tags,
   favoriteMetricFieldNames,
   onToggleFavoriteMetric,
   onNavigateWorkspace,
-  onUpdateMetricStatus,
 }: MetricsWorkspaceViewProps) {
-
-  const selectedTenantId = activeGlobalTenantId
 
   const [selectedMetricSetId, setSelectedMetricSetId] = useState<string | null>(null)
   const [workspaceMode, setWorkspaceMode] = useState<"metrics" | "dimensions">("metrics")
@@ -119,26 +109,13 @@ export function MetricsWorkspaceView({
   const [isCombinedQuerySheetOpen, setIsCombinedQuerySheetOpen] = useState(false)
   const [isAddToMetricSetSheetOpen, setIsAddToMetricSetSheetOpen] = useState(false)
   const [selectedFieldNamesForAddToMetricSet, setSelectedFieldNamesForAddToMetricSet] = useState<string[]>([])
-  const [selectedTagId, setSelectedTagId] = useState<string | null>(null)
-
-  const metricSetsForTenant = useMemo(() => {
-    if (!selectedTenantId) return metricSets
-    return metricSets.filter((set) => set.tenant === selectedTenantId)
-  }, [metricSets, selectedTenantId])
 
   const filteredSets = useMemo(() => {
-    let result = metricSetsForTenant
+    let result = metricSets
 
     const q = metricSetSearch.toLowerCase().trim()
     if (q) {
       result = result.filter((set) => set.name.toLowerCase().includes(q))
-    }
-
-    if (selectedTagId) {
-      result = result.filter((set) => {
-        if (!set.tags || set.tags.length === 0) return false
-        return set.tags.includes(selectedTagId)
-      })
     }
 
     const sorted = [...result].sort((a, b) => {
@@ -148,7 +125,7 @@ export function MetricsWorkspaceView({
     })
 
     return sorted
-  }, [metricSetsForTenant, metricSetSearch, metricSetSortField, metricSetSortDirection, selectedTagId])
+  }, [metricSets, metricSetSearch, metricSetSortField, metricSetSortDirection])
 
   const selectedMetricSet = useMemo(() => {
     if (!selectedMetricSetId) return null
@@ -171,73 +148,7 @@ export function MetricsWorkspaceView({
     return metrics.filter((m) => (selectedMetricSet.metricFieldNames ?? []).includes(m.fieldName))
   }, [metrics, selectedMetricSet])
 
-
-  const metricsForTenant = useMemo(() => {
-    if (!selectedTenantId) return metrics
-    return metrics.filter((m) => m.tenant === selectedTenantId)
-  }, [metrics, selectedTenantId])
-
-  const metricFieldNamesForSelectedTags = useMemo(() => {
-    if (!selectedTagId) return null
-    const setsInTenant = selectedTenantId ? metricSets.filter((set) => set.tenant === selectedTenantId) : metricSets
-    const fieldNames = new Set<string>()
-    setsInTenant.forEach((set) => {
-      if (!set.tags || set.tags.length === 0) return
-      if (set.tags.includes(selectedTagId)) {
-        (set.metricFieldNames ?? []).forEach((fieldName) => fieldNames.add(fieldName))
-      }
-    })
-    return fieldNames
-  }, [metricSets, selectedTenantId, selectedTagId])
-
-  const metricsForTenantWithTagFilter = useMemo(() => {
-    if (!metricFieldNamesForSelectedTags) return metricsForTenant
-    return metricsForTenant.filter((m) => metricFieldNamesForSelectedTags.has(m.fieldName))
-  }, [metricsForTenant, metricFieldNamesForSelectedTags])
-
-  const dimensionsForTenant = useMemo(() => {
-    if (!selectedTenantId) return dimensions
-    return dimensions.filter(
-      (d) => d.tenant === selectedTenantId || (d.scope && d.scope.includes(selectedTenantId)),
-    )
-  }, [dimensions, selectedTenantId])
-
-  const dimensionFieldNamesForTenant = useMemo(
-    () => new Set(dimensionsForTenant.map((d) => d.fieldName)),
-    [dimensionsForTenant],
-  )
-
-  const filteredDimensionTree = useMemo(() => {
-    if (!selectedTenantId) return dimensionTree
-
-    const filterNode = (node: DimensionTreeNode): DimensionTreeNode | null => {
-      const children =
-        node.children
-          ?.map(filterNode)
-          .filter((child): child is DimensionTreeNode => child !== null) ?? []
-
-      const ownFieldNames = node.dimensionFieldNames?.filter((fieldName) => dimensionFieldNamesForTenant.has(fieldName)) ?? []
-      const childrenCount = children.reduce((sum, child) => sum + child.count, 0)
-      const totalCount = ownFieldNames.length + childrenCount
-
-      if (totalCount === 0) {
-        return null
-      }
-
-      return {
-        ...node,
-        children: children.length ? children : undefined,
-        dimensionFieldNames: ownFieldNames.length ? ownFieldNames : undefined,
-        count: totalCount,
-      }
-    }
-
-    const roots = dimensionTree
-      .map(filterNode)
-      .filter((node): node is DimensionTreeNode => node !== null)
-
-    return roots
-  }, [dimensionTree, dimensionFieldNamesForTenant, selectedTenantId])
+  const filteredDimensionTree = dimensionTree
 
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")

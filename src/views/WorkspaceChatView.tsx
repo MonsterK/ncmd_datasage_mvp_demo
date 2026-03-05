@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import type { CategoryNode, Metric, Tenant } from "@/types"
+import type { CategoryNode, Metric } from "@/types"
 
 type ChatMessage = {
   id: string
@@ -15,13 +15,11 @@ type ChatMessage = {
 
 export function WorkspaceChatView({
   metrics,
-  tenants,
   categories,
   onBack,
   fullScreen,
 }: {
   metrics: Metric[]
-  tenants: Tenant[]
   categories: CategoryNode[]
   onBack?: () => void
   fullScreen?: boolean

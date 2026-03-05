@@ -51,17 +51,13 @@ export function DerivedMetricSheet({
   const [message, setMessage] = useState<string | null>(null)
 
   const metricsInTenant = useMemo(
-    () => metrics.filter((m) => m.tenant === baseMetric.tenant && m.fieldName !== baseMetric.fieldName),
-    [metrics, baseMetric.tenant, baseMetric.fieldName],
+    () => metrics.filter((m) => m.fieldName !== baseMetric.fieldName),
+    [metrics, baseMetric.fieldName],
   )
 
   const dimensionsForBase = useMemo(
-    () =>
-      dimensions.filter(
-        (d) =>
-          d.tenant === baseMetric.tenant || (Array.isArray(d.scope) && d.scope.includes(baseMetric.tenant)),
-      ),
-    [dimensions, baseMetric.tenant],
+    () => dimensions,
+    [dimensions],
   )
 
   useEffect(() => {

@@ -20,6 +20,8 @@ export interface TopDimensionPoint {
   value: number
 }
 
+export type MetricStatus = "Active" | "Offline"
+
 export interface Metric {
   id: string
   businessName: string
@@ -27,8 +29,7 @@ export interface Metric {
   categoryPath: string[]
   businessDefinition: string
   technicalDefinition: string
-  status: "Active" | "Offline"
-  tenant: string
+  status: MetricStatus
   owners: {
     businessOwner: string
     techOwner: string
@@ -44,8 +45,8 @@ export interface Metric {
   history?: ChangeLog[]
   dataType?: string
   unit?: string
-  dispatchHistory?: DispatchHistory[]
-  lastDispatchAt?: string
+  deployHistory?: DeployHistory[]
+  lastDeployAt?: string
 }
 
 export interface ChangeLog {
@@ -67,7 +68,6 @@ export interface Dimension {
   fieldName: string
   aliases: string[]
   description: string
-  tenant: string
   version: string
   scope: string[]
   type: string
@@ -87,11 +87,6 @@ export interface Dimension {
   history?: ChangeLog[]
 }
 
-export interface Tag {
-  id: string
-  name: string
-}
-
 export type TopNav = "home" | "metrics" | "dimensions" | "workspace" | "management"
 
 export interface AlbumRef {
@@ -105,11 +100,9 @@ export interface Album {
   description: string
   scope: string
   visibility: "team" | "private"
-  tenant: string
   metricRefs: AlbumRef[]
   dimensionRefs: AlbumRef[]
   metricFieldNames?: string[] // Deprecated
-  tags: string[]
   createdAt?: string
   updatedAt?: string
   history?: ChangeLog[]
@@ -127,20 +120,6 @@ export interface CategoryNode {
   }
 }
 
-export interface TenantCategory {
-  name: string
-}
-
-export interface Tenant {
-  id: string
-  name: string
-  description?: string
-  permitted?: boolean
-  sourceType?: string
-  sourceLink?: string
-  categories?: TenantCategory[]
-}
-
 export interface DimensionTreeNode {
   id: string
   name: string
@@ -154,7 +133,6 @@ export interface DataState {
   dimensions: Dimension[]
   metricSets: Album[]
   categories: CategoryNode[]
-  tenants: Tenant[]
   dimensionTree: DimensionTreeNode[]
 }
 
@@ -178,17 +156,16 @@ export interface NewMetricPayload {
     createInDownstream?: string[]
     relatedDatasets?: string[]
   }
-  tenantId?: string
-  dispatchSummary?: DispatchHistory
+  deploySummary?: DeployHistory
 }
 
-export type DispatchTargetType = "Aeolus Dataset" | "Hive Table"
+export type DeployTargetType = "Aeolus Dataset" | "Hive Table"
 
-export interface DispatchHistory {
-  targetType: DispatchTargetType
+export interface DeployHistory {
+  targetType: DeployTargetType
   target: string
   status: "success" | "failed"
-  dispatchedAt: string
+  deployedAt: string
   fieldCount: number
 }
 

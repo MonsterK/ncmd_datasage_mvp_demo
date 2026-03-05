@@ -17,14 +17,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 
-import { NewMetricPayload, CategoryNode, Metric, Tenant, Dimension, DispatchHistory, DispatchTargetType } from "@/types"
+import { NewMetricPayload, CategoryNode, Metric, Dimension, DeployHistory, DeployTargetType } from "@/types"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 import { mockResolveCdm, CdmFieldRecommendation } from "@/mocks/cdm"
-import { mockValidateDispatch, CdmBindingItem, DispatchValidationResult } from "@/mocks/production"
+import { mockValidateDeploy, CdmBindingItem, DeployValidationResult } from "@/mocks/production"
 import { Calendar, Hash, Search, Type, Braces, Trash2 } from "lucide-react"
 
 export interface MetricRegistrationViewProps {
-  tenants: Tenant[]
   dimensions: Dimension[]
   metrics: Metric[]
   categories: CategoryNode[]
@@ -32,12 +31,10 @@ export interface MetricRegistrationViewProps {
   initialMetric?: Metric
   disableFieldNameEditing?: boolean
   showLarkImport?: boolean
-  defaultTenantId?: string | null
   onExpressionChange?: (expression: string) => void
 }
 
 export function MetricRegistrationView({
-  tenants,
   dimensions,
   metrics,
   categories,
@@ -45,51 +42,28 @@ export function MetricRegistrationView({
   initialMetric,
   disableFieldNameEditing,
   showLarkImport = false,
-  defaultTenantId,
   onExpressionChange,
 }: MetricRegistrationViewProps) {
   const baseQuery = initialMetric?.queryDefinitions?.[0]
-
-  const [selectedTenantId, setSelectedTenantId] = useState<string>(
-    initialMetric?.tenant ?? defaultTenantId ?? (tenants.length > 0 ? tenants[0].id : "")
-  )
 
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>(
     initialMetric?.categoryPath ?? []
   )
 
-  // Update available categories when tenant changes
-  const currentTenant = useMemo(() => {
-    return tenants.find(t => t.id === selectedTenantId)
-  }, [tenants, selectedTenantId])
-
-  const availableTopCategories = useMemo(() => {
-    const permitted = currentTenant?.categories?.map((c) => c.name) ?? []
-    if (permitted.length === 0) return categories
-    return categories.filter((category) => permitted.includes(category.name))
-  }, [categories, currentTenant])
-
   const selectedTopCategory = useMemo(() => {
     if (!selectedCategoryPath.length) return null
-    return availableTopCategories.find((category) => category.name === selectedCategoryPath[0]) ?? null
-  }, [availableTopCategories, selectedCategoryPath])
+    return categories.find((category) => category.name === selectedCategoryPath[0]) ?? null
+  }, [categories, selectedCategoryPath])
 
   const semanticView = selectedTopCategory?.semanticView ?? null
 
   useEffect(() => {
-    if (initialMetric?.tenant) return
-    if (defaultTenantId && !selectedTenantId) {
-      setSelectedTenantId(defaultTenantId)
-    }
-  }, [defaultTenantId, initialMetric?.tenant, selectedTenantId])
-
-  useEffect(() => {
     if (!selectedCategoryPath.length) return
-    const exists = availableTopCategories.some((c) => c.name === selectedCategoryPath[0])
+    const exists = categories.some((c) => c.name === selectedCategoryPath[0])
     if (!exists) {
       setSelectedCategoryPath([])
     }
-  }, [availableTopCategories, selectedCategoryPath])
+  }, [categories, selectedCategoryPath])
 
   useEffect(() => {
     if (!semanticView) {
@@ -101,12 +75,12 @@ export function MetricRegistrationView({
 
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
-  const [businessOwner, setBusinessOwner] = useState(initialMetric?.owners?.businessOwner ?? "")
+  const [businessOwner, setBusinessOwner] = useState(initialMetric?.owners?.businessOwner ?? (Math.random() > 0.5 ? "PM" : "DS"))
   const [fieldName, setFieldName] = useState(initialMetric?.fieldName ?? "")
   const [dataType, setDataType] = useState(initialMetric?.dataType ?? "decimal")
   const [unit, setUnit] = useState(initialMetric?.unit ?? "")
   const [technicalDefinition, setTechnicalDefinition] = useState(initialMetric?.technicalDefinition ?? "")
-  const [techOwner, setTechOwner] = useState(initialMetric?.owners?.techOwner ?? "")
+  const [techOwner, setTechOwner] = useState(initialMetric?.owners?.techOwner ?? "DE")
   const [larkSheetLink, setLarkSheetLink] = useState(initialMetric?.larkSheetLink ?? "")
   const [importMessage, setImportMessage] = useState<string | null>(null)
 
@@ -137,28 +111,28 @@ export function MetricRegistrationView({
   >([])
   const [cdmLoading, setCdmLoading] = useState(false)
   const [cdmError, setCdmError] = useState<string | null>(null)
-  const [dispatchTargetType, setDispatchTargetType] = useState<DispatchTargetType>("Aeolus Dataset")
-  const [dispatchTargetId, setDispatchTargetId] = useState("")
-  const [dispatchValidation, setDispatchValidation] = useState<DispatchValidationResult | null>(null)
-  const [dispatchSteps, setDispatchSteps] = useState<
+  const [deployTargetType, setDeployTargetType] = useState<DeployTargetType>("Aeolus Dataset")
+  const [deployTargetId, setDeployTargetId] = useState("")
+  const [deployValidation, setDeployValidation] = useState<DeployValidationResult | null>(null)
+  const [deploySteps, setDeploySteps] = useState<
     Array<{ id: string; label: string; status: "pending" | "running" | "success" | "failed" }>
   >([])
-  const [dispatchProgress, setDispatchProgress] = useState(0)
-  const [dispatchRunning, setDispatchRunning] = useState(false)
-  const [dispatchResult, setDispatchResult] = useState<DispatchHistory | null>(null)
-  const [dispatchErrors, setDispatchErrors] = useState<string[]>([])
+  const [deployProgress, setDeployProgress] = useState(0)
+  const [deployRunning, setDeployRunning] = useState(false)
+  const [deployResult, setDeployResult] = useState<DeployHistory | null>(null)
+  const [deployErrors, setDeployErrors] = useState<string[]>([])
 
-  const dispatchFieldErrorMap = useMemo(() => {
-    if (!dispatchValidation) return new Map<string, string[]>()
+  const deployFieldErrorMap = useMemo(() => {
+    if (!deployValidation) return new Map<string, string[]>()
     const map = new Map<string, string[]>()
-    dispatchValidation.errors.forEach((err) => {
+    deployValidation.errors.forEach((err) => {
       if (!err.fieldName) return
       const list = map.get(err.fieldName) ?? []
       list.push(err.message)
       map.set(err.fieldName, list)
     })
     return map
-  }, [dispatchValidation])
+  }, [deployValidation])
 
   const fieldGroups = useMemo(
     () => ({
@@ -242,7 +216,6 @@ export function MetricRegistrationView({
       Boolean(trimmedFieldName) &&
       metrics.some((m) => m.fieldName === trimmedFieldName && m.fieldName !== initialMetric?.fieldName)
 
-    if (!selectedTenantId) errors.push("Tenant is required.")
     if (!selectedCategoryPath.length) errors.push("Category is required.")
     if (!trimmedBusinessName) errors.push("Business name is required.")
     if (!trimmedDefinition) errors.push("Business definition is required.")
@@ -295,9 +268,9 @@ export function MetricRegistrationView({
     )
   }
 
-  const runDispatchSimulation = (bindings: CdmBindingItem[]) => {
+  const runDeploySimulation = (bindings: CdmBindingItem[]) => {
     const steps =
-      dispatchTargetType === "Aeolus Dataset"
+      deployTargetType === "Aeolus Dataset"
         ? [
             { id: "queue", label: "Queue release request", status: "pending" as const },
             { id: "apply", label: "Create or update metric fields", status: "pending" as const },
@@ -309,56 +282,56 @@ export function MetricRegistrationView({
             { id: "publish", label: "Publish Hive task", status: "pending" as const },
           ]
 
-    setDispatchSteps(steps)
-    setDispatchProgress(0)
-    setDispatchRunning(true)
-    setDispatchErrors([])
-    const shouldFail = dispatchTargetId.toLowerCase().includes("fail")
+    setDeploySteps(steps)
+    setDeployProgress(0)
+    setDeployRunning(true)
+    setDeployErrors([])
+    const shouldFail = deployTargetId.toLowerCase().includes("fail")
 
     steps.forEach((step, index) => {
       setTimeout(() => {
-        setDispatchSteps((prev) =>
+        setDeploySteps((prev) =>
           prev.map((item) =>
             item.id === step.id ? { ...item, status: "running" } : item,
           ),
         )
       }, 200 + index * 800)
       setTimeout(() => {
-        setDispatchSteps((prev) =>
+        setDeploySteps((prev) =>
           prev.map((item) =>
             item.id === step.id ? { ...item, status: "success" } : item,
           ),
         )
-        setDispatchProgress(Math.round(((index + 1) / steps.length) * 100))
+        setDeployProgress(Math.round(((index + 1) / steps.length) * 100))
         if (index === steps.length - 1) {
           if (shouldFail) {
-            setDispatchSteps((prev) =>
+            setDeploySteps((prev) =>
               prev.map((item) =>
                 item.id === step.id ? { ...item, status: "failed" } : item,
               ),
             )
-            setDispatchRunning(false)
-            setDispatchErrors(["Execution failed during pipeline run."])
+            setDeployRunning(false)
+            setDeployErrors(["Execution failed during pipeline run."])
             const nowIso = new Date().toISOString()
-            setDispatchResult({
-              targetType: dispatchTargetType,
-              target: dispatchTargetId.trim(),
+            setDeployResult({
+              targetType: deployTargetType,
+              target: deployTargetId.trim(),
               status: "failed",
-              dispatchedAt: nowIso,
+              deployedAt: nowIso,
               fieldCount: bindings.length,
             })
             return
           }
-          setDispatchRunning(false)
+          setDeployRunning(false)
           const nowIso = new Date().toISOString()
-          const summary: DispatchHistory = {
-            targetType: dispatchTargetType,
-            target: dispatchTargetId.trim(),
+          const summary: DeployHistory = {
+            targetType: deployTargetType,
+            target: deployTargetId.trim(),
             status: "success",
-            dispatchedAt: nowIso,
+            deployedAt: nowIso,
             fieldCount: bindings.length,
           }
-          setDispatchResult(summary)
+          setDeployResult(summary)
           const payload: NewMetricPayload = {
             businessName: businessName.trim(),
             businessDefinition: businessDefinition.trim(),
@@ -367,9 +340,8 @@ export function MetricRegistrationView({
             businessOwner: businessOwner.trim(),
             techOwner: techOwner.trim(),
             categoryPath: selectedCategoryPath,
-            tenantId: selectedTenantId,
             larkSheetLink: larkSheetLink.trim() || undefined,
-            dispatchSummary: summary,
+            deploySummary: summary,
             query: {
               type: queryType,
               source: querySource,
@@ -388,25 +360,25 @@ export function MetricRegistrationView({
     })
   }
 
-  const handleValidateAndDispatch = async () => {
-    setDispatchErrors([])
+  const handleValidateAndDeploy = async () => {
+    setDeployErrors([])
     const bindings: CdmBindingItem[] = cdmBindings.map((binding) => ({
       fieldName: binding.fieldName,
       tableName: binding.notFound ? "" : binding.tableName,
       isCertifiedCDM: binding.isCertifiedCDM,
       notFound: binding.notFound,
     }))
-    const result = await mockValidateDispatch({
+    const result = await mockValidateDeploy({
       bindings,
-      targetType: dispatchTargetType,
-      targetId: dispatchTargetId,
+      targetType: deployTargetType,
+      targetId: deployTargetId,
     })
-    setDispatchValidation(result)
+    setDeployValidation(result)
     if (!result.ok) {
-      setDispatchErrors(result.errors.map((err) => err.message))
+      setDeployErrors(result.errors.map((err) => err.message))
       return
     }
-    runDispatchSimulation(bindings.filter((binding) => !binding.notFound))
+    runDeploySimulation(bindings.filter((binding) => !binding.notFound))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -421,7 +393,6 @@ export function MetricRegistrationView({
       businessOwner,
       techOwner,
       categoryPath: selectedCategoryPath,
-      tenantId: selectedTenantId,
       larkSheetLink: larkSheetLink.trim() || undefined,
       query: {
         type: queryType,
@@ -599,32 +570,17 @@ export function MetricRegistrationView({
 
               <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Tenant & Category</p>
-                  <p className="text-xs text-slate-500 mt-1">Choose tenant and category path (up to 3 levels).</p>
+                  <p className="text-sm font-semibold text-slate-900">Category</p>
+                  <p className="text-xs text-slate-500 mt-1">Choose category path (up to 3 levels).</p>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-medium text-slate-500">Tenant</label>
-                    <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
-                      <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
-                        <SelectValue placeholder="Select tenant" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {tenants.map(t => (
-                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-medium text-slate-500">Category</label>
-                    <CategoryTreeSelect
-                      categories={availableTopCategories}
-                      value={selectedCategoryPath}
-                      onChange={setSelectedCategoryPath}
-                      placeholder="Select Category"
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-medium text-slate-500">Category</label>
+                  <CategoryTreeSelect
+                    categories={categories}
+                    value={selectedCategoryPath}
+                    onChange={setSelectedCategoryPath}
+                    placeholder="Select Category"
+                  />
                 </div>
                 {semanticView && (
                   <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-[11px] text-slate-600">
@@ -805,18 +761,18 @@ export function MetricRegistrationView({
                           Configure target and run preflight validation before delivery.
                         </p>
                       </div>
-                      {(dispatchTargetId || dispatchValidation) && (
+                      {(deployTargetId || deployValidation) && (
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           className="h-8 text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
                           onClick={() => {
-                            setDispatchTargetId("")
-                            setDispatchValidation(null)
-                            setDispatchResult(null)
-                            setDispatchErrors([])
-                            setDispatchSteps([])
+                            setDeployTargetId("")
+                            setDeployValidation(null)
+                            setDeployResult(null)
+                            setDeployErrors([])
+                            setDeploySteps([])
                           }}
                         >
                           <Trash2 className="mr-2 h-3.5 w-3.5" />
@@ -829,8 +785,8 @@ export function MetricRegistrationView({
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-700">Target type</label>
                       <Select
-                        value={dispatchTargetType}
-                        onValueChange={(value: DispatchTargetType) => setDispatchTargetType(value)}
+                        value={deployTargetType}
+                        onValueChange={(value: DeployTargetType) => setDeployTargetType(value)}
                       >
                         <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
                           <SelectValue />
@@ -843,12 +799,12 @@ export function MetricRegistrationView({
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-700">
-                        {dispatchTargetType === "Aeolus Dataset" ? "Dataset ID / Link" : "Hive db.table"}
+                        {deployTargetType === "Aeolus Dataset" ? "Dataset ID / Link" : "Hive db.table"}
                       </label>
                       <Input
-                        placeholder={dispatchTargetType === "Aeolus Dataset" ? "dataset_123 or https://..." : "db.table"}
-                        value={dispatchTargetId}
-                        onChange={(e) => setDispatchTargetId(e.target.value)}
+                        placeholder={deployTargetType === "Aeolus Dataset" ? "dataset_123 or https://..." : "db.table"}
+                        value={deployTargetId}
+                        onChange={(e) => setDeployTargetId(e.target.value)}
                         className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
                       />
                     </div>
@@ -857,51 +813,51 @@ export function MetricRegistrationView({
                     <Button
                       type="button"
                       className="h-9 text-xs bg-blue-600 text-white hover:bg-blue-700"
-                      onClick={handleValidateAndDispatch}
-                      disabled={dispatchRunning}
+                      onClick={handleValidateAndDeploy}
+                      disabled={deployRunning}
                     >
-                      {dispatchRunning ? "Delivering..." : "Validate & Deliver"}
+                      {deployRunning ? "Delivering..." : "Validate & Deliver"}
                     </Button>
-                    {dispatchValidation && dispatchValidation.ok && (
+                    {deployValidation && deployValidation.ok && (
                       <span className="text-xs text-emerald-600">Validation passed</span>
                     )}
                   </div>
-                  {dispatchErrors.length > 0 && (
+                  {deployErrors.length > 0 && (
                     <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700 space-y-1">
-                      {dispatchErrors.map((err) => (
+                      {deployErrors.map((err) => (
                         <div key={err}>{err}</div>
                       ))}
                     </div>
                   )}
-                  {dispatchValidation && dispatchValidation.errors.length > 0 && (
+                  {deployValidation && deployValidation.errors.length > 0 && (
                     <div className="space-y-2">
                       {cdmBindings.map((binding) => (
                         <div
                           key={binding.fieldName}
                           className={`rounded-xl border px-3 py-2 text-xs ${
-                            dispatchFieldErrorMap.has(binding.fieldName)
+                            deployFieldErrorMap.has(binding.fieldName)
                               ? "border-red-200 bg-red-50 text-red-700"
                               : "border-slate-200 bg-slate-50/40 text-slate-600"
                           }`}
                         >
                           <div className="font-semibold">{binding.fieldName}</div>
-                          {dispatchFieldErrorMap.get(binding.fieldName)?.map((msg) => (
+                          {deployFieldErrorMap.get(binding.fieldName)?.map((msg) => (
                             <div key={msg}>{msg}</div>
                           ))}
                         </div>
                       ))}
-                      {dispatchValidation.errors.some((err) => !err.fieldName) && (
+                      {deployValidation.errors.some((err) => !err.fieldName) && (
                         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
                           Target configuration needs attention.
                         </div>
                       )}
                     </div>
                   )}
-                  {dispatchRunning && (
+                  {deployRunning && (
                     <div className="space-y-3">
-                      <Progress value={dispatchProgress} />
+                      <Progress value={deployProgress} />
                       <div className="space-y-2">
-                        {dispatchSteps.map((step) => (
+                        {deploySteps.map((step) => (
                           <div key={step.id} className="flex items-center justify-between text-xs text-slate-600">
                             <span>{step.label}</span>
                             <span
@@ -922,41 +878,41 @@ export function MetricRegistrationView({
                   )}
                 </div>
 
-              {dispatchResult && (
+              {deployResult && (
                 <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Dispatch result</p>
+                      <p className="text-sm font-semibold text-slate-900">Delivery result</p>
                       <p className="text-xs text-slate-500 mt-1">Summary of the production release.</p>
                     </div>
                     <Badge
                       className={
-                        dispatchResult.status === "success"
+                        deployResult.status === "success"
                           ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
                           : "bg-red-100 text-red-700 border border-red-200"
                       }
                       variant="outline"
                     >
-                      {dispatchResult.status === "success" ? "Success" : "Failed"}
+                      {deployResult.status === "success" ? "Success" : "Failed"}
                     </Badge>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2 text-xs">
                     <div className="space-y-1">
                       <span className="text-slate-500">Target</span>
-                      <div className="font-semibold text-slate-900">{dispatchResult.target}</div>
-                      <div className="text-[11px] text-slate-500">{dispatchResult.targetType}</div>
+                      <div className="font-semibold text-slate-900">{deployResult.target}</div>
+                      <div className="text-[11px] text-slate-500">{deployResult.targetType}</div>
                     </div>
                     <div className="space-y-1">
                       <span className="text-slate-500">Fields</span>
-                      <div className="font-semibold text-slate-900">{dispatchResult.fieldCount}</div>
+                      <div className="font-semibold text-slate-900">{deployResult.fieldCount}</div>
                       <div className="text-[11px] text-slate-500">
-                        {new Date(dispatchResult.dispatchedAt).toLocaleString()}
+                        {new Date(deployResult.deployedAt).toLocaleString()}
                       </div>
                     </div>
                   </div>
-                  {dispatchResult.status === "failed" && dispatchErrors.length > 0 && (
+                  {deployResult.status === "failed" && deployErrors.length > 0 && (
                     <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                      {dispatchErrors.map((err) => (
+                      {deployErrors.map((err) => (
                         <div key={err}>{err}</div>
                       ))}
                     </div>
@@ -968,27 +924,27 @@ export function MetricRegistrationView({
                       size="sm"
                       className="h-8 text-xs"
                       onClick={() => {
-                        setDispatchResult(null)
-                        setDispatchSteps([])
-                        setDispatchProgress(0)
-                        setDispatchErrors([])
+                        setDeployResult(null)
+                        setDeploySteps([])
+                        setDeployProgress(0)
+                        setDeployErrors([])
                       }}
                     >
                       Modify configuration
                     </Button>
-                    {dispatchResult.status === "failed" && (
+                    {deployResult.status === "failed" && (
                       <Button
                         type="button"
                         size="sm"
                         className="h-8 text-xs bg-blue-600 text-white hover:bg-blue-700"
                         onClick={() => {
-                          setDispatchResult(null)
-                          setDispatchSteps([])
-                          setDispatchProgress(0)
-                          setDispatchErrors([])
+                          setDeployResult(null)
+                          setDeploySteps([])
+                          setDeployProgress(0)
+                          setDeployErrors([])
                         }}
                       >
-                        Retry dispatch
+                        Retry delivery
                       </Button>
                     )}
                   </div>

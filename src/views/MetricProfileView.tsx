@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Flame, LineChart as LineChartIcon, Star } from "lucide-react"
+import { Flame, LineChart as LineChartIcon, Star, Database, Truck, Info } from "lucide-react"
 import {
   BarChart,
   Bar,
@@ -47,10 +47,10 @@ export function MetricProfileView({
     () => dimensions.filter((d) => metric.boundDimensionFieldNames.includes(d.fieldName)),
     [dimensions, metric.boundDimensionFieldNames],
   )
-  const latestDispatch = useMemo(() => {
-    if (!metric.dispatchHistory || metric.dispatchHistory.length === 0) return null
-    return metric.dispatchHistory[metric.dispatchHistory.length - 1]
-  }, [metric.dispatchHistory])
+  const latestDeploy = useMemo(() => {
+    if (!metric.deployHistory || metric.deployHistory.length === 0) return null
+    return metric.deployHistory[metric.deployHistory.length - 1]
+  }, [metric.deployHistory])
 
   return (
     <div className="space-y-6">
@@ -79,8 +79,6 @@ export function MetricProfileView({
               </span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-600">Category: {metric.categoryPath.join(" › ")}</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-600">Tenant: {metric.tenant}</span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-600 capitalize">{metric.dataType || "decimal"}</span>
               {metric.unit && (
@@ -125,10 +123,14 @@ export function MetricProfileView({
       </div>
 
       <div className="grid gap-6">
+        {/* Business Information */}
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="border-slate-200 shadow-sm rounded-2xl">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-              <CardTitle className="text-sm font-bold text-slate-900">Overview</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Info className="h-4 w-4 text-slate-500" />
+                Business Information
+              </CardTitle>
               <CardDescription className="text-xs text-slate-500">
                 Business definition and ownership details.
               </CardDescription>
@@ -144,10 +146,6 @@ export function MetricProfileView({
                   <p className="font-medium text-slate-900">{metric.owners.businessOwner}</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-slate-500">Tech owner</span>
-                  <p className="font-medium text-slate-900">{metric.owners.techOwner}</p>
-                </div>
-                <div className="space-y-1">
                   <span className="text-slate-500">Data type</span>
                   <p className="text-slate-700 capitalize">{metric.dataType || "decimal"}</p>
                 </div>
@@ -155,30 +153,6 @@ export function MetricProfileView({
                   <span className="text-slate-500">Unit</span>
                   <p className="text-slate-700">{metric.unit || "-"}</p>
                 </div>
-              </div>
-              <div className="space-y-1.5 pt-3 border-t border-slate-100">
-                <p className="font-semibold text-slate-800">Dispatch status</p>
-                {latestDispatch ? (
-                  <div className="text-xs text-slate-600 space-y-2">
-                    <div>
-                      {latestDispatch.targetType} · {latestDispatch.target}
-                    </div>
-                    <div className="text-[11px] text-slate-500">
-                      {latestDispatch.status} · {new Date(latestDispatch.dispatchedAt).toLocaleString()}
-                    </div>
-                    {metric.dispatchHistory && metric.dispatchHistory.length > 1 && (
-                      <div className="space-y-1 text-[11px] text-slate-500">
-                        {metric.dispatchHistory.slice(-3).reverse().map((item, index) => (
-                          <div key={`${item.target}-${item.dispatchedAt}-${index}`}>
-                            {item.targetType} · {item.target} · {item.status}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-500">No dispatch history yet.</p>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -210,33 +184,52 @@ export function MetricProfileView({
           </Card>
         </div>
 
+        {/* Technical Information */}
         <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-            <CardTitle className="text-sm font-bold text-slate-900">Definition & Query</CardTitle>
+            <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <LineChartIcon className="h-4 w-4 text-slate-500" />
+              Technical Information
+            </CardTitle>
             <CardDescription className="text-xs text-slate-500">
               Technical definition and online query configurations.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 p-5 text-xs">
+            <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-1">
+                  <span className="text-slate-500">Tech owner</span>
+                  <p className="font-medium text-slate-900">{metric.owners.techOwner}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-slate-500">Field Name</span>
+                  <p className="font-mono text-slate-900">{metric.fieldName}</p>
+                </div>
+            </div>
             <div className="space-y-1.5">
               <p className="font-semibold text-slate-800">Technical definition (pseudo SQL)</p>
               <pre className="overflow-x-auto rounded-xl bg-slate-900 p-4 text-[11px] leading-relaxed text-slate-50 font-mono shadow-inner">
                 <code>{metric.technicalDefinition}</code>
               </pre>
             </div>
-            <div className="space-y-3">
-              <p className="font-semibold text-slate-800">Online queries</p>
-              <div className="space-y-3">
-                {metric.queryDefinitions.map((q) => {
-                  const relatedDatasets = Array.from(
-                    new Set([q.source, ...(q.relatedDatasets ?? []), ...(q.createInDownstream ?? [])]),
-                  )
+          </CardContent>
+        </Card>
 
-                  return (
-                    <div
-                      key={q.id}
-                      className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px] transition-all hover:border-blue-200 hover:bg-white hover:shadow-sm"
-                    >
+        {/* Source Info */}
+        <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+          <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
+             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Database className="h-4 w-4 text-blue-500" />
+                Source Info
+              </CardTitle>
+            <CardDescription className="text-xs text-slate-500">
+              Map fields to source CDM tables.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 text-xs">
+            <div className="space-y-3">
+              {metric.queryDefinitions.map((q) => (
+                 <div key={q.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[11px]">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
                         {q.type}
@@ -251,74 +244,52 @@ export function MetricProfileView({
                         </code>
                       </div>
                     )}
-                    <div className="flex flex-col gap-1 mt-3 pt-3 border-t border-slate-200/50">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider">Related Datasets</span>
-                      <div className="flex flex-wrap gap-3">
-                        {relatedDatasets.map((dataset) => {
-                          const isSource = dataset === q.source
-                          return (
-                            <a
-                              key={dataset}
-                              href={`https://aeolus-sg.tiktok-row.net/dataset/${dataset.replace(/\s+/g, "_")}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className={isSource ? "text-blue-600 hover:underline text-[10px] flex items-center gap-1 font-medium" : "text-purple-600 hover:underline text-[10px] flex items-center gap-1 font-medium"}
-                            >
-                              {isSource ? "Source" : "Related"}: {dataset}
-                            </a>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                  )
-                })}
-              </div>
-            </div>
-            <div className="space-y-1.5 pt-2 border-t border-slate-100">
-              <p className="font-semibold text-slate-800">Available dimensions</p>
-              {boundDimensions.length > 0 ? (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {boundDimensions.map((d) => (
-                    <Badge key={d.id} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 px-2 py-1">
-                      {d.name} <span className="ml-1 opacity-50 font-normal">({d.fieldName})</span>
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-[11px] text-slate-400 italic">No bound dimensions in the mock data.</p>
-              )}
+                 </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-              <CardTitle className="text-sm font-bold text-slate-900">Top dimensions</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="h-52">
-                {metric.topDimensions.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={metric.topDimensions} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                      <XAxis type="number" hide />
-                      <YAxis dataKey="label" type="category" tick={{ fontSize: 10, fill: "#64748b" }} tickLine={false} axisLine={false} width={80} />
-                      <RechartsTooltip cursor={{ fill: "#f8fafc" }} contentStyle={{ fontSize: 11, borderRadius: "8px", border: "1px solid #e2e8f0" }} />
-                      <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <p className="text-xs text-slate-400">No dimension data available.</p>
+        {/* Delivery Scenario */}
+        <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
+             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Truck className="h-4 w-4 text-emerald-500" />
+                Delivery Scenario
+              </CardTitle>
+            <CardDescription className="text-xs text-slate-500">
+              Configure target and run preflight validation before delivery.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 text-xs">
+             <div className="space-y-1.5">
+                <p className="font-semibold text-slate-800">Deploy status</p>
+                {latestDeploy ? (
+                  <div className="text-xs text-slate-600 space-y-2">
+                    <div>
+                      {latestDeploy.targetType} · {latestDeploy.target}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      {latestDeploy.status} · {new Date(latestDeploy.deployedAt).toLocaleString()}
+                    </div>
+                    {metric.deployHistory && metric.deployHistory.length > 1 && (
+                      <div className="space-y-1 text-[11px] text-slate-500">
+                        {metric.deployHistory.slice(-3).reverse().map((item, index) => (
+                          <div key={`${item.target}-${item.deployedAt}-${index}`}>
+                            {item.targetType} · {item.target} · {item.status}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  <p className="text-xs text-slate-500">No deploy history yet.</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+          </CardContent>
+        </Card>
 
+        {/* Context */}
         <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
           <CardHeader className="pb-0 border-b border-slate-100 bg-slate-50/30">
             <Tabs defaultValue="lineage" className="w-full">
