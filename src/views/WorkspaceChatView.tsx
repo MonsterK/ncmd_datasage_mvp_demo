@@ -96,18 +96,7 @@ export function WorkspaceChatView({
   }
 
   return (
-    <div className={fullScreen ? "relative h-full w-full p-6" : ""}>
-      {onBack && fullScreen && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 text-xs absolute left-6 top-6"
-          onClick={onBack}
-        >
-          back to homepage
-        </Button>
-      )}
+    <div className={fullScreen ? "h-full w-full p-6" : ""}>
       <Card className="border-slate-200 shadow-sm rounded-2xl flex flex-col min-h-[640px] h-full">
         <CardHeader className="pb-3 border-b border-slate-100">
           <div className="flex items-center justify-between gap-4">
@@ -117,7 +106,7 @@ export function WorkspaceChatView({
                 Create metrics, bind categories, and deploy to target systems via chat.
               </CardDescription>
             </div>
-            {onBack && !fullScreen && (
+            {onBack && (
               <Button type="button" variant="outline" size="sm" className="h-8 text-xs" onClick={onBack}>
                 back to homepage
               </Button>
