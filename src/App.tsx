@@ -37,7 +37,7 @@ import {
 
 // ---- Types ----
 
-type TopNav = "home" | "metrics" | "dimensions" | "workspace" | "management"
+type AppTopNav = "home" | "metrics" | "dimensions" | "workspace" | "management"
 
 export type AppViewsRegistry =
   | typeof HomeView
@@ -84,7 +84,7 @@ function App() {
   } = useDataSage()
 
   const [tags, setTags] = useState<Tag[]>(INITIAL_TAGS)
-  const [activeTopNav, setActiveTopNav] = useState<TopNav>("home")
+  const [activeTopNav, setActiveTopNav] = useState<AppTopNav>("home")
   const [activeManagementSection, setActiveManagementSection] = useState<ManagementSection>("metric")
   const [selectedMetricFieldName, setSelectedMetricFieldName] = useState<string | null>(null)
   const [isMetricProfileOpen, setIsMetricProfileOpen] = useState(false)
@@ -683,7 +683,7 @@ function App() {
     }))
   }
 
-  const handleChangeTopNav = (nav: TopNav) => {
+  const handleChangeTopNav = (nav: AppTopNav) => {
     setActiveTopNav(nav)
   }
 
@@ -693,8 +693,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      {!isWorkspace && (
-        <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/90 shadow-sm">
+      <header
+        className={`sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/90 shadow-sm ${
+          isWorkspace ? "hidden" : ""
+        }`}
+      >
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
@@ -761,7 +764,6 @@ function App() {
             </nav>
           </div>
         </header>
-      )}
 
       {isWorkspace ? (
         <div className="fixed inset-0 bg-slate-50">

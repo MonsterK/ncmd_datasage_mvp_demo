@@ -92,6 +92,8 @@ export interface Tag {
   name: string
 }
 
+export type TopNav = "home" | "metrics" | "dimensions" | "workspace" | "management"
+
 export interface AlbumRef {
   fieldName: string
   version?: string

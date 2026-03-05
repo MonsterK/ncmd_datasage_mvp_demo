@@ -3,9 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Clock, Star } from "lucide-react"
 
-import { Metric, Dimension, Album } from "@/types"
-
-export type TopNav = "home" | "metrics" | "dimensions" | "management"
+import { Metric, Dimension, Album, TopNav } from "@/types"
 
 export interface HomeViewProps {
   metrics: Metric[]
