@@ -66,6 +66,7 @@ export interface ManagementWorkspaceViewProps {
   onCreateCategory: (payload: { id: string; name: string; description: string }) => void
   onUpdateCategory: (payload: { id: string; semanticView: { name: string; hiveTables: string[] } }) => void
   onUpdateTenant: (tenant: Tenant) => void
+  onNavigateWorkspace: () => void
   onCreateDimension: (payload: {
     fieldName: string
     businessName: string
@@ -117,6 +118,7 @@ export function ManagementWorkspaceView({
   onCreateCategory,
   onUpdateCategory,
   onUpdateTenant,
+  onNavigateWorkspace,
   onCreateDimension,
   onUpdateDimension,
   onDeleteDimension,
@@ -438,13 +440,9 @@ export function ManagementWorkspaceView({
 
   const handleAddClick = () => {
     if (activeSection === "metric") {
-      setMetricSheetMode("create")
-      setMetricToEdit(null)
-      setIsNewMetricSheetOpen(true)
+      onNavigateWorkspace()
     } else if (activeSection === "dimension") {
-      setDimensionSheetMode("create")
-      setDimensionToEdit(null)
-      setIsNewDimensionSheetOpen(true)
+      onNavigateWorkspace()
     }
   }
 
@@ -454,10 +452,6 @@ export function ManagementWorkspaceView({
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
         <Card className="border-slate-200 shadow-sm rounded-2xl h-fit">
-          <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/60">
-            <CardTitle className="text-sm font-semibold text-slate-900">Areas</CardTitle>
-            <CardDescription className="text-xs text-slate-500">Navigation modules</CardDescription>
-          </CardHeader>
           <CardContent className="space-y-1 p-3">
             <SidebarItem
               icon={LineChartIcon}
@@ -516,33 +510,26 @@ export function ManagementWorkspaceView({
               <p className="text-sm font-semibold text-slate-900">{semanticViewPreview?.name ?? "-"}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Hive CDM Tables</p>
-              <div className="flex flex-wrap gap-2">
-                {(semanticViewPreview?.tables ?? []).map((table) => (
-                  <span
-                    key={table}
-                    className="px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-[10px] text-slate-600"
-                  >
-                    {table}
-                  </span>
-                ))}
-                {!semanticViewPreview?.tables?.length && <span className="text-slate-400">No CDM tables</span>}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Table Links</p>
-              <div className="space-y-1 text-[11px] text-slate-600">
-                {semanticViewPreview?.tables?.length ? (
-                  semanticViewPreview.tables.slice(0, -1).map((table, index) => (
-                    <div key={`${table}-${index}`} className="flex items-center gap-2">
-                      <span className="text-slate-500">{table}</span>
-                      <span className="text-slate-300">→</span>
-                      <span className="text-slate-500">{semanticViewPreview.tables[index + 1]}</span>
+              <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">CDM Topology</p>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-col items-center gap-3">
+                  {(semanticViewPreview?.tables ?? []).map((table, index, list) => (
+                    <div key={`${table}-${index}`} className="flex flex-col items-center gap-2">
+                      <div className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-[11px] text-slate-700 shadow-sm">
+                        {table}
+                      </div>
+                      {index < list.length - 1 && (
+                        <div className="flex flex-col items-center gap-1 text-slate-300">
+                          <div className="h-4 w-px bg-slate-300"></div>
+                          <span className="text-[10px]">▼</span>
+                        </div>
+                      )}
                     </div>
-                  ))
-                ) : (
-                  <span className="text-slate-400">No links available</span>
-                )}
+                  ))}
+                  {!semanticViewPreview?.tables?.length && (
+                    <span className="text-slate-400 text-[11px]">No CDM tables</span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex justify-end">

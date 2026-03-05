@@ -15,6 +15,7 @@ import { HomeView } from "@/views/HomeView"
 import { MetricsWorkspaceView } from "@/views/MetricsWorkspaceView"
 import { DimensionsWorkspaceView } from "@/views/DimensionsWorkspaceView"
 import { ManagementWorkspaceView } from "@/views/ManagementWorkspaceView"
+import { WorkspaceChatView } from "@/views/WorkspaceChatView"
 import { MetricProfileView } from "@/views/MetricProfileView"
 import { MetricSearchView } from "@/views/MetricSearchView"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
@@ -36,7 +37,7 @@ import {
 
 // ---- Types ----
 
-type TopNav = "home" | "metrics" | "dimensions" | "management"
+type TopNav = "home" | "metrics" | "dimensions" | "workspace" | "management"
 
 export type AppViewsRegistry =
   | typeof HomeView
@@ -688,73 +689,92 @@ function App() {
 
   const tenantSelectValue =
     activeGlobalTenantId ?? permittedTenants[0]?.id ?? uniqueTenants[0]?.id ?? ""
+  const isWorkspace = activeTopNav === "workspace"
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/90 shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-200/50 ring-1 ring-blue-500/10">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
+      {!isWorkspace && (
+        <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/90 shadow-sm">
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-200/50 ring-1 ring-blue-500/10">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold tracking-tight text-slate-900 leading-none">DataSage</span>
+                  <span className="text-[10px] text-slate-500 font-medium tracking-wide">Unified Metric Semantics</span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold tracking-tight text-slate-900 leading-none">DataSage</span>
-                <span className="text-[10px] text-slate-500 font-medium tracking-wide">Unified Metric Semantics</span>
+
+              <div className="flex items-center gap-3 ml-4 border-l-2 border-slate-100 pl-6">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tenant</span>
+                {data.tenants.length > 0 && (
+                  <Select value={tenantSelectValue} onValueChange={(value) => setActiveGlobalTenantId(value)}>
+                    <SelectTrigger className="h-8 w-[150px] border-slate-200 bg-white text-sm rounded-lg hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:ring-2 focus:ring-blue-100">
+                      <SelectValue placeholder="Select tenant" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(permittedTenants.length ? permittedTenants : uniqueTenants).map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
 
-            <div className="flex items-center gap-3 ml-4 border-l-2 border-slate-100 pl-6">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tenant</span>
-              {data.tenants.length > 0 && (
-                <Select value={tenantSelectValue} onValueChange={(value) => setActiveGlobalTenantId(value)}>
-                  <SelectTrigger className="h-8 w-[150px] border-slate-200 bg-white text-sm rounded-lg hover:border-blue-300 hover:bg-blue-50/30 transition-all focus:ring-2 focus:ring-blue-100">
-                    <SelectValue placeholder="Select tenant" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(permittedTenants.length ? permittedTenants : uniqueTenants).map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
+            <nav className="flex items-center bg-slate-100/70 p-1.5 rounded-full border border-slate-200/60">
+              <TopNavButton
+                label="Home"
+                active={activeTopNav === "home"}
+                onClick={() => handleChangeTopNav("home")}
+              />
+              <TopNavButton
+                label="Metrics & Dimensions"
+                active={activeTopNav === "metrics" || activeTopNav === "dimensions"}
+                onClick={() => handleChangeTopNav("metrics")}
+              />
+              <TopNavButton
+                label="Workspace"
+                active={activeTopNav === "workspace"}
+                onClick={() => handleChangeTopNav("workspace")}
+              />
+              <TopNavButton
+                label="Management"
+                active={activeTopNav === "management"}
+                onClick={() => handleChangeTopNav("management")}
+              />
+            </nav>
           </div>
+        </header>
+      )}
 
-          <nav className="flex items-center bg-slate-100/70 p-1.5 rounded-full border border-slate-200/60">
-            <TopNavButton
-              label="Home"
-              active={activeTopNav === "home"}
-              onClick={() => handleChangeTopNav("home")}
-            />
-            <TopNavButton
-              label="Metrics & Dimensions"
-              active={activeTopNav === "metrics" || activeTopNav === "dimensions"}
-              onClick={() => handleChangeTopNav("metrics")}
-            />
-            <TopNavButton
-              label="Management"
-              active={activeTopNav === "management"}
-              onClick={() => handleChangeTopNav("management")}
-            />
-          </nav>
+      {isWorkspace ? (
+        <div className="fixed inset-0 bg-slate-50">
+          <WorkspaceChatView
+            metrics={data.metrics}
+            tenants={data.tenants}
+            categories={data.categories}
+            onBack={() => setActiveTopNav("home")}
+            fullScreen
+          />
         </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
+      ) : (
+        <main className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
         {loading && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
              {[1, 2, 3].map((i) => (
@@ -804,6 +824,7 @@ function App() {
                 onCreateDimension={handleCreateDimension}
                 favoriteMetricFieldNames={favoriteMetricFieldNames}
                 onToggleFavoriteMetric={handleToggleFavoriteMetric}
+                onNavigateWorkspace={() => setActiveTopNav("workspace")}
               />
             )}
 
@@ -838,6 +859,7 @@ function App() {
                 onUpdateDimension={handleUpdateDimension}
                 onDeleteDimension={handleDeleteDimension}
                 setTags={setTags}
+                onNavigateWorkspace={() => setActiveTopNav("workspace")}
               />
             )}
           </div>
@@ -851,9 +873,11 @@ function App() {
             onOpenChange={setIsMetricProfileOpen}
             isFavorite={favoriteMetricFieldNames.includes(selectedMetric.fieldName)}
             onToggleFavorite={handleToggleFavoriteMetric}
+            onNavigateWorkspace={() => setActiveTopNav("workspace")}
           />
         )}
       </main>
+      )}
     </div>
   )
 }

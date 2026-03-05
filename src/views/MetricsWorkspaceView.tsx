@@ -42,7 +42,6 @@ import {
   type HasQueryFilter,
 } from "@/views/MetricSearchView"
 import { DimensionsWorkspaceView } from "@/views/DimensionsWorkspaceView"
-import { WorkspaceChatView } from "@/views/WorkspaceChatView"
 import { NewMetricSheet, NewMetricSetSheet, NewDimensionSheet } from "@/views/ManagementWorkspaceView"
 
 export interface MetricsWorkspaceViewProps {
@@ -73,6 +72,7 @@ export interface MetricsWorkspaceViewProps {
   tags: Tag[]
   favoriteMetricFieldNames?: string[]
   onToggleFavoriteMetric?: (fieldName: string) => void
+  onNavigateWorkspace: () => void
 }
 
 function getMetricSetTimestamp(metricSet: Album, key: "createdAt" | "updatedAt"): number {
@@ -97,12 +97,13 @@ export function MetricsWorkspaceView({
   tags,
   favoriteMetricFieldNames,
   onToggleFavoriteMetric,
+  onNavigateWorkspace,
 }: MetricsWorkspaceViewProps) {
 
   const selectedTenantId = activeGlobalTenantId
 
   const [selectedMetricSetId, setSelectedMetricSetId] = useState<string | null>(null)
-  const [workspaceMode, setWorkspaceMode] = useState<"metrics" | "dimensions" | "workspace">("metrics")
+  const [workspaceMode, setWorkspaceMode] = useState<"metrics" | "dimensions">("metrics")
   const [metricsViewMode, setMetricsViewMode] = useState<"view" | "library">("view")
   const [metricSetSearch, setMetricSetSearch] = useState("")
   const [metricSetSortField, setMetricSetSortField] = useState<MetricSortField>("updatedAt")
@@ -345,7 +346,7 @@ export function MetricsWorkspaceView({
                 value={workspaceMode}
                 onValueChange={(value) => {
                   if (!value) return
-                  setWorkspaceMode(value as "metrics" | "dimensions" | "workspace")
+                  setWorkspaceMode(value as "metrics" | "dimensions")
                   setSelectedMetricSetId(null)
                 }}
                 className="bg-slate-100/50 p-1 rounded-full border border-slate-200"
@@ -365,13 +366,6 @@ export function MetricsWorkspaceView({
               >
                 Dimensions
               </ToggleGroupItem>
-              <ToggleGroupItem
-                value="workspace"
-                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
-                aria-label="View workspace"
-              >
-                Workspace
-              </ToggleGroupItem>
             </ToggleGroup>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -388,7 +382,7 @@ export function MetricsWorkspaceView({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuItem
-                  onClick={() => setIsNewMetricSheetOpen(true)}
+                  onClick={onNavigateWorkspace}
                   className="text-sm"
                 >
                   New metric
@@ -404,7 +398,7 @@ export function MetricsWorkspaceView({
                   New Metric View
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => setIsNewDimensionSheetOpen(true)}
+                  onClick={onNavigateWorkspace}
                   className="text-sm"
                 >
                   New dimension
@@ -685,7 +679,21 @@ export function MetricsWorkspaceView({
 
                     <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
                       <span className="truncate max-w-[150px]">{m.categoryPath.join(" › ")}</span>
-                      <span>{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : "-"}</span>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-6 px-2 text-[10px]"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onNavigateWorkspace()
+                          }}
+                        >
+                          生产下发
+                        </Button>
+                        <span>{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : "-"}</span>
+                      </div>
                     </CardFooter>
                   </Card>
                 ))}
@@ -713,6 +721,7 @@ export function MetricsWorkspaceView({
             tags={tags}
             selectedTagId={selectedTagId}
             onSelectTag={(tagId) => setSelectedTagId(tagId)}
+            onNavigateWorkspace={onNavigateWorkspace}
           />
         )}
 
@@ -720,13 +729,6 @@ export function MetricsWorkspaceView({
           <DimensionsWorkspaceView
             dimensionTree={selectedTenantId ? filteredDimensionTree : dimensionTree}
             dimensions={dimensionsForTenant}
-          />
-        )}
-        {workspaceMode === "workspace" && (
-          <WorkspaceChatView
-            metrics={metrics}
-            tenants={tenants}
-            categories={categories}
           />
         )}
       </div>

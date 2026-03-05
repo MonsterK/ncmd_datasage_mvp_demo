@@ -17,10 +17,14 @@ export function WorkspaceChatView({
   metrics,
   tenants,
   categories,
+  onBack,
+  fullScreen,
 }: {
   metrics: Metric[]
   tenants: Tenant[]
   categories: CategoryNode[]
+  onBack?: () => void
+  fullScreen?: boolean
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -92,86 +96,108 @@ export function WorkspaceChatView({
   }
 
   return (
-    <Card className="border-slate-200 shadow-sm rounded-2xl flex flex-col min-h-[640px]">
-      <CardHeader className="pb-3 border-b border-slate-100">
-        <CardTitle className="text-base font-bold text-slate-900">AI Workspace</CardTitle>
-        <CardDescription className="text-xs text-slate-500">
-          通过对话创建指标、绑定类目并下发到目标系统。
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-0 flex flex-col flex-1">
-        <ScrollArea className="flex-1 px-6 py-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <div key={message.id} className={message.role === "user" ? "text-right" : "text-left"}>
-                <div
-                  className={
-                    message.role === "user"
-                      ? "inline-block max-w-[80%] rounded-2xl bg-blue-600 text-white px-4 py-2 text-xs"
-                      : "inline-block max-w-[80%] rounded-2xl bg-slate-100 text-slate-700 px-4 py-2 text-xs"
-                  }
-                >
-                  {message.content}
-                </div>
-                {message.actions && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {message.actions.map((action) => (
-                      <Button
-                        key={action.id}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-[10px]"
-                        onClick={() => handleAction(action.label)}
-                      >
-                        {action.label}
-                      </Button>
-                    ))}
+    <div className={fullScreen ? "relative h-full w-full p-6" : ""}>
+      {onBack && fullScreen && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 text-xs absolute left-6 top-6"
+          onClick={onBack}
+        >
+          返回首页
+        </Button>
+      )}
+      <Card className="border-slate-200 shadow-sm rounded-2xl flex flex-col min-h-[640px] h-full">
+        <CardHeader className="pb-3 border-b border-slate-100">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-base font-bold text-slate-900">AI Workspace</CardTitle>
+              <CardDescription className="text-xs text-slate-500">
+                通过对话创建指标、绑定类目并下发到目标系统。
+              </CardDescription>
+            </div>
+            {onBack && !fullScreen && (
+              <Button type="button" variant="outline" size="sm" className="h-8 text-xs" onClick={onBack}>
+                返回首页
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="p-0 flex flex-col flex-1">
+          <ScrollArea className="flex-1 px-6 py-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div key={message.id} className={message.role === "user" ? "text-right" : "text-left"}>
+                  <div
+                    className={
+                      message.role === "user"
+                        ? "inline-block max-w-[80%] rounded-2xl bg-blue-600 text-white px-4 py-2 text-xs"
+                        : "inline-block max-w-[80%] rounded-2xl bg-slate-100 text-slate-700 px-4 py-2 text-xs"
+                    }
+                  >
+                    {message.content}
                   </div>
-                )}
-              </div>
-            ))}
+                  {message.actions && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {message.actions.map((action) => (
+                        <Button
+                          key={action.id}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[10px]"
+                          onClick={() => handleAction(action.label)}
+                        >
+                          {action.label}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="border-t border-slate-100 px-6 py-4 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-[10px]"
+                onClick={() => handleQuickInput("创建指标 日活跃用户")}
+              >
+                创建指标
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-[10px]"
+                onClick={() => handleQuickInput("下发指标 spp_revenue 到 Hive 表")}
+              >
+                下发指标
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="输入你的请求，例如：创建指标 订单转化率"
+                className="h-9 text-xs"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSend()
+                  }
+                }}
+              />
+              <Button type="button" size="sm" className="h-9 text-xs" onClick={handleSend}>
+                发送
+              </Button>
+            </div>
           </div>
-        </ScrollArea>
-        <div className="border-t border-slate-100 px-6 py-4 space-y-3">
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-7 text-[10px]"
-              onClick={() => handleQuickInput("创建指标 日活跃用户")}
-            >
-              创建指标
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-7 text-[10px]"
-              onClick={() => handleQuickInput("下发指标 spp_revenue 到 Hive 表")}
-            >
-              下发指标
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="输入你的请求，例如：创建指标 订单转化率"
-              className="h-9 text-xs"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSend()
-                }
-              }}
-            />
-            <Button type="button" size="sm" className="h-9 text-xs" onClick={handleSend}>
-              发送
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

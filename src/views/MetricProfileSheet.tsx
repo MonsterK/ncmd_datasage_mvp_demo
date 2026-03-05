@@ -10,6 +10,7 @@ export interface MetricProfileSheetProps {
   onDeriveMetric?: (metric: Metric) => void
   isFavorite?: boolean
   onToggleFavorite?: (fieldName: string) => void
+  onNavigateWorkspace?: () => void
 }
 
 export function MetricProfileSheet({
@@ -20,6 +21,7 @@ export function MetricProfileSheet({
   onDeriveMetric,
   isFavorite,
   onToggleFavorite,
+  onNavigateWorkspace,
 }: MetricProfileSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -31,6 +33,7 @@ export function MetricProfileSheet({
             onDeriveMetric={onDeriveMetric}
             isFavorite={isFavorite}
             onToggleFavorite={onToggleFavorite}
+            onNavigateWorkspace={onNavigateWorkspace}
           />
         </div>
       </SheetContent>
