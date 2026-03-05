@@ -31,7 +31,7 @@ export function WorkspaceChatView({
       id: "intro",
       role: "assistant",
       content:
-        "我是你的指标助手，可以通过对话创建指标、绑定类目并发起下发。你可以直接说：“创建指标 日活跃用户”或“下发指标 spp_revenue 到 Hive 表”。",
+        "I am your metric assistant. I can create metrics, bind categories, and deploy them through chat. Try: “create metric daily active users” or “deploy metric spp_revenue to Hive table”.",
     },
   ])
   const [input, setInput] = useState("")
@@ -43,10 +43,10 @@ export function WorkspaceChatView({
         id: crypto.randomUUID(),
         role: "assistant",
         content:
-          "已识别为下发请求。我可以将指标发布到目标系统，并生成校验报告。请选择目标或补充目标信息。",
+          "Deployment request recognized. I can publish the metric to a target system and generate a validation report. Choose a target or provide more details.",
         actions: [
-          { id: "dispatch-aeolus", label: "下发到 Aeolus 数据集" },
-          { id: "dispatch-hive", label: "下发到 Hive 表" },
+          { id: "dispatch-aeolus", label: "Deploy to Aeolus dataset" },
+          { id: "dispatch-hive", label: "Deploy to Hive table" },
         ],
       }
     }
@@ -55,17 +55,17 @@ export function WorkspaceChatView({
         id: crypto.randomUUID(),
         role: "assistant",
         content:
-          "已生成指标草案。请确认租户与类目路径，我将生成字段与表达式建议。",
+          "Draft metric created. Confirm the tenant and category path, and I will generate field and expression suggestions.",
         actions: [
-          { id: "draft-confirm", label: "确认创建草案" },
-          { id: "draft-edit", label: "补充信息" },
+          { id: "draft-confirm", label: "Confirm draft creation" },
+          { id: "draft-edit", label: "Add details" },
         ],
       }
     }
     return {
       id: crypto.randomUUID(),
       role: "assistant",
-      content: "我可以帮你创建指标或下发指标。可以试试：“创建指标 订单转化率”或“下发指标 to Hive”。",
+      content: "I can help you create or deploy metrics. Try: “create metric order conversion rate” or “deploy metric to Hive”.",
     }
   }
 
@@ -86,7 +86,7 @@ export function WorkspaceChatView({
     const assistantMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "assistant",
-      content: `已选择：${actionLabel}。请补充指标名称、目标或确认默认配置。`,
+      content: `Selected: ${actionLabel}. Please provide the metric name and target, or confirm the default configuration.`,
     }
     setMessages((prev) => [...prev, assistantMessage])
   }
@@ -105,7 +105,7 @@ export function WorkspaceChatView({
           className="h-8 text-xs absolute left-6 top-6"
           onClick={onBack}
         >
-          返回首页
+          back to homepage
         </Button>
       )}
       <Card className="border-slate-200 shadow-sm rounded-2xl flex flex-col min-h-[640px] h-full">
@@ -114,12 +114,12 @@ export function WorkspaceChatView({
             <div>
               <CardTitle className="text-base font-bold text-slate-900">AI Workspace</CardTitle>
               <CardDescription className="text-xs text-slate-500">
-                通过对话创建指标、绑定类目并下发到目标系统。
+                Create metrics, bind categories, and deploy to target systems via chat.
               </CardDescription>
             </div>
             {onBack && !fullScreen && (
               <Button type="button" variant="outline" size="sm" className="h-8 text-xs" onClick={onBack}>
-                返回首页
+                back to homepage
               </Button>
             )}
           </div>
@@ -165,25 +165,25 @@ export function WorkspaceChatView({
                 variant="outline"
                 size="sm"
                 className="h-7 text-[10px]"
-                onClick={() => handleQuickInput("创建指标 日活跃用户")}
+                onClick={() => handleQuickInput("create metric daily active users")}
               >
-                创建指标
+                Create metric
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="h-7 text-[10px]"
-                onClick={() => handleQuickInput("下发指标 spp_revenue 到 Hive 表")}
+                onClick={() => handleQuickInput("deploy metric spp_revenue to Hive table")}
               >
-                下发指标
+                Deploy metric
               </Button>
             </div>
             <div className="flex items-center gap-2">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="输入你的请求，例如：创建指标 订单转化率"
+                placeholder="Type your request, e.g. create metric order conversion rate"
                 className="h-9 text-xs"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -192,7 +192,7 @@ export function WorkspaceChatView({
                 }}
               />
               <Button type="button" size="sm" className="h-9 text-xs" onClick={handleSend}>
-                发送
+                Send
               </Button>
             </div>
           </div>

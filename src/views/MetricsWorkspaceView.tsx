@@ -690,7 +690,7 @@ export function MetricsWorkspaceView({
                             onNavigateWorkspace()
                           }}
                         >
-                          生产下发
+                          deploy
                         </Button>
                         <span>{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : "-"}</span>
                       </div>

@@ -100,7 +100,7 @@ export function MetricProfileView({
                 className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-slate-600 hover:border-blue-200 hover:text-blue-700"
                 onClick={onNavigateWorkspace}
               >
-                生产下发
+                deploy
               </button>
             )}
           </div>
