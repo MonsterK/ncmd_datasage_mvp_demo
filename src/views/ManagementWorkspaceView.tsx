@@ -131,6 +131,12 @@ export function ManagementWorkspaceView({
   const [metricToEdit, setMetricToEdit] = useState<Metric | null>(null)
   const [dimensionSheetMode, setDimensionSheetMode] = useState<"create" | "edit">("create")
   const [dimensionToEdit, setDimensionToEdit] = useState<Dimension | null>(null)
+  const [isSemanticViewPreviewOpen, setIsSemanticViewPreviewOpen] = useState(false)
+  const [semanticViewPreview, setSemanticViewPreview] = useState<{
+    name: string
+    tables: string[]
+    categoryName: string
+  } | null>(null)
   const [isSemanticViewDialogOpen, setIsSemanticViewDialogOpen] = useState(false)
   const [semanticViewCategory, setSemanticViewCategory] = useState<CategoryNode | null>(null)
   const [semanticViewName, setSemanticViewName] = useState("")
@@ -159,7 +165,7 @@ export function ManagementWorkspaceView({
                 <TableRow className="hover:bg-slate-50 border-slate-100">
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
@@ -171,7 +177,9 @@ export function ManagementWorkspaceView({
                   <TableRow key={m.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
                     <TableCell className="text-sm font-medium text-slate-900">{m.businessName}</TableCell>
                     <TableCell className="font-mono text-[11px] text-slate-500">{m.fieldName}</TableCell>
-                    <TableCell className="text-xs text-slate-700">{m.tenant}</TableCell>
+                    <TableCell className="text-xs text-slate-700">
+                      {m.categoryPath?.length ? m.categoryPath.join(" › ") : "Uncategorized"}
+                    </TableCell>
                     <TableCell className="text-xs">
                       <Badge variant="outline" className={`text-[10px] border-slate-200 ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600'}`}>
                         {m.status}
@@ -241,9 +249,9 @@ export function ManagementWorkspaceView({
                 <TableRow className="hover:bg-slate-50 border-slate-100">
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Bound metric count</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
                   <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
                 </TableRow>
@@ -253,13 +261,24 @@ export function ManagementWorkspaceView({
                   <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
                     <TableCell className="text-sm font-medium text-slate-900">{d.name}</TableCell>
                     <TableCell className="font-mono text-[11px] text-slate-500">{d.fieldName}</TableCell>
-                    <TableCell className="text-xs text-slate-700">{d.tenant}</TableCell>
+                    <TableCell className="text-xs text-slate-700">
+                      {d.categoryPath?.length ? d.categoryPath.join(" › ") : d.category ?? "Uncategorized"}
+                    </TableCell>
                     <TableCell className="text-xs">
                       <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
                         {d.type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-slate-700">{d.boundMetricFieldNames.length}</TableCell>
+                    <TableCell className="text-xs">
+                      {d.owners ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-slate-900">{d.owners.businessOwner}</span>
+                          <span className="text-[11px] text-slate-500">{d.owners.techOwner}</span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-[11px] text-slate-500">{formatDate(d.updatedAt)}</TableCell>
                     <TableCell className="text-xs">
                       <div className="flex justify-end gap-2">
@@ -333,7 +352,26 @@ export function ManagementWorkspaceView({
                               <span className="text-slate-400 italic">No CDM tables</span>
                             )}
                           </div>
-                          <div className="flex justify-end">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 text-[10px]"
+                              onClick={() => {
+                                if (!category) return
+                                const fallbackTables = ["dwd_ad_impressions", "dwa_campaign_perf", "dim_advertiser"]
+                                const tables = category.semanticView?.hiveTables?.length ? category.semanticView.hiveTables : fallbackTables
+                                setSemanticViewPreview({
+                                  name: category.semanticView?.name ?? `${category.name}_semantic_view`,
+                                  tables,
+                                  categoryName: category.name,
+                                })
+                                setIsSemanticViewPreviewOpen(true)
+                              }}
+                            >
+                              View
+                            </Button>
                             <Button
                               type="button"
                               variant="outline"
@@ -348,7 +386,7 @@ export function ManagementWorkspaceView({
                                 setIsSemanticViewDialogOpen(true)
                               }}
                             >
-                              View / Edit
+                              Edit
                             </Button>
                           </div>
                         </div>
@@ -464,6 +502,63 @@ export function ManagementWorkspaceView({
           <CardContent className="p-0 sm:p-4">{renderSectionContent()}</CardContent>
         </Card>
       </div>
+
+      <Dialog open={isSemanticViewPreviewOpen} onOpenChange={setIsSemanticViewPreviewOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold">
+              {semanticViewPreview ? `${semanticViewPreview.categoryName} Semantic View` : "Semantic View"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-xs">
+            <div className="space-y-1">
+              <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Semantic View Name</p>
+              <p className="text-sm font-semibold text-slate-900">{semanticViewPreview?.name ?? "-"}</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Hive CDM Tables</p>
+              <div className="flex flex-wrap gap-2">
+                {(semanticViewPreview?.tables ?? []).map((table) => (
+                  <span
+                    key={table}
+                    className="px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-[10px] text-slate-600"
+                  >
+                    {table}
+                  </span>
+                ))}
+                {!semanticViewPreview?.tables?.length && <span className="text-slate-400">No CDM tables</span>}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Table Links</p>
+              <div className="space-y-1 text-[11px] text-slate-600">
+                {semanticViewPreview?.tables?.length ? (
+                  semanticViewPreview.tables.slice(0, -1).map((table, index) => (
+                    <div key={`${table}-${index}`} className="flex items-center gap-2">
+                      <span className="text-slate-500">{table}</span>
+                      <span className="text-slate-300">→</span>
+                      <span className="text-slate-500">{semanticViewPreview.tables[index + 1]}</span>
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-slate-400">No links available</span>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => setIsSemanticViewPreviewOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isSemanticViewDialogOpen} onOpenChange={setIsSemanticViewDialogOpen}>
         <DialogContent className="max-w-lg">
