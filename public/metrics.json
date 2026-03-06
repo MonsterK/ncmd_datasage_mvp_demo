@@ -405,7 +405,7 @@
       "fieldName": "auto_ads_revenue",
       "categoryPath": ["delivery"],
       "businessDefinition": "Revenue from Auto Ads.",
-      "technicalDefinition": "SUM(dollar_revenue_real)",
+      "technicalDefinition": "sum(CASE WHEN l3_product_tag='Auto Ads' THEN dollar_revenue_real ELSE 0 END)",
       "status": "Active",
       "tenant": "M10N Data",
       "owners": {
@@ -418,20 +418,39 @@
       "deployHistory": [
         {
           "targetType": "Aeolus Dataset",
-          "target": "auto_ads_revenue_v1",
+          "target": "https://mmm.tiktok-row.net/analytics/biportal/dataset/detail/679?tab=dataPreview",
           "status": "success",
           "deployedAt": "2026-02-09T10:00:00Z",
+          "fieldCount": 5
+        },
+        {
+          "targetType": "Hive Table",
+          "target": "ad_dm.dm_transaction_client_incentive_sgi_creative_df_utc12",
+          "status": "success",
+          "deployedAt": "2026-02-09T09:30:00Z",
           "fieldCount": 5
         }
       ],
       "queryDefinitions": [
         {
-          "id": "q7",
-          "type": "Aeolus Visual Query",
-          "source": "fabric_sgi_payout_daily",
+          "id": "q7_1",
+          "type": "Table",
+          "source": "ad_dim.dim_overseas_overture_creative_product_tag_brief_df_utc0",
+          "fields": ["l3_product_tag"],
+          "originField": "l3_product_tag",
+          "aggregate": "NONE",
+          "businessDate": "ds",
+          "filters": [],
+          "analysisDimensions": []
+        },
+        {
+          "id": "q7_2",
+          "type": "Table",
+          "source": "ad_dwa.dwa_crm_performance_adjust_log_global_di_utc12",
+          "fields": ["dollar_revenue_real"],
           "originField": "dollar_revenue_real",
           "aggregate": "SUM",
-          "businessDate": "biz_date",
+          "businessDate": "ds",
           "filters": [],
           "analysisDimensions": []
         }
