@@ -126,6 +126,7 @@ export function ManagementWorkspaceView({
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false)
   const [categorySheetMode, setCategorySheetMode] = useState<"create" | "edit">("create")
   const [categoryToEdit, setCategoryToEdit] = useState<CategoryNode | null>(null)
+  const [isEditingSubCategory, setIsEditingSubCategory] = useState(false)
   const [parentCategoryForCreate, setParentCategoryForCreate] = useState<CategoryNode | null>(null)
 
   const renderSectionContent = () => {
@@ -332,9 +333,10 @@ export function ManagementWorkspaceView({
                       key={category.id}
                       category={category}
                       level={0}
-                      onEdit={(cat) => {
+                      onEdit={(cat, isSub) => {
                         setCategorySheetMode("edit")
                         setCategoryToEdit(cat)
+                        setIsEditingSubCategory(isSub)
                         setIsCategorySheetOpen(true)
                       }}
                       onCreateSub={(parent) => {
@@ -640,6 +642,7 @@ export function ManagementWorkspaceView({
         mode={categorySheetMode}
         initialCategory={categoryToEdit}
         parentCategory={parentCategoryForCreate}
+        isSubCategory={isEditingSubCategory}
         onCreateCategory={(payload) => {
           if (parentCategoryForCreate) {
             onCreateCategory({ ...payload, parentId: parentCategoryForCreate.id })
@@ -682,9 +685,60 @@ function NewCategorySheet({
   const [semanticViewTables, setSemanticViewTables] = useState<string[]>([])
 
   // Only top-level categories (no parent) can have semantic view configuration
-  const showSemanticViewConfig = !parentCategory
+  // When editing, we check if the category has a parent in the full list
+  // But initialCategory doesn't store parentId, so we rely on the `parentCategory` prop for sub-creation
+  // For editing, we need to know if it's a subcategory.
+  // A simple heuristic: if we are in "create" mode and have parentCategory, it's a sub.
+  // If we are in "edit" mode, we need to find if this category is a child of someone.
+  
+  // However, the prompt says "only first-level categories have Semantic View Configuration".
+  // Let's check if the category being edited is top-level.
+  // We can pass `categories` prop to check relationships if needed, but `NewCategorySheet` doesn't have `categories` prop currently.
+  // Let's assume `parentCategory` is passed when creating sub.
+  // When editing, we might need to know.
+  // For now, let's stick to the prompt requirement: "sub category editing only supports name modification".
+  
+  // Actually, we can just use the fact that if it's a sub-category, we probably passed `parentCategory` during creation.
+  // But during edit, `parentCategory` prop is undefined in the current usage in `ManagementWorkspaceView`.
+  // Let's fix `ManagementWorkspaceView` to pass `parentCategory` or `isSubCategory` flag if needed, or better yet,
+  // we can infer it.
+  
+  // Let's update `NewCategorySheet` to accept `isSubCategory` boolean.
 
-  useEffect(() => {
+function NewCategorySheet({
+  open,
+  onOpenChange,
+  mode,
+  initialCategory,
+  parentCategory,
+  onCreateCategory,
+  onUpdateCategory,
+}: NewCategorySheetProps) {
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+  const [semanticViewName, setSemanticViewName] = useState("")
+  const [semanticViewTables, setSemanticViewTables] = useState<string[]>([])
+
+  // Determine if we should show semantic view config
+  // 1. Create mode: show if NO parentCategory (top level)
+  // 2. Edit mode: show if initialCategory is top level (we need to know this)
+  //    Since we don't have the full tree here, we can rely on `initialCategory` properties or passed props.
+  //    The `CategoryNode` type doesn't explicitly store `parentId`.
+  //    However, looking at `ManagementWorkspaceView`, `CategoryRow` is recursive.
+  //    When we click edit on a sub-category, `initialCategory` is that sub-category node.
+  
+  // Let's update the component to check if we should show it.
+  // The simplest way without changing data structure is to check if `parentCategory` is present (for create).
+  // For edit, we need to know if it's a sub.
+  // Let's modify `NewCategorySheetProps` to include `isSubCategory`.
+  
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      {/* ... */}
+    </Sheet>
+  )
+}
+
     if (open) {
       if (mode === "edit" && initialCategory) {
         setName(initialCategory.name)
@@ -704,12 +758,13 @@ function NewCategorySheet({
     e.preventDefault()
     if (!name.trim()) return
 
-    const semanticView = showSemanticViewConfig && (semanticViewName.trim() || semanticViewTables.length > 0)
-      ? {
-          name: semanticViewName.trim() || `${name.trim()}_semantic_view`,
-          hiveTables: semanticViewTables.map(t => t.trim()).filter(Boolean),
-        }
-      : undefined
+    let semanticView = undefined
+    if (showSemanticViewConfig) {
+      semanticView = {
+        name: semanticViewName.trim() || (name.trim() ? `${name.trim()}_semantic_view` : ""),
+        hiveTables: semanticViewTables.map(t => t.trim()).filter(Boolean),
+      }
+    }
 
     if (mode === "edit" && initialCategory) {
       onUpdateCategory({
@@ -851,7 +906,7 @@ interface SidebarItemProps {
 interface CategoryRowProps {
   category: CategoryNode
   level: number
-  onEdit: (cat: CategoryNode) => void
+  onEdit: (cat: CategoryNode, isSub: boolean) => void
   onCreateSub: (parent: CategoryNode) => void
   onDelete: (id: string) => void
   onViewSemanticView: (cat: CategoryNode) => void
@@ -936,7 +991,7 @@ function CategoryRow({ category, level, onEdit, onCreateSub, onDelete, onViewSem
               size="sm"
               className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
               title="Edit"
-              onClick={() => onEdit(category)}
+              onClick={() => onEdit(category, level > 0)}
             >
               <Type className="h-4 w-4" />
             </Button>

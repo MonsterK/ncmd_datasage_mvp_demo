@@ -94,105 +94,87 @@ export function WorkspaceChatView({
   }
 
   return (
-    <div className={fullScreen ? "h-full w-full p-6" : ""}>
-      <Card className="border-slate-200 shadow-sm rounded-2xl flex flex-col min-h-[640px] h-full">
-        <CardHeader className="pb-3 border-b border-slate-100">
+    <div className={fullScreen ? "h-full w-full p-6 bg-slate-50" : ""}>
+      <Card className="border-slate-200 shadow-sm rounded-2xl flex flex-col h-full bg-white overflow-hidden">
+        <CardHeader className="pb-4 border-b border-slate-100 bg-white">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-base font-bold text-slate-900">AI Workspace</CardTitle>
-              <CardDescription className="text-xs text-slate-500">
-                Create metrics&dimensions, and delivery to target systems via chat.
+              <CardTitle className="text-lg font-bold text-slate-900">AI Workspace</CardTitle>
+              <CardDescription className="text-sm text-slate-500 mt-1">
+                Create metrics & dimensions, and delivery to target systems via chat.
               </CardDescription>
             </div>
             {onBack && (
-              <Button type="button" variant="outline" size="sm" className="h-8 text-xs" onClick={onBack}>
-                back to homepage
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="h-8 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200" 
+                onClick={onBack}
+              >
+                Back
               </Button>
             )}
           </div>
         </CardHeader>
-        <CardContent className="p-0 flex flex-col flex-1">
-          <ScrollArea className="flex-1 px-6 py-4">
-            <div className="space-y-4">
+        <div className="flex-1 overflow-hidden relative">
+          <ScrollArea className="h-full px-6 py-6">
+            <div className="space-y-6">
               {messages.map((message) => (
-                <div key={message.id} className={message.role === "user" ? "text-right" : "text-left"}>
+                <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
                     className={
                       message.role === "user"
-                        ? "inline-block max-w-[80%] rounded-2xl bg-blue-600 text-white px-4 py-2 text-xs"
-                        : "inline-block max-w-[80%] rounded-2xl bg-slate-100 text-slate-700 px-4 py-2 text-xs"
+                        ? "max-w-[80%] rounded-2xl rounded-tr-sm bg-blue-600 text-white px-4 py-2.5 text-sm shadow-sm"
+                        : "max-w-[80%] rounded-2xl rounded-tl-sm bg-slate-100 text-slate-700 px-4 py-2.5 text-sm"
                     }
                   >
                     {message.content}
                   </div>
-                  {message.actions && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {message.actions.map((action) => (
-                        <Button
-                          key={action.id}
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 text-[10px]"
-                          onClick={() => handleAction(action.label)}
-                        >
-                          {action.label}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           </ScrollArea>
-          <div className="border-t border-slate-100 px-6 py-4 space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-7 text-[10px]"
-                onClick={() => handleQuickInput("create metric daily active users")}
-              >
-                Create metric
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-7 text-[10px]"
-                onClick={() => handleQuickInput("deploy metric spp_revenue to Hive table")}
-              >
-                Deploy metric
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-7 text-[10px]"
-                onClick={() => handleQuickInput("create dimension user_segment")}
-              >
-                Create dimension
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your request, e.g. create metric order conversion rate"
-                className="h-9 text-xs"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSend()
-                  }
-                }}
-              />
-              <Button type="button" size="sm" className="h-9 text-xs" onClick={handleSend}>
-                Send
-              </Button>
-            </div>
+        </div>
+        <div className="p-4 border-t border-slate-100 bg-white space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+              onClick={() => setInput("create metric daily active users")}
+            >
+              Create metric
+            </button>
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+              onClick={() => setInput("deploy metric spp_revenue to Hive table")}
+            >
+              Deploy metric
+            </button>
           </div>
-        </CardContent>
+          <div className="flex items-center gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your request..."
+              className="h-10 text-sm bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSend()
+                }
+              }}
+            />
+            <Button 
+              type="button" 
+              size="sm" 
+              className="h-10 px-6 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-200" 
+              onClick={handleSend}
+            >
+              Send
+            </Button>
+          </div>
+        </div>
       </Card>
     </div>
   )
