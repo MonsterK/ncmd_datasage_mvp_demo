@@ -127,60 +127,12 @@ export function MetricProfileView({
                 </div>
             </div>
             <div className="space-y-1.5">
-              <p className="font-semibold text-slate-800">Technical definition (pseudo SQL)</p>
+              <p className="font-semibold text-slate-800">Tech definition (SQL)</p>
               <pre className="overflow-x-auto rounded-xl bg-slate-900 p-4 text-[11px] leading-relaxed text-slate-50 font-mono shadow-inner">
                 <code>{metric.technicalDefinition}</code>
               </pre>
             </div>
           </CardContent>
-        </Card>
-
-        {/* Deploy Scenario */}
-        <Card className="border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-xl overflow-hidden">
-           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Truck className="h-4 w-4 text-emerald-500" />
-                Deploy Scenario
-              </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
-              Deployment status and history.
-            </CardDescription>
-          </CardHeader>
-          <div className="p-0">
-             {latestDeploy ? (
-               <div className="w-full">
-                 <div className="grid grid-cols-4 gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
-                   <div>Target</div>
-                   <div>Owner</div>
-                   <div>Status</div>
-                   <div className="text-right">Last Deployed</div>
-                 </div>
-                 <div className="grid grid-cols-4 gap-4 px-5 py-3 text-xs items-center">
-                   <div className="font-medium text-slate-900 flex items-center gap-1.5">
-                     <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
-                     {latestDeploy.target}
-                   </div>
-                   <div className="text-slate-600">{metric.owners.techOwner}</div>
-                   <div>
-                     <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
-                       latestDeploy.status === 'success' 
-                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                         : 'bg-red-50 text-red-700 border-red-200'
-                     }`}>
-                       {latestDeploy.status}
-                     </Badge>
-                   </div>
-                   <div className="text-right text-slate-500 font-mono text-[11px]">
-                     {new Date(latestDeploy.deployedAt).toLocaleString()}
-                   </div>
-                 </div>
-               </div>
-             ) : (
-               <div className="p-8 text-center text-xs text-slate-400 italic">
-                 No deployment history available.
-               </div>
-             )}
-          </div>
         </Card>
 
         {/* Source Info */}
@@ -220,6 +172,54 @@ export function MetricProfileView({
               ))}
             </div>
           </CardContent>
+        </Card>
+
+        {/* Deploy Scenario */}
+        <Card className="border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-xl overflow-hidden">
+           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
+             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Truck className="h-4 w-4 text-emerald-500" />
+                Deploy Scenario
+              </CardTitle>
+            <CardDescription className="text-xs text-slate-500">
+              Deployment status and history.
+            </CardDescription>
+          </CardHeader>
+          <div className="p-0">
+             {latestDeploy ? (
+               <div className="w-full">
+                 <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                   <div>Target</div>
+                   <div>Owner</div>
+                   <div>Status</div>
+                   <div className="text-right">Last Deployed</div>
+                 </div>
+                 <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 px-5 py-3 text-xs items-center">
+                   <div className="font-medium text-slate-900 flex items-center gap-1.5 min-w-0">
+                     <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0"></div>
+                     <span className="truncate" title={latestDeploy.target}>{latestDeploy.target}</span>
+                   </div>
+                   <div className="text-slate-600 truncate">{metric.owners.techOwner}</div>
+                   <div>
+                     <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
+                       latestDeploy.status === 'success' 
+                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                         : 'bg-red-50 text-red-700 border-red-200'
+                     }`}>
+                       {latestDeploy.status}
+                     </Badge>
+                   </div>
+                   <div className="text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                     {new Date(latestDeploy.deployedAt).toLocaleDateString()}
+                   </div>
+                 </div>
+               </div>
+             ) : (
+               <div className="p-8 text-center text-xs text-slate-400 italic">
+                 No deployment history available.
+               </div>
+             )}
+          </div>
         </Card>
 
         {/* Lineage */}
