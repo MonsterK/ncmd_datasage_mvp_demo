@@ -247,7 +247,7 @@ export function MetricsWorkspaceView({
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-2 pl-3 pr-2 rounded-2xl border border-slate-200 shadow-sm">
           <div className="flex items-center gap-4">
               <ToggleGroup
                 type="single"
@@ -259,19 +259,19 @@ export function MetricsWorkspaceView({
                   setWorkspaceMode(value as "metrics" | "dimensions")
                   setSelectedMetricSetId(null)
                 }}
-                className="bg-slate-100/50 p-1 rounded-full border border-slate-200"
+                className="bg-slate-100/80 p-1 rounded-xl border border-slate-200"
                 aria-label="Toggle workspace mode"
               >
               <ToggleGroupItem
                 value="metrics"
-                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+                className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm transition-all"
                 aria-label="View metrics"
               >
                 Metrics
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="dimensions"
-                className="rounded-full px-4 text-xs font-medium data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+                className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm transition-all"
                 aria-label="View dimensions"
               >
                 Dimensions
@@ -282,11 +282,12 @@ export function MetricsWorkspaceView({
             <Button
               type="button"
               size="sm"
-              className="h-9 w-9 rounded-full bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
+              className="h-9 px-4 rounded-xl bg-blue-600 text-white font-semibold text-xs shadow-md shadow-blue-200 hover:bg-blue-700 hover:shadow-lg transition-all"
               aria-label="New"
               onClick={onNavigateWorkspace}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              {workspaceMode === "metrics" ? "New Metric" : "New Dimension"}
             </Button>
           </div>
         </div>

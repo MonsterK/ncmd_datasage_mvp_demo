@@ -28,15 +28,13 @@ export function HomeView({
   const favoriteDisplayMetrics = favoriteMetrics.length ? favoriteMetrics : metrics.slice(4, 8)
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <Card className="border-none shadow-none bg-transparent">
-        <CardHeader className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between px-0">
-          <div>
-            <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">Welcome back</CardTitle>
-          </div>
-        </CardHeader>
-      </Card>
-      <div className="grid gap-6 lg:grid-cols-2">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Welcome back</h1>
+        <p className="text-slate-500">Here's what's happening with your metrics today.</p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
         <MetricListCard
           title="Recently viewed"
           description="Your latest accessed metrics"
@@ -72,55 +70,71 @@ interface MetricListCardProps {
 
 function MetricListCard({ title, description, metrics, emptyLabel, onOpenMetric, onBrowse, icon: Icon }: MetricListCardProps) {
   return (
-    <Card className="border-slate-200 shadow-sm rounded-2xl">
-      <CardHeader className="pb-3 border-b border-slate-50">
+    <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden h-full flex flex-col">
+      <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-blue-600">
-              <Icon className="h-4 w-4" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 shadow-sm text-blue-600">
+              <Icon className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-sm font-semibold text-slate-900">{title}</CardTitle>
-              <CardDescription className="text-xs text-slate-500 mt-1">{description}</CardDescription>
+              <CardTitle className="text-base font-bold text-slate-900">{title}</CardTitle>
+              <CardDescription className="text-xs text-slate-500 mt-0.5">{description}</CardDescription>
             </div>
           </div>
           <button
             type="button"
             onClick={onBrowse}
-            className="text-[11px] font-medium text-blue-600 hover:text-blue-800"
+            className="text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline underline-offset-2 transition-all"
           >
-            Browse
+            View all
           </button>
         </div>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-0 flex-1">
         {metrics.length === 0 ? (
-          <div className="text-xs text-slate-400 italic text-center py-6">{emptyLabel}</div>
+          <div className="flex flex-col items-center justify-center h-40 text-slate-400">
+            <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center mb-2">
+              <Icon className="h-5 w-5 opacity-20" />
+            </div>
+            <p className="text-xs font-medium">{emptyLabel}</p>
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="divide-y divide-slate-50">
             {metrics.slice(0, 6).map((metric) => (
               <button
                 key={metric.id}
                 type="button"
                 onClick={() => onOpenMetric(metric.fieldName)}
-                className="w-full flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-600 hover:border-blue-200 hover:text-blue-700 hover:shadow-sm transition"
+                className="w-full flex items-center justify-between gap-4 px-5 py-3.5 text-left transition-colors hover:bg-slate-50 group"
               >
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-900 truncate">{metric.businessName}</div>
-                  <div className="text-[10px] font-mono text-slate-400 truncate">{metric.fieldName}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-semibold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+                      {metric.businessName}
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
+                        metric.status === "Active"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : metric.status === "Draft"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-slate-50 text-slate-600"
+                      }`}
+                    >
+                      {metric.status}
+                    </Badge>
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-400 truncate flex items-center gap-1.5">
+                     <span>{metric.fieldName}</span>
+                     <span className="text-slate-300">•</span>
+                     <span>{metric.categoryPath?.join(" › ")}</span>
+                  </div>
                 </div>
-                <Badge
-                  variant="outline"
-                  className={`text-[10px] border-slate-200 ${
-                    metric.status === "Active"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : metric.status === "Draft"
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : "bg-slate-50 text-slate-600"
-                  }`}
-                >
-                  {metric.status}
-                </Badge>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
               </button>
             ))}
           </div>

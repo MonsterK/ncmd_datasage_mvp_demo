@@ -97,206 +97,201 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-50/50">
-      <div className="border-b border-slate-200/70 bg-white/90 px-5 py-3 sticky top-16 z-10 backdrop-blur-md supports-[backdrop-filter]:bg-white/90">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400" />
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex flex-col gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <div className="relative max-w-md">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
               <Input
                 placeholder="Search dimensions by name, field name, or description..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-7 h-8 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-xs"
+                className="pl-9 h-9 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-xs rounded-lg"
               />
             </div>
-            <div className="flex flex-wrap items-center gap-2 ml-auto">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-8 text-xs w-[150px] bg-white">
-                  <SelectValue placeholder="All types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  {typeOptions.map((opt) => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="h-9 text-xs w-[140px] bg-slate-50 border-slate-200 rounded-lg">
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {typeOptions.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-              <Select value={sortField} onValueChange={(value: DimensionSortField) => setSortField(value)}>
-                <SelectTrigger className="h-8 text-xs w-[140px] bg-white">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="updatedAt">Updated Date</SelectItem>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="usage">Usage Count</SelectItem>
-                </SelectContent>
-              </Select>
+            <Select value={sortField} onValueChange={(value: DimensionSortField) => setSortField(value)}>
+              <SelectTrigger className="h-9 text-xs w-[130px] bg-slate-50 border-slate-200 rounded-lg">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="updatedAt">Updated Date</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="usage">Usage Count</SelectItem>
+              </SelectContent>
+            </Select>
 
+            <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs text-slate-500"
-                onClick={() => {
-                  setTypeFilter("all")
-                  setSearch("")
-                  setSortField("updatedAt")
-                }}
+                className={`h-8 w-8 p-0 rounded-md ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                onClick={() => setViewMode('card')}
               >
-                Reset Filters
+                <LayoutGrid className="h-4 w-4" />
               </Button>
-            </div>
-            <div className="flex items-center gap-2 border-l border-slate-200/70 pl-3 ml-2">
-              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 rounded-md ${viewMode === 'card' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
-                  onClick={() => setViewMode('card')}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`h-8 w-8 p-0 rounded-md ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900'}`}
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto px-5 py-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {filteredDimensions.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-xl border border-dashed border-slate-200">
-              <div className="bg-slate-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="h-8 w-8 text-slate-300" />
-              </div>
-              <h3 className="text-lg font-medium text-slate-900">No dimensions found</h3>
-              <p className="text-slate-500 mt-1 max-w-sm mx-auto">
-                We couldn't find any dimensions matching your criteria. Try adjusting your search terms or filters.
-              </p>
+      <div>
+        {filteredDimensions.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
+            <div className="bg-slate-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="h-8 w-8 text-slate-300" />
             </div>
-          ) : viewMode === 'card' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDimensions.map(dim => (
-                <Card 
-                  key={dim.id} 
-                  className="group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col hover:border-blue-200"
-                  onClick={() => handleDimensionClick(dim)}
-                >
-                  <CardHeader className="space-y-3 pb-4">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <CardTitle className="text-lg font-semibold leading-tight group-hover:text-blue-600 transition-colors truncate">
-                          {dim.name}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-                          <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{dim.fieldName}</span>
-                        </div>
+            <h3 className="text-lg font-medium text-slate-900">No dimensions found</h3>
+            <p className="text-slate-500 mt-1 max-w-sm mx-auto text-sm">
+              We couldn't find any dimensions matching your criteria. Try adjusting your search terms or filters.
+            </p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => {
+                setTypeFilter("all")
+                setSearch("")
+                setSortField("updatedAt")
+              }}
+            >
+              Clear filters
+            </Button>
+          </div>
+        ) : viewMode === 'card' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredDimensions.map(dim => (
+              <Card 
+                key={dim.id} 
+                className="group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col hover:border-blue-200"
+                onClick={() => handleDimensionClick(dim)}
+              >
+                <CardHeader className="space-y-3 pb-4">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <CardTitle className="text-lg font-semibold leading-tight group-hover:text-blue-600 transition-colors truncate">
+                        {dim.name}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{dim.fieldName}</span>
                       </div>
-                      <Badge 
-                        variant={dim.status === "Active" ? "default" : "secondary"}
-                        className={`shrink-0 ${dim.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}
-                      >
-                        {dim.status || "Active"}
-                      </Badge>
                     </div>
-                    <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10">
-                      {dim.description || "No description provided."}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="pb-4 flex-1">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
-                        <User className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="truncate">{dim.owners?.techOwner || "DE"}</span>
+                    <Badge 
+                      variant={dim.status === "Active" ? "default" : "secondary"}
+                      className={`shrink-0 ${dim.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}
+                    >
+                      {dim.status || "Active"}
+                    </Badge>
+                  </div>
+                  <CardDescription className="line-clamp-2 text-sm leading-relaxed h-10">
+                    {dim.description || "No description provided."}
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent className="pb-4 flex-1">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-xs text-slate-600">
+                      <User className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="truncate">{dim.owners?.techOwner || "DE"}</span>
+                    </div>
+                    
+                    <div className="flex items-end justify-between gap-2 pt-2">
+                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
+                        <Share2 className="h-3 w-3 text-blue-500" />
+                        <span>{dim.boundMetricFieldNames.length} Metrics</span>
                       </div>
                       
-                      <div className="flex items-end justify-between gap-2 pt-2">
-                        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
-                          <Share2 className="h-3 w-3 text-blue-500" />
-                          <span>{dim.boundMetricFieldNames.length} Metrics</span>
+                      {dim.values && dim.values.length > 0 && (
+                        <div className="text-[10px] text-slate-400">
+                          {dim.values.length} values
                         </div>
-                        
-                        {dim.values && dim.values.length > 0 && (
-                          <div className="text-[10px] text-slate-400">
-                            {dim.values.length} values
-                          </div>
-                        )}
-                      </div>
+                      )}
                     </div>
-                  </CardContent>
+                  </div>
+                </CardContent>
 
-                  <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
-                    <span className="truncate max-w-[150px]">
-                      {dim.categoryPath?.join(" › ") ?? dim.category ?? "Uncategorized"}
-                    </span>
-                    <span>{dim.updatedAt ? new Date(dim.updatedAt).toLocaleDateString() : "-"}</span>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="overflow-hidden border-slate-200 shadow-sm">
-              <Table>
-                <TableHeader className="bg-slate-50">
-                  <TableRow>
-                    <TableHead>Dimension Name</TableHead>
-                    <TableHead>Field Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Tech Owner</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Usage</TableHead>
-                    <TableHead className="text-right">Updated</TableHead>
+                <CardFooter className="pt-3 pb-3 text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 bg-slate-50/50 mt-auto">
+                  <span className="truncate max-w-[150px]">
+                    {dim.categoryPath?.join(" › ") ?? dim.category ?? "Uncategorized"}
+                  </span>
+                  <span>{dim.updatedAt ? new Date(dim.updatedAt).toLocaleDateString() : "-"}</span>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="overflow-hidden border-slate-200 shadow-sm rounded-2xl">
+            <Table>
+              <TableHeader className="bg-slate-50">
+                <TableRow>
+                  <TableHead>Dimension Name</TableHead>
+                  <TableHead>Field Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Tech Owner</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Usage</TableHead>
+                  <TableHead className="text-right">Updated</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredDimensions.map((d) => (
+                  <TableRow 
+                    key={d.id} 
+                    className="cursor-pointer hover:bg-slate-50/80"
+                    onClick={() => handleDimensionClick(d)}
+                  >
+                    <TableCell className="font-medium text-slate-900">{d.name}</TableCell>
+                    <TableCell className="font-mono text-xs text-slate-500">{d.fieldName}</TableCell>
+                    <TableCell>
+                       <Badge 
+                        variant="secondary" 
+                        className="text-[10px] bg-slate-100 text-slate-600 border-slate-200"
+                      >
+                        {d.type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-600">
+                      {d.categoryPath?.join(" › ") ?? d.category ?? "-"}
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-600">{d.owners?.techOwner || "DE"}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={d.status === "Active" ? "default" : "secondary"}
+                        className={`shrink-0 ${d.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}
+                      >
+                        {d.status || "Active"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-600">{d.boundMetricFieldNames.length} metrics</TableCell>
+                    <TableCell className="text-xs text-slate-500 text-right">{d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : "-"}</TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredDimensions.map((d) => (
-                    <TableRow 
-                      key={d.id} 
-                      className="cursor-pointer hover:bg-slate-50/80"
-                      onClick={() => handleDimensionClick(d)}
-                    >
-                      <TableCell className="font-medium text-slate-900">{d.name}</TableCell>
-                      <TableCell className="font-mono text-xs text-slate-500">{d.fieldName}</TableCell>
-                      <TableCell>
-                         <Badge 
-                          variant="secondary" 
-                          className="text-[10px] bg-slate-100 text-slate-600 border-slate-200"
-                        >
-                          {d.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-slate-600">
-                        {d.categoryPath?.join(" › ") ?? d.category ?? "-"}
-                      </TableCell>
-                      <TableCell className="text-xs text-slate-600">{d.owners?.techOwner || "DE"}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={d.status === "Active" ? "default" : "secondary"}
-                          className={`shrink-0 ${d.status === "Active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}
-                        >
-                          {d.status || "Active"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-slate-600">{d.boundMetricFieldNames.length} metrics</TableCell>
-                      <TableCell className="text-xs text-slate-500 text-right">{d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : "-"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          )}
-        </div>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        )}
       </div>
 
       <DimensionDetailSheet 

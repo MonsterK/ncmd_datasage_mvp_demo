@@ -137,172 +137,176 @@ export function ManagementWorkspaceView({
       case "metric":
         return (
           <div className="space-y-3">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-slate-50 border-slate-100">
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
-                  <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {metrics.map((m) => (
-                  <TableRow key={m.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
-                    <TableCell className="text-sm font-medium text-slate-900">{m.businessName}</TableCell>
-                    <TableCell className="font-mono text-[11px] text-slate-500">{m.fieldName}</TableCell>
-                    <TableCell className="text-xs text-slate-700">
-                      {m.categoryPath?.length ? m.categoryPath.join(" › ") : "Uncategorized"}
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      <Select
-                        value={m.status}
-                        onValueChange={(value) => onUpdateMetricStatus(m.fieldName, value as MetricStatus)}
-                      >
-                        <SelectTrigger className={`h-7 text-[10px] border-none shadow-none px-2 w-auto min-w-[80px] ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="Draft">Draft</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-slate-900">{m.owners.businessOwner}</span>
-                        <span className="text-[11px] text-slate-500">{m.owners.techOwner}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-[11px] text-slate-500">{formatDate(m.updatedAt)}</TableCell>
-                    <TableCell className="text-xs">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                          onClick={() => {
-                            setMetricSheetMode("edit")
-                            setMetricToEdit(m)
-                            setIsNewMetricSheetOpen(true)
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
-                          onClick={() => onDeleteMetric(m.fieldName)}
-                        >
-                          Delete
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                          onClick={() => onOpenMetricProfile(m.fieldName)}
-                        >
-                          View
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-slate-50 border-slate-100 bg-slate-50/50">
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider pl-4">Name</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
+                    <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider pr-4">Actions</TableHead>
                   </TableRow>
-                ))}
-                {metrics.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-xs text-slate-400 italic">
-                      No metrics in the registry yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {metrics.map((m) => (
+                    <TableRow key={m.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
+                      <TableCell className="text-sm font-medium text-slate-900 pl-4">{m.businessName}</TableCell>
+                      <TableCell className="font-mono text-[11px] text-slate-500">{m.fieldName}</TableCell>
+                      <TableCell className="text-xs text-slate-700">
+                        {m.categoryPath?.length ? m.categoryPath.join(" › ") : "Uncategorized"}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        <Select
+                          value={m.status}
+                          onValueChange={(value) => onUpdateMetricStatus(m.fieldName, value as MetricStatus)}
+                        >
+                          <SelectTrigger className={`h-7 text-[10px] border-none shadow-none px-2 w-auto min-w-[80px] ${m.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Active">Active</SelectItem>
+                            <SelectItem value="Draft">Draft</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-slate-900">{m.owners.businessOwner}</span>
+                          <span className="text-[11px] text-slate-500">{m.owners.techOwner}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-[11px] text-slate-500">{formatDate(m.updatedAt)}</TableCell>
+                      <TableCell className="text-xs pr-4">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
+                            onClick={() => {
+                              setMetricSheetMode("edit")
+                              setMetricToEdit(m)
+                              setIsNewMetricSheetOpen(true)
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
+                            onClick={() => onDeleteMetric(m.fieldName)}
+                          >
+                            Delete
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
+                            onClick={() => onOpenMetricProfile(m.fieldName)}
+                          >
+                            View
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {metrics.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-8 text-center text-xs text-slate-400 italic">
+                        No metrics in the registry yet.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )
 
       case "dimension":
         return (
           <div className="space-y-3">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-slate-50 border-slate-100">
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
-                  <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dimensions.map((d) => (
-                  <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
-                    <TableCell className="text-sm font-medium text-slate-900">{d.name}</TableCell>
-                    <TableCell className="font-mono text-[11px] text-slate-500">{d.fieldName}</TableCell>
-                    <TableCell className="text-xs text-slate-700">
-                      {d.categoryPath?.length ? d.categoryPath.join(" › ") : d.category ?? "Uncategorized"}
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
-                        {d.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      {d.owners ? (
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-slate-900">{d.owners.businessOwner}</span>
-                          <span className="text-[11px] text-slate-500">{d.owners.techOwner}</span>
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-slate-50 border-slate-100 bg-slate-50/50">
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider pl-4">Name</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Updated at</TableHead>
+                    <TableHead className="w-[1%] text-xs text-right font-semibold text-slate-500 uppercase tracking-wider pr-4">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dimensions.map((d) => (
+                    <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
+                      <TableCell className="text-sm font-medium text-slate-900 pl-4">{d.name}</TableCell>
+                      <TableCell className="font-mono text-[11px] text-slate-500">{d.fieldName}</TableCell>
+                      <TableCell className="text-xs text-slate-700">
+                        {d.categoryPath?.length ? d.categoryPath.join(" › ") : d.category ?? "Uncategorized"}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
+                          {d.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {d.owners ? (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-slate-900">{d.owners.businessOwner}</span>
+                            <span className="text-[11px] text-slate-500">{d.owners.techOwner}</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-[11px] text-slate-500">{formatDate(d.updatedAt)}</TableCell>
+                      <TableCell className="text-xs pr-4">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
+                            onClick={() => {
+                              setDimensionSheetMode("edit")
+                              setDimensionToEdit(d)
+                              setIsNewDimensionSheetOpen(true)
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
+                            onClick={() => onDeleteDimension(d.id)}
+                          >
+                            Delete
+                          </Button>
                         </div>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-[11px] text-slate-500">{formatDate(d.updatedAt)}</TableCell>
-                    <TableCell className="text-xs">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                          onClick={() => {
-                            setDimensionSheetMode("edit")
-                            setDimensionToEdit(d)
-                            setIsNewDimensionSheetOpen(true)
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
-                          onClick={() => onDeleteDimension(d.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {dimensions.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-xs text-slate-400 italic">
-                      No dimensions in the registry yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {dimensions.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-8 text-center text-xs text-slate-400 italic">
+                        No dimensions in the registry yet.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )
 
