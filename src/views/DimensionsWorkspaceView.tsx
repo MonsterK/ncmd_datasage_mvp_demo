@@ -477,46 +477,6 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             </CardContent>
           </Card>
 
-          {/* Source Info */}
-          {/* Deploy Scenario */}
-          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-               <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-emerald-500" />
-                  Deploy Scenario
-                </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
-                Configure target and run preflight validation before deploy.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-5 text-xs">
-               <div className="space-y-1.5">
-                  <p className="font-semibold text-slate-800">Deploy status</p>
-                  {latestDeploy ? (
-                    <div className="text-xs text-slate-600 space-y-2">
-                      <div>
-                        {latestDeploy.targetType} · {latestDeploy.target}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        {latestDeploy.status} · {new Date(latestDeploy.deployedAt).toLocaleString()}
-                      </div>
-                      {dimension.deployHistory && dimension.deployHistory.length > 1 && (
-                        <div className="space-y-1 text-[11px] text-slate-500">
-                          {dimension.deployHistory.slice(-3).reverse().map((item, index) => (
-                            <div key={`${item.target}-${item.deployedAt}-${index}`}>
-                              {item.targetType} · {item.target} · {item.status}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-500">No deploy history yet.</p>
-                  )}
-                </div>
-            </CardContent>
-          </Card>
-
           <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
               <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -546,6 +506,54 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Deploy Scenario */}
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-emerald-500" />
+                      Deploy Scenario
+                    </CardTitle>
+                  <CardDescription className="text-xs text-slate-500 mt-1">
+                    Deployment status and history.
+                  </CardDescription>
+                 </div>
+                 <button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm"
+                 >
+                   Deploy
+                 </button>
+               </div>
+            </CardHeader>
+            <CardContent className="p-5 text-xs">
+               <div className="space-y-1.5">
+                  <p className="font-semibold text-slate-800">Deploy status</p>
+                  {latestDeploy ? (
+                    <div className="text-xs text-slate-600 space-y-2">
+                      <div>
+                        {latestDeploy.targetType} · {latestDeploy.target}
+                      </div>
+                      <div className="text-[11px] text-slate-500">
+                        {latestDeploy.status} · {new Date(latestDeploy.deployedAt).toLocaleString()}
+                      </div>
+                      {dimension.deployHistory && dimension.deployHistory.length > 1 && (
+                        <div className="space-y-1 text-[11px] text-slate-500">
+                          {dimension.deployHistory.slice(-3).reverse().map((item, index) => (
+                            <div key={`${item.target}-${item.deployedAt}-${index}`}>
+                              {item.targetType} · {item.target} · {item.status}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500">No deploy history yet.</p>
+                  )}
+                </div>
             </CardContent>
           </Card>
 

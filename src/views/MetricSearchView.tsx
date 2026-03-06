@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search as SearchIcon, Flame, Filter, ArrowUpDown, User, BarChart2, LayoutGrid, List, Star } from "lucide-react"
+import { Search as SearchIcon, Filter, ArrowUpDown, User, BarChart2, LayoutGrid, List } from "lucide-react"
 import { ResponsiveContainer, LineChart, Line } from "recharts"
 
 import { Metric } from "@/types"
@@ -32,8 +32,6 @@ export interface MetricSearchViewProps {
   onOpenMetric: (fieldName: string) => void
   initialViewMode?: MetricViewMode
   onAddToMetricSetFromSelection?: (metricFieldNames: string[]) => void
-  favoriteMetricFieldNames?: string[]
-  onToggleFavoriteMetric?: (fieldName: string) => void
   onNavigateWorkspace?: () => void
 }
 
@@ -48,8 +46,6 @@ export function MetricSearchView({
   onOpenMetric,
   initialViewMode,
   onAddToMetricSetFromSelection,
-  favoriteMetricFieldNames,
-  onToggleFavoriteMetric,
   onNavigateWorkspace,
 }: MetricSearchViewProps) {
   const [search, setSearch] = useState("")
@@ -271,24 +267,6 @@ export function MetricSearchView({
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {onToggleFavoriteMetric && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onToggleFavoriteMetric(metric.fieldName)
-                            }}
-                            className="h-7 w-7 rounded-full border border-slate-200 bg-white flex items-center justify-center hover:border-yellow-300 hover:text-yellow-600"
-                          >
-                            <Star
-                              className={`h-3.5 w-3.5 ${
-                                favoriteMetricFieldNames?.includes(metric.fieldName)
-                                  ? "text-yellow-500 fill-yellow-400"
-                                  : "text-slate-300"
-                              }`}
-                            />
-                          </button>
-                        )}
                         <div onClick={(e) => e.stopPropagation()}>
                           <Badge
                             variant={metric.status === "Active" ? "default" : "secondary"}
@@ -320,13 +298,6 @@ export function MetricSearchView({
                           ? `${metric.deployHistory[metric.deployHistory.length - 1].targetType} · ${metric.deployHistory[metric.deployHistory.length - 1].status}`
                           : "-"}
                       </div>
-                      
-                      <div className="flex items-end justify-between gap-2 pt-2">
-                        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-orange-50 px-2 py-1 rounded-full border border-orange-100">
-                          <Flame className="h-3 w-3 text-orange-500" />
-                          <span>{metric.heat ?? 0} Heat</span>
-                        </div>
-                      </div>
                     </div>
                   </CardContent>
 
@@ -344,7 +315,6 @@ export function MetricSearchView({
               <Table>
                 <TableHeader className="bg-slate-50">
                   <TableRow>
-                    {onToggleFavoriteMetric && <TableHead className="w-10"></TableHead>}
                     <TableHead>Metric Name</TableHead>
                     <TableHead>Field Name</TableHead>
                     <TableHead>Category</TableHead>
@@ -362,26 +332,6 @@ export function MetricSearchView({
                       className="cursor-pointer hover:bg-slate-50/80"
                       onClick={() => onOpenMetric(m.fieldName)}
                     >
-                    {onToggleFavoriteMetric && (
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onToggleFavoriteMetric(m.fieldName)
-                          }}
-                          className="h-6 w-6 rounded-full border border-slate-200 bg-white flex items-center justify-center hover:border-yellow-300 hover:text-yellow-600"
-                        >
-                          <Star
-                            className={`h-3 w-3 ${
-                              favoriteMetricFieldNames?.includes(m.fieldName)
-                                ? "text-yellow-500 fill-yellow-400"
-                                : "text-slate-300"
-                            }`}
-                          />
-                        </button>
-                      </TableCell>
-                    )}
                     <TableCell className="font-medium text-slate-900">{m.businessName}</TableCell>
                       <TableCell className="font-mono text-xs text-slate-500">{m.fieldName}</TableCell>
                       <TableCell className="text-xs text-slate-600 max-w-[200px] truncate" title={m.categoryPath.join(" > ")}>

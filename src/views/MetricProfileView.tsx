@@ -18,8 +18,6 @@ export interface MetricProfileViewProps {
   metric: Metric
   dimensions: Dimension[]
   onDeriveMetric?: (metric: Metric) => void
-  isFavorite?: boolean
-  onToggleFavorite?: (fieldName: string) => void
   onNavigateWorkspace?: () => void
   onUpdateMetricStatus?: (fieldName: string, status: "Active" | "Draft") => void
 }
@@ -28,8 +26,6 @@ export function MetricProfileView({
   metric,
   dimensions,
   onDeriveMetric,
-  isFavorite,
-  onToggleFavorite,
   onNavigateWorkspace,
   onUpdateMetricStatus,
 }: MetricProfileViewProps) {
@@ -58,14 +54,6 @@ export function MetricProfileView({
             <div className={`px-2 py-0.5 rounded text-[10px] font-semibold text-white ${metric.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'}`}>
               {metric.status}
             </div>
-            {onToggleFavorite && (
-              <button 
-                onClick={() => onToggleFavorite(metric.fieldName)}
-                className="text-slate-300 hover:text-yellow-400 transition-colors"
-              >
-                <Star className={`h-4 w-4 ${isFavorite ? "fill-yellow-400 text-yellow-400" : ""}`} />
-              </button>
-            )}
           </div>
         </div>
 
@@ -87,11 +75,6 @@ export function MetricProfileView({
             </div>
             <div className="text-[11px] text-slate-400">Owners</div>
           </div>
-          
-           <div className="flex items-center gap-1.5">
-              <Flame className="h-3.5 w-3.5 text-orange-400" />
-              <span className="text-[11px] font-medium text-slate-600">{metric.heat || 0} Heat</span>
-           </div>
         </div>
 
         {/* Footer */}
@@ -177,13 +160,23 @@ export function MetricProfileView({
         {/* Deploy Scenario */}
         <Card className="border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-xl overflow-hidden">
            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Truck className="h-4 w-4 text-emerald-500" />
-                Deploy Scenario
-              </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
-              Deployment status and history.
-            </CardDescription>
+             <div className="flex items-center justify-between">
+               <div>
+                 <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-emerald-500" />
+                    Deploy Scenario
+                  </CardTitle>
+                <CardDescription className="text-xs text-slate-500 mt-1">
+                  Deployment status and history.
+                </CardDescription>
+               </div>
+               <button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm"
+                  onClick={onNavigateWorkspace}
+               >
+                 Deploy
+               </button>
+             </div>
           </CardHeader>
           <div className="p-0">
              {latestDeploy ? (
@@ -220,22 +213,6 @@ export function MetricProfileView({
                </div>
              )}
           </div>
-        </Card>
-
-        {/* Lineage */}
-        <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-          <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
-            <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Share2 className="h-4 w-4 text-blue-500" />
-              Metric Lineage
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">Metric lineage.</CardDescription>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="h-[200px]">
-              <MetricLineageDag metric={metric} />
-            </div>
-          </CardContent>
         </Card>
 
         {/* Version History */}

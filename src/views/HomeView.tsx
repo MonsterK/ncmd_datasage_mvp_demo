@@ -9,7 +9,6 @@ export interface HomeViewProps {
   metrics: Metric[]
   dimensions: Dimension[]
   metricSets: Album[]
-  favoriteMetrics: Metric[]
   recentMetrics: Metric[]
   onNavigateTopNav: (nav: TopNav) => void
   onOpenMetric: (fieldName: string) => void
@@ -19,13 +18,11 @@ export function HomeView({
   metrics,
   dimensions,
   metricSets,
-  favoriteMetrics,
   recentMetrics,
   onNavigateTopNav,
   onOpenMetric,
 }: HomeViewProps) {
   const recentDisplayMetrics = recentMetrics.length ? recentMetrics : metrics.slice(0, 4)
-  const favoriteDisplayMetrics = favoriteMetrics.length ? favoriteMetrics : metrics.slice(4, 8)
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -34,7 +31,7 @@ export function HomeView({
         <p className="text-slate-500">Here's what's happening with your metrics today.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-1 max-w-3xl">
         <MetricListCard
           title="Recently viewed"
           description="Your latest accessed metrics"
@@ -43,15 +40,6 @@ export function HomeView({
           onOpenMetric={onOpenMetric}
           onBrowse={() => onNavigateTopNav("metrics")}
           icon={Clock}
-        />
-        <MetricListCard
-          title="Favorites"
-          description="Pinned metrics you care about"
-          metrics={favoriteDisplayMetrics}
-          emptyLabel="No favorited metrics yet."
-          onOpenMetric={onOpenMetric}
-          onBrowse={() => onNavigateTopNav("metrics")}
-          icon={Star}
         />
       </div>
     </div>

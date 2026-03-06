@@ -73,23 +73,11 @@ function App() {
   const [isMetricProfileOpen, setIsMetricProfileOpen] = useState(false)
   const [isDerivedMetricSheetOpen, setIsDerivedMetricSheetOpen] = useState(false)
   const [derivedMetricBaseFieldName, setDerivedMetricBaseFieldName] = useState<string | null>(null)
-  const [favoriteMetricFieldNames, setFavoriteMetricFieldNames] = useState<string[]>([])
   const [recentMetricFieldNames, setRecentMetricFieldNames] = useState<string[]>([])
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const storedFavorites = window.localStorage.getItem("datasage.favoriteMetrics")
     const storedRecent = window.localStorage.getItem("datasage.recentMetrics")
-    if (storedFavorites) {
-      try {
-        const parsed = JSON.parse(storedFavorites)
-        if (Array.isArray(parsed)) {
-          setFavoriteMetricFieldNames(parsed.filter((v) => typeof v === "string"))
-        }
-      } catch {
-        setFavoriteMetricFieldNames([])
-      }
-    }
     if (storedRecent) {
       try {
         const parsed = JSON.parse(storedRecent)
@@ -103,14 +91,8 @@ function App() {
   }, [])
 
   useEffect(() => {
-    setFavoriteMetricFieldNames((prev) => prev.filter((fieldName) => data.metrics.some((m) => m.fieldName === fieldName)))
     setRecentMetricFieldNames((prev) => prev.filter((fieldName) => data.metrics.some((m) => m.fieldName === fieldName)))
   }, [data.metrics])
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    window.localStorage.setItem("datasage.favoriteMetrics", JSON.stringify(favoriteMetricFieldNames))
-  }, [favoriteMetricFieldNames])
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -120,14 +102,6 @@ function App() {
   const selectedMetric = useMemo(
     () => data.metrics.find((m) => m.fieldName === selectedMetricFieldName) ?? null,
     [data.metrics, selectedMetricFieldName],
-  )
-
-  const favoriteMetrics = useMemo(
-    () =>
-      favoriteMetricFieldNames
-        .map((fieldName) => data.metrics.find((m) => m.fieldName === fieldName))
-        .filter((m): m is Metric => Boolean(m)),
-    [data.metrics, favoriteMetricFieldNames],
   )
 
   const recentMetrics = useMemo(
@@ -150,15 +124,6 @@ function App() {
       return next.slice(0, 6)
     })
     setIsMetricProfileOpen(true)
-  }
-
-  const handleToggleFavoriteMetric = (fieldName: string) => {
-    setFavoriteMetricFieldNames((prev) => {
-      if (prev.includes(fieldName)) {
-        return prev.filter((name) => name !== fieldName)
-      }
-      return [fieldName, ...prev]
-    })
   }
 
   const handleOpenDerivedMetricSheet = (metric: Metric) => {
@@ -792,7 +757,6 @@ function App() {
                 metrics={data.metrics}
                 dimensions={data.dimensions}
                 metricSets={metricSetsState}
-                favoriteMetrics={favoriteMetrics}
                 recentMetrics={recentMetrics}
                 onNavigateTopNav={setActiveTopNav}
                 onOpenMetric={handleOpenMetricProfile}
@@ -810,8 +774,6 @@ function App() {
                 onRegisterMetric={handleRegisterMetric}
                 onMetricSetsChange={setMetricSetsState}
                 onCreateDimension={handleCreateDimension}
-                favoriteMetricFieldNames={favoriteMetricFieldNames}
-                onToggleFavoriteMetric={handleToggleFavoriteMetric}
                 onNavigateWorkspace={() => setActiveTopNav("workspace")}
               />
             )}
@@ -855,8 +817,6 @@ function App() {
             dimensions={data.dimensions}
             open={isMetricProfileOpen}
             onOpenChange={setIsMetricProfileOpen}
-            isFavorite={favoriteMetricFieldNames.includes(selectedMetric.fieldName)}
-            onToggleFavorite={handleToggleFavoriteMetric}
             onNavigateWorkspace={() => setActiveTopNav("workspace")}
             onUpdateMetricStatus={activeTopNav === "management" ? handleUpdateMetricStatus : undefined}
           />
