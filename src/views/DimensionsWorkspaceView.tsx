@@ -112,6 +112,14 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              className="h-9 w-9 rounded-full bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
+              aria-label="New"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="h-9 text-xs w-[140px] bg-slate-50 border-slate-200 rounded-lg">
                 <SelectValue placeholder="All types" />

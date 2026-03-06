@@ -43,85 +43,81 @@ export function MetricProfileView({
   }, [metric.deployHistory])
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between bg-white/80 border-b border-slate-200/70 p-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <CardTitle className="text-xl font-bold text-slate-900">{metric.businessName}</CardTitle>
-              <Badge variant={metric.status === "Active" ? "default" : "secondary"} className={`h-6 text-[10px] px-2 rounded-full ${metric.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50' : 'bg-slate-100 text-slate-600 hover:bg-slate-100'}`}>
-                {metric.status}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              <span className="font-mono bg-white px-1.5 py-0.5 rounded text-slate-600 border border-slate-200">
-                {metric.fieldName}
-              </span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-600">Category: {metric.categoryPath.join(" › ")}</span>
+    <div className="space-y-6 max-w-2xl mx-auto py-8 px-4">
+      {/* Metric Detail Card */}
+      <div className="bg-white rounded-[12px] shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-6 border border-slate-100">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h1 className="text-[22px] font-bold text-slate-900 leading-none">{metric.businessName}</h1>
+            <div className="bg-slate-100 text-slate-600 text-[12px] font-medium px-3 py-1.5 rounded-full font-mono">
+              {metric.fieldName}
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className={`px-3 py-1.5 rounded-full text-[12px] font-medium text-white ${metric.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'}`}>
+              {metric.status}
+            </div>
             {onToggleFavorite && (
-              <button
-                type="button"
+              <button 
                 onClick={() => onToggleFavorite(metric.fieldName)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-slate-600 hover:border-yellow-300 hover:text-yellow-600"
+                className="text-slate-400 hover:text-yellow-400 transition-colors"
               >
-                <Star className={`h-3.5 w-3.5 ${isFavorite ? "text-yellow-500 fill-yellow-400" : "text-slate-300"}`} />
-                {isFavorite ? "Favorited" : "Favorite"}
-              </button>
-            )}
-            {onDeriveMetric && (
-              <button
-                type="button"
-                className="inline-flex items-center rounded-full bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
-                onClick={() => onDeriveMetric(metric)}
-              >
-                Derive metric
-              </button>
-            )}
-            {onNavigateWorkspace && (
-              <button
-                type="button"
-                className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-slate-600 hover:border-blue-200 hover:text-blue-700"
-                onClick={onNavigateWorkspace}
-              >
-                Deploy
+                <Star className={`h-5 w-5 ${isFavorite ? "fill-yellow-400 text-yellow-400" : ""}`} />
               </button>
             )}
           </div>
+        </div>
+
+        {/* Description */}
+        <p className="text-[16px] text-slate-500 leading-normal mb-4">
+          {metric.businessDefinition}
+        </p>
+
+        {/* Info Section */}
+        <div className="space-y-3 mb-4">
+          {/* Owners */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-full border border-slate-100">
+               <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                  {metric.owners.businessOwner.charAt(0).toUpperCase()}
+               </div>
+               <span className="text-[14px] text-slate-700 font-medium">{metric.owners.businessOwner}</span>
+            </div>
+             <div className="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-full border border-slate-100">
+               <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                  {metric.owners.techOwner.charAt(0).toUpperCase()}
+               </div>
+               <span className="text-[14px] text-slate-700 font-medium">{metric.owners.techOwner}</span>
+            </div>
+          </div>
+
+          {/* Deploy Status */}
+           <div className="flex items-center gap-2">
+              <span className="text-[14px] text-sky-600 font-medium bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+                Deploy: {latestDeploy ? `${latestDeploy.targetType} · ${latestDeploy.status}` : "Not deployed"}
+              </span>
+           </div>
+        </div>
+        
+         {/* Heat Indicator */}
+        <div className="mb-6">
+           <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full border border-amber-100">
+              <Flame className="h-4 w-4" />
+              <span className="text-[14px] font-medium">{metric.heat || 0} Heat</span>
+           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+          <span className="text-[14px] text-slate-500 font-medium">delivery</span>
+          <span className="text-[14px] text-slate-500 font-medium">
+             {metric.updatedAt ? new Date(metric.updatedAt).toLocaleDateString() : "-"}
+          </span>
         </div>
       </div>
 
       <div className="grid gap-6">
-        {/* Business Information */}
-        <div className="grid gap-6 md:grid-cols-1">
-          <Card className="border-slate-200 shadow-sm rounded-2xl">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Info className="h-4 w-4 text-slate-500" />
-                Business Information
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
-                Business definition and ownership details.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 p-5 text-xs">
-              <div className="space-y-1.5">
-                <p className="font-semibold text-slate-800">Business definition</p>
-                <p className="text-slate-600 leading-relaxed">{metric.businessDefinition}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <span className="text-slate-500">Business owner</span>
-                  <p className="font-medium text-slate-900">{metric.owners.businessOwner}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Technical Information */}
         <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">

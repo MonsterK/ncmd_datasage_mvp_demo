@@ -279,12 +279,11 @@ export function MetricsWorkspaceView({
             <Button
               type="button"
               size="sm"
-              className="h-9 px-4 rounded-xl bg-blue-600 text-white font-semibold text-xs shadow-md shadow-blue-200 hover:bg-blue-700 hover:shadow-lg transition-all"
+              className="h-9 w-9 rounded-full bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
               aria-label="New"
               onClick={onNavigateWorkspace}
             >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              {workspaceMode === "metrics" ? "New Metric" : "New Dimension"}
+              <Plus className="h-4 w-4" />
             </Button>
           </div>
         </div>
