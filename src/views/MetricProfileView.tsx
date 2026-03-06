@@ -43,83 +43,69 @@ export function MetricProfileView({
   }, [metric.deployHistory])
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto py-8 px-4">
+    <div className="space-y-4 max-w-2xl mx-auto py-6 px-4">
       {/* Metric Detail Card */}
-      <div className="bg-white rounded-[12px] shadow-[0_2px_8px_rgba(0,0,0,0.05)] p-6 border border-slate-100">
+      <div className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.04)] p-5 border border-slate-100">
         {/* Top Bar */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <h1 className="text-[22px] font-bold text-slate-900 leading-none">{metric.businessName}</h1>
-            <div className="bg-slate-100 text-slate-600 text-[12px] font-medium px-3 py-1.5 rounded-full font-mono">
+            <h1 className="text-[18px] font-bold text-slate-900 leading-tight">{metric.businessName}</h1>
+            <div className="bg-slate-50 text-slate-500 text-[11px] font-mono px-2 py-0.5 rounded border border-slate-100">
               {metric.fieldName}
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className={`px-3 py-1.5 rounded-full text-[12px] font-medium text-white ${metric.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`px-2 py-0.5 rounded text-[10px] font-semibold text-white ${metric.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'}`}>
               {metric.status}
             </div>
             {onToggleFavorite && (
               <button 
                 onClick={() => onToggleFavorite(metric.fieldName)}
-                className="text-slate-400 hover:text-yellow-400 transition-colors"
+                className="text-slate-300 hover:text-yellow-400 transition-colors"
               >
-                <Star className={`h-5 w-5 ${isFavorite ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                <Star className={`h-4 w-4 ${isFavorite ? "fill-yellow-400 text-yellow-400" : ""}`} />
               </button>
             )}
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-[16px] text-slate-500 leading-normal mb-4">
+        <p className="text-[13px] text-slate-500 leading-relaxed mb-4 line-clamp-2">
           {metric.businessDefinition}
         </p>
 
-        {/* Info Section */}
-        <div className="space-y-3 mb-4">
-          {/* Owners */}
+        {/* Info Grid */}
+        <div className="flex items-center gap-6 mb-4 border-b border-slate-50 pb-4">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-full border border-slate-100">
-               <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
+            <div className="flex -space-x-1.5">
+               <div className="h-6 w-6 rounded-full bg-indigo-100 border border-white flex items-center justify-center text-[9px] font-bold text-indigo-600 shadow-sm" title={metric.owners.businessOwner}>
                   {metric.owners.businessOwner.charAt(0).toUpperCase()}
                </div>
-               <span className="text-[14px] text-slate-700 font-medium">{metric.owners.businessOwner}</span>
-            </div>
-             <div className="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-full border border-slate-100">
-               <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
+               <div className="h-6 w-6 rounded-full bg-blue-100 border border-white flex items-center justify-center text-[9px] font-bold text-blue-600 shadow-sm" title={metric.owners.techOwner}>
                   {metric.owners.techOwner.charAt(0).toUpperCase()}
                </div>
-               <span className="text-[14px] text-slate-700 font-medium">{metric.owners.techOwner}</span>
             </div>
+            <div className="text-[11px] text-slate-400">Owners</div>
           </div>
-
-          {/* Deploy Status */}
-           <div className="flex items-center gap-2">
-              <span className="text-[14px] text-sky-600 font-medium bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-                Deploy: {latestDeploy ? `${latestDeploy.targetType} · ${latestDeploy.status}` : "Not deployed"}
-              </span>
-           </div>
-        </div>
-        
-         {/* Heat Indicator */}
-        <div className="mb-6">
-           <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full border border-amber-100">
-              <Flame className="h-4 w-4" />
-              <span className="text-[14px] font-medium">{metric.heat || 0} Heat</span>
+          
+           <div className="flex items-center gap-1.5">
+              <Flame className="h-3.5 w-3.5 text-orange-400" />
+              <span className="text-[11px] font-medium text-slate-600">{metric.heat || 0} Heat</span>
            </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-          <span className="text-[14px] text-slate-500 font-medium">delivery</span>
-          <span className="text-[14px] text-slate-500 font-medium">
-             {metric.updatedAt ? new Date(metric.updatedAt).toLocaleDateString() : "-"}
+        <div className="flex items-center justify-between text-[11px] text-slate-400">
+          <span>delivery</span>
+          <span>
+             Updated {metric.updatedAt ? new Date(metric.updatedAt).toLocaleDateString() : "-"}
           </span>
         </div>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         {/* Technical Information */}
-        <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+        <Card className="border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-xl overflow-hidden">
           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <LineChartIcon className="h-4 w-4 text-slate-500" />
@@ -149,8 +135,56 @@ export function MetricProfileView({
           </CardContent>
         </Card>
 
+        {/* Deploy Scenario */}
+        <Card className="border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-xl overflow-hidden">
+           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
+             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Truck className="h-4 w-4 text-emerald-500" />
+                Deploy Scenario
+              </CardTitle>
+            <CardDescription className="text-xs text-slate-500">
+              Deployment status and history.
+            </CardDescription>
+          </CardHeader>
+          <div className="p-0">
+             {latestDeploy ? (
+               <div className="w-full">
+                 <div className="grid grid-cols-4 gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                   <div>Target</div>
+                   <div>Owner</div>
+                   <div>Status</div>
+                   <div className="text-right">Last Deployed</div>
+                 </div>
+                 <div className="grid grid-cols-4 gap-4 px-5 py-3 text-xs items-center">
+                   <div className="font-medium text-slate-900 flex items-center gap-1.5">
+                     <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+                     {latestDeploy.target}
+                   </div>
+                   <div className="text-slate-600">{metric.owners.techOwner}</div>
+                   <div>
+                     <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
+                       latestDeploy.status === 'success' 
+                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                         : 'bg-red-50 text-red-700 border-red-200'
+                     }`}>
+                       {latestDeploy.status}
+                     </Badge>
+                   </div>
+                   <div className="text-right text-slate-500 font-mono text-[11px]">
+                     {new Date(latestDeploy.deployedAt).toLocaleString()}
+                   </div>
+                 </div>
+               </div>
+             ) : (
+               <div className="p-8 text-center text-xs text-slate-400 italic">
+                 No deployment history available.
+               </div>
+             )}
+          </div>
+        </Card>
+
         {/* Source Info */}
-        <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+        <Card className="border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.03)] rounded-xl overflow-hidden">
           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Database className="h-4 w-4 text-blue-500" />
@@ -160,69 +194,31 @@ export function MetricProfileView({
               Map fields to source CDM tables.
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-5 text-xs">
-            <div className="space-y-4">
+          <CardContent className="p-0">
+            <div className="divide-y divide-slate-50">
               {metric.queryDefinitions.map((q) => (
-                 <div key={q.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 last:pb-0 border-b last:border-0 border-slate-100">
+                 <div key={q.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 hover:bg-slate-50/30 transition-colors">
                     <div className="space-y-1">
-                      <span className="text-slate-500">Source Table</span>
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Source Table</span>
                       <div className="flex items-center gap-2">
-                        <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200 truncate">
+                        <a 
+                          href="#" 
+                          className="font-mono text-xs text-blue-600 hover:underline hover:text-blue-700 truncate"
+                          onClick={(e) => e.preventDefault()}
+                        >
                           {q.source}
-                        </p>
-                        <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
-                          {q.type}
-                        </Badge>
+                        </a>
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-slate-500">Source Field</span>
-                      <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200 break-all">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Source Field</span>
+                      <p className="font-mono text-xs text-slate-700 break-all">
                         {q.fields && q.fields.length > 0 ? q.fields.join(", ") : (q.expression || "Not configured")}
                       </p>
                     </div>
                  </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Deploy Scenario */}
-        <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-           <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
-             <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Truck className="h-4 w-4 text-emerald-500" />
-                Deploy Scenario
-              </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
-              Configure target and run preflight validation before deploy.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 text-xs">
-             <div className="space-y-1.5">
-                <p className="font-semibold text-slate-800">Deploy status</p>
-                {latestDeploy ? (
-                  <div className="text-xs text-slate-600 space-y-2">
-                    <div>
-                      {latestDeploy.targetType} · {latestDeploy.target}
-                    </div>
-                    <div className="text-[11px] text-slate-500">
-                      {latestDeploy.status} · {new Date(latestDeploy.deployedAt).toLocaleString()}
-                    </div>
-                    {metric.deployHistory && metric.deployHistory.length > 1 && (
-                      <div className="space-y-1 text-[11px] text-slate-500">
-                        {metric.deployHistory.slice(-3).reverse().map((item, index) => (
-                          <div key={`${item.target}-${item.deployedAt}-${index}`}>
-                            {item.targetType} · {item.target} · {item.status}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-500">No deploy history yet.</p>
-                )}
-              </div>
           </CardContent>
         </Card>
 
