@@ -54,7 +54,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
   const [selectedDimension, setSelectedDimension] = useState<Dimension | null>(null)
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false)
   const [sortField, setSortField] = useState<DimensionSortField>("updatedAt")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
 
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [businessOwnerFilter, setBusinessOwnerFilter] = useState<string>("all")
@@ -101,10 +100,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       )
     }
 
-    if (typeFilter !== "all") {
-      result = result.filter(d => d.type === typeFilter)
-    }
-
     if (categoryFilter !== "all") {
       result = result.filter(d => (d.categoryPath?.join(" › ") ?? d.category) === categoryFilter)
     }
@@ -129,12 +124,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       const tB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
       return tB - tA
     })
-  }, [dimensions, search, typeFilter, categoryFilter, businessOwnerFilter, techOwnerFilter, sortField])
-
-  const typeOptions = useMemo(() => {
-    const types = new Set(dimensions.map(d => d.type))
-    return Array.from(types).sort()
-  }, [dimensions])
+  }, [dimensions, search, categoryFilter, businessOwnerFilter, techOwnerFilter, sortField])
 
   const handleDimensionClick = (dim: Dimension) => {
     setSelectedDimension(dim)
@@ -193,17 +183,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
               </SelectContent>
             </Select>
 
-            <Select value={sortField} onValueChange={(value: DimensionSortField) => setSortField(value)}>
-              <SelectTrigger className="h-9 text-xs w-[130px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="updatedAt">Updated Date</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="usage">Usage Count</SelectItem>
-              </SelectContent>
-            </Select>
-
             <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
               <Button
                 variant="ghost"
@@ -240,7 +219,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
               variant="outline"
               className="mt-4"
               onClick={() => {
-                setTypeFilter("all")
                 setSearch("")
                 setSortField("updatedAt")
               }}

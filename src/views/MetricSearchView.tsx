@@ -190,16 +190,6 @@ export function MetricSearchView({
               </SelectContent>
             </Select>
 
-            <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
-              <SelectTrigger className="h-9 text-xs w-[130px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="createdAt">Created Date</SelectItem>
-                <SelectItem value="updatedAt">Updated Date</SelectItem>
-              </SelectContent>
-            </Select>
-
             <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
               <Button
                 variant="ghost"
