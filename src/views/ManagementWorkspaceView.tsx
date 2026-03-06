@@ -25,7 +25,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
-import { Home, ListTree, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Search, Type, Calendar, Braces, Trash2, Database, Eye } from "lucide-react"
+import { Home, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Type, Calendar, Braces, Trash2, Eye } from "lucide-react"
 
 import {
   Metric,
@@ -127,10 +127,6 @@ export function ManagementWorkspaceView({
   const [categorySheetMode, setCategorySheetMode] = useState<"create" | "edit">("create")
   const [categoryToEdit, setCategoryToEdit] = useState<CategoryNode | null>(null)
   const [parentCategoryForCreate, setParentCategoryForCreate] = useState<CategoryNode | null>(null)
-
-  const tagNameById = useMemo(() => {
-    return new Map<string, string>()
-  }, [])
 
   const renderSectionContent = () => {
     switch (activeSection) {
@@ -1122,9 +1118,6 @@ export function NewDimensionSheet({
   const [sourceLink, setSourceLink] = useState("")
   const [sourceDimensionField, setSourceDimensionField] = useState("")
   const [enumValues, setEnumValues] = useState<{ code: string; label: string }[]>([])
-  const [isFieldsOpen, setIsFieldsOpen] = useState(false)
-  const [fieldSearch, setFieldSearch] = useState("")
-  const [fieldTab, setFieldTab] = useState("source")
   const [message, setMessage] = useState<string | null>(null)
 
   const isEditMode = mode === "edit" && initialDimension && onUpdateDimension
@@ -1158,9 +1151,6 @@ export function NewDimensionSheet({
       setSourceDimensionField("")
       setEnumValues([])
     }
-    setFieldSearch("")
-    setFieldTab("source")
-    setIsFieldsOpen(false)
     setMessage(null)
   }, [open, isEditMode, initialDimension])
 
@@ -1173,54 +1163,6 @@ export function NewDimensionSheet({
       setSelectedCategoryPath([])
     }
   }, [availableTopCategories, selectedCategoryPath])
-
-  const fieldGroups = useMemo(
-    () => ({
-      source: [
-        { name: "p_date", type: "date" },
-        { name: "data_dt", type: "date" },
-        { name: "ad_id", type: "number" },
-        { name: "rit", type: "number" },
-        { name: "external_action", type: "string" },
-        { name: "objective_type", type: "string" },
-        { name: "pricing_type", type: "string" },
-        { name: "smart_bid_type", type: "string" },
-        { name: "advertiser_origin", type: "string" },
-        { name: "advertiser_customer_type", type: "string" },
-        { name: "advertiser_id", type: "number" },
-        { name: "ad_ref_app_id", type: "number" },
-      ],
-      dataset: [
-        { name: "campaign_id", type: "number" },
-        { name: "campaign_name", type: "string" },
-        { name: "adgroup_id", type: "number" },
-        { name: "adgroup_name", type: "string" },
-        { name: "creative_id", type: "number" },
-        { name: "placement", type: "string" },
-        { name: "country_code", type: "string" },
-      ],
-      params: [
-        { name: "start_date", type: "param" },
-        { name: "end_date", type: "param" },
-        { name: "timezone", type: "param" },
-      ],
-    }),
-    [],
-  )
-
-  const filteredFields = useMemo(() => {
-    const list = fieldGroups[fieldTab as keyof typeof fieldGroups] ?? []
-    const keyword = fieldSearch.trim().toLowerCase()
-    if (!keyword) return list
-    return list.filter((field) => field.name.toLowerCase().includes(keyword))
-  }, [fieldGroups, fieldSearch, fieldTab])
-
-  const fieldIconMap = {
-    date: Calendar,
-    number: Hash,
-    string: Type,
-    param: Braces,
-  } as const
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

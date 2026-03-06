@@ -21,8 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { ResponsiveContainer, LineChart, Line } from "recharts"
-import { Flame, Search, Filter, ArrowUpDown, Plus } from "lucide-react"
+import { Flame, Search, Plus } from "lucide-react"
 
 import type {
   Metric,
@@ -144,8 +143,6 @@ export function MetricsWorkspaceView({
 
     return metrics.filter((m) => (selectedMetricSet.metricFieldNames ?? []).includes(m.fieldName))
   }, [metrics, selectedMetricSet])
-
-  const filteredDimensionTree = dimensionTree
 
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
