@@ -666,6 +666,7 @@ interface NewCategorySheetProps {
   mode: "create" | "edit"
   initialCategory?: CategoryNode | null
   parentCategory?: CategoryNode | null
+  isSubCategory?: boolean
   onCreateCategory: (payload: { id: string; name: string; description: string; semanticView?: { name: string; hiveTables: string[] } }) => void
   onUpdateCategory: (payload: { id: string; name: string; description: string; semanticView?: { name: string; hiveTables: string[] } }) => void
 }
@@ -676,6 +677,7 @@ function NewCategorySheet({
   mode,
   initialCategory,
   parentCategory,
+  isSubCategory = false,
   onCreateCategory,
   onUpdateCategory,
 }: NewCategorySheetProps) {
@@ -684,61 +686,11 @@ function NewCategorySheet({
   const [semanticViewName, setSemanticViewName] = useState("")
   const [semanticViewTables, setSemanticViewTables] = useState<string[]>([])
 
-  // Only top-level categories (no parent) can have semantic view configuration
-  // When editing, we check if the category has a parent in the full list
-  // But initialCategory doesn't store parentId, so we rely on the `parentCategory` prop for sub-creation
-  // For editing, we need to know if it's a subcategory.
-  // A simple heuristic: if we are in "create" mode and have parentCategory, it's a sub.
-  // If we are in "edit" mode, we need to find if this category is a child of someone.
-  
-  // However, the prompt says "only first-level categories have Semantic View Configuration".
-  // Let's check if the category being edited is top-level.
-  // We can pass `categories` prop to check relationships if needed, but `NewCategorySheet` doesn't have `categories` prop currently.
-  // Let's assume `parentCategory` is passed when creating sub.
-  // When editing, we might need to know.
-  // For now, let's stick to the prompt requirement: "sub category editing only supports name modification".
-  
-  // Actually, we can just use the fact that if it's a sub-category, we probably passed `parentCategory` during creation.
-  // But during edit, `parentCategory` prop is undefined in the current usage in `ManagementWorkspaceView`.
-  // Let's fix `ManagementWorkspaceView` to pass `parentCategory` or `isSubCategory` flag if needed, or better yet,
-  // we can infer it.
-  
-  // Let's update `NewCategorySheet` to accept `isSubCategory` boolean.
+  // Only top-level categories can have semantic view configuration
+  // If we are creating a sub-category (parentCategory exists) or editing a sub-category (isSubCategory is true), hide it.
+  const showSemanticViewConfig = !parentCategory && !isSubCategory
 
-function NewCategorySheet({
-  open,
-  onOpenChange,
-  mode,
-  initialCategory,
-  parentCategory,
-  onCreateCategory,
-  onUpdateCategory,
-}: NewCategorySheetProps) {
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [semanticViewName, setSemanticViewName] = useState("")
-  const [semanticViewTables, setSemanticViewTables] = useState<string[]>([])
-
-  // Determine if we should show semantic view config
-  // 1. Create mode: show if NO parentCategory (top level)
-  // 2. Edit mode: show if initialCategory is top level (we need to know this)
-  //    Since we don't have the full tree here, we can rely on `initialCategory` properties or passed props.
-  //    The `CategoryNode` type doesn't explicitly store `parentId`.
-  //    However, looking at `ManagementWorkspaceView`, `CategoryRow` is recursive.
-  //    When we click edit on a sub-category, `initialCategory` is that sub-category node.
-  
-  // Let's update the component to check if we should show it.
-  // The simplest way without changing data structure is to check if `parentCategory` is present (for create).
-  // For edit, we need to know if it's a sub.
-  // Let's modify `NewCategorySheetProps` to include `isSubCategory`.
-  
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      {/* ... */}
-    </Sheet>
-  )
-}
-
+  useEffect(() => {
     if (open) {
       if (mode === "edit" && initialCategory) {
         setName(initialCategory.name)
