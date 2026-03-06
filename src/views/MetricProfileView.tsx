@@ -1,7 +1,8 @@
-import { useMemo } from "react"
+import { useMemo, useState, useEffect } from "react"
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -9,9 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Flame, LineChart as LineChartIcon, Star, Database, Truck, Info, Share2, History } from "lucide-react"
+import { Flame, LineChart as LineChartIcon, Star, Database, Truck, Info, Share2, History, Link, Check, X } from "lucide-react"
 
-import { Metric, Dimension } from "@/types"
+import { Metric, Dimension, DeployHistory } from "@/types"
 import { MetricLineageDag } from "./MetricLineageDag"
 
 export interface MetricProfileViewProps {
@@ -33,10 +34,47 @@ export function MetricProfileView({
     () => dimensions.filter((d) => metric.boundDimensionFieldNames.includes(d.fieldName)),
     [dimensions, metric.boundDimensionFieldNames],
   )
-  const latestDeploy = useMemo(() => {
-    if (!metric.deployHistory || metric.deployHistory.length === 0) return null
-    return metric.deployHistory[metric.deployHistory.length - 1]
+  
+  // Local state for deploy history to support adding bindings
+  const [deployHistory, setDeployHistory] = useState<DeployHistory[]>([])
+  const [isAddingBinding, setIsAddingBinding] = useState(false)
+  const [newBindingTarget, setNewBindingTarget] = useState("")
+  const [newBindingOwner, setNewBindingOwner] = useState(metric.owners.techOwner)
+
+  useEffect(() => {
+    if (metric.deployHistory) {
+      setDeployHistory(metric.deployHistory)
+    } else {
+      setDeployHistory([])
+    }
   }, [metric.deployHistory])
+
+  const handleAddBinding = () => {
+    setIsAddingBinding(true)
+    setNewBindingTarget("")
+    setNewBindingOwner(metric.owners.techOwner)
+  }
+
+  const handleSaveBinding = () => {
+    if (!newBindingTarget.trim()) return
+
+    const newEntry: DeployHistory = {
+      targetType: "Hive Table", // Default or could be a selection
+      target: newBindingTarget,
+      status: "success",
+      deployedAt: new Date().toISOString(),
+      fieldCount: 1,
+      type: "binding"
+    }
+
+    setDeployHistory([...deployHistory, newEntry])
+    setIsAddingBinding(false)
+  }
+
+  const handleCancelBinding = () => {
+    setIsAddingBinding(false)
+    setNewBindingTarget("")
+  }
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto py-6 px-4">
@@ -170,42 +208,98 @@ export function MetricProfileView({
                   Deployment status and history.
                 </CardDescription>
                </div>
-               <button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm"
-                  onClick={onNavigateWorkspace}
-               >
-                 Deploy
-               </button>
+               <div className="flex items-center gap-2">
+                  <button 
+                    className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm flex items-center gap-1.5"
+                    onClick={handleAddBinding}
+                  >
+                    <Link className="h-3 w-3" />
+                    Binding
+                  </button>
+                  <button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm"
+                    onClick={onNavigateWorkspace}
+                  >
+                    Deploy
+                  </button>
+               </div>
              </div>
           </CardHeader>
           <div className="p-0">
-             {latestDeploy ? (
+             {deployHistory.length > 0 || isAddingBinding ? (
                <div className="w-full">
-                 <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                 <div className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
                    <div>Target</div>
+                   <div>Type</div>
                    <div>Owner</div>
                    <div>Status</div>
                    <div className="text-right">Last Deployed</div>
                  </div>
-                 <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 px-5 py-3 text-xs items-center">
-                   <div className="font-medium text-slate-900 flex items-center gap-1.5 min-w-0">
-                     <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0"></div>
-                     <span className="truncate" title={latestDeploy.target}>{latestDeploy.target}</span>
+                 {deployHistory.map((item, index) => (
+                    <div key={index} className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0">
+                      <div className="font-medium text-slate-900 flex items-center gap-1.5 min-w-0">
+                        <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${item.type === 'binding' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
+                        <span className="truncate" title={item.target}>{item.target}</span>
+                      </div>
+                      <div className="text-slate-600">
+                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-slate-200 bg-slate-50 text-slate-600">
+                           {item.type || "deployment"}
+                        </Badge>
+                      </div>
+                      <div className="text-slate-600 truncate">{metric.owners.techOwner}</div>
+                      <div>
+                        <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
+                          item.status === 'success' 
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                            : 'bg-red-50 text-red-700 border-red-200'
+                        }`}>
+                          {item.status}
+                        </Badge>
+                      </div>
+                      <div className="text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                        {new Date(item.deployedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                 ))}
+                 
+                 {isAddingBinding && (
+                   <div className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-3 text-xs items-center bg-blue-50/30">
+                     <div>
+                       <Input 
+                         value={newBindingTarget}
+                         onChange={(e) => setNewBindingTarget(e.target.value)}
+                         placeholder="Enter target..."
+                         className="h-7 text-xs bg-white"
+                         autoFocus
+                       />
+                     </div>
+                     <div>
+                       <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-purple-200 bg-purple-50 text-purple-700">
+                         binding
+                       </Badge>
+                     </div>
+                     <div className="text-slate-600 truncate">{newBindingOwner}</div>
+                     <div>
+                       <span className="text-[10px] text-slate-400 italic">Pending...</span>
+                     </div>
+                     <div className="flex justify-end gap-2">
+                       <button 
+                         onClick={handleSaveBinding}
+                         className="h-6 w-6 flex items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700"
+                         title="Save binding"
+                       >
+                         <Check className="h-3 w-3" />
+                       </button>
+                       <button 
+                         onClick={handleCancelBinding}
+                         className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300"
+                         title="Cancel"
+                       >
+                         <X className="h-3 w-3" />
+                       </button>
+                     </div>
                    </div>
-                   <div className="text-slate-600 truncate">{metric.owners.techOwner}</div>
-                   <div>
-                     <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
-                       latestDeploy.status === 'success' 
-                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                         : 'bg-red-50 text-red-700 border-red-200'
-                     }`}>
-                       {latestDeploy.status}
-                     </Badge>
-                   </div>
-                   <div className="text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
-                     {new Date(latestDeploy.deployedAt).toLocaleDateString()}
-                   </div>
-                 </div>
+                 )}
                </div>
              ) : (
                <div className="p-8 text-center text-xs text-slate-400 italic">

@@ -170,6 +170,7 @@ export interface DeployHistory {
   status: "success" | "failed"
   deployedAt: string
   fieldCount: number
+  type?: "deployment" | "binding"
 }
 
 export interface FilterBasedDerivedDimensionFilter {

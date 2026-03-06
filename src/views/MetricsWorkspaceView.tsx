@@ -277,11 +277,14 @@ export function MetricsWorkspaceView({
             <Button
               type="button"
               size="sm"
-              className="h-9 w-9 rounded-full bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
+              className="h-9 rounded-full bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700 transition-all duration-300 pl-2.5 pr-2.5 hover:pr-4 group overflow-hidden w-9 hover:w-auto"
               aria-label="New"
               onClick={onNavigateWorkspace}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 shrink-0" />
+              <span className="max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 whitespace-nowrap">
+                Smart create
+              </span>
             </Button>
           </div>
         </div>
