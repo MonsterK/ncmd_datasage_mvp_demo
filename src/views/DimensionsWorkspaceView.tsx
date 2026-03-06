@@ -193,18 +193,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
               </SelectContent>
             </Select>
 
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="h-9 text-xs w-[140px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="All types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                {typeOptions.map((opt) => (
-                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
             <Select value={sortField} onValueChange={(value: DimensionSortField) => setSortField(value)}>
               <SelectTrigger className="h-9 text-xs w-[130px] bg-slate-50 border-slate-200 rounded-lg">
                 <SelectValue placeholder="Sort by" />
@@ -276,6 +264,8 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                       </CardTitle>
                       <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
                         <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{dim.fieldName}</span>
+                        <span className="text-slate-300">•</span>
+                        <span>{dim.type}</span>
                       </div>
                     </div>
                     <Badge 
@@ -319,7 +309,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                 <TableRow>
                   <TableHead>Dimension Name</TableHead>
                   <TableHead>Field Name</TableHead>
-                  <TableHead>Type</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Tech Owner</TableHead>
                   <TableHead>Status</TableHead>
@@ -336,14 +325,6 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                   >
                     <TableCell className="font-medium text-slate-900">{d.name}</TableCell>
                     <TableCell className="font-mono text-xs text-slate-500">{d.fieldName}</TableCell>
-                    <TableCell>
-                       <Badge 
-                        variant="secondary" 
-                        className="text-[10px] bg-slate-100 text-slate-600 border-slate-200"
-                      >
-                        {d.type}
-                      </Badge>
-                    </TableCell>
                     <TableCell className="text-xs text-slate-600">
                       {d.categoryPath?.join(" › ") ?? d.category ?? "-"}
                     </TableCell>
@@ -410,11 +391,6 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                 </span>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="text-[10px] bg-white border-slate-200 text-slate-700 font-mono">
-                {dimension.type}
-              </Badge>
-            </div>
         </SheetHeader>
 
         <div className="px-6 py-6 space-y-6">
@@ -459,10 +435,6 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                  <div className="space-y-1">
                     <span className="text-slate-500">Tech owner</span>
                     <p className="font-medium text-slate-900">{dimension.owners?.techOwner || "DE"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-slate-500">Type</span>
-                    <p className="font-mono text-slate-900">{dimension.type}</p>
                   </div>
               </div>
             </CardContent>
