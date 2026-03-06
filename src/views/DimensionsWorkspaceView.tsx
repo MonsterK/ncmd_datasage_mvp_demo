@@ -263,7 +263,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
         ) : viewMode === 'card' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDimensions.map(dim => (
-              <Card 
+                <Card 
                 key={dim.id} 
                 className="group hover:shadow-lg transition-all duration-200 border-slate-200 cursor-pointer overflow-hidden flex flex-col hover:border-blue-200"
                 onClick={() => handleDimensionClick(dim)}
@@ -294,20 +294,11 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 text-xs text-slate-600">
                       <User className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="truncate">{dim.owners?.techOwner || "DE"}</span>
+                      <span className="truncate">{dim.owners?.businessOwner || "PM"}</span>
                     </div>
-                    
-                    <div className="flex items-end justify-between gap-2 pt-2">
-                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
-                        <Share2 className="h-3 w-3 text-blue-500" />
-                        <span>{dim.boundMetricFieldNames.length} Metrics</span>
-                      </div>
-                      
-                      {dim.values && dim.values.length > 0 && (
-                        <div className="text-[10px] text-slate-400">
-                          {dim.values.length} values
-                        </div>
-                      )}
+                    <div className="flex items-center gap-2 text-xs text-slate-600">
+                      <User className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="truncate">{dim.owners?.techOwner || "DE"}</span>
                     </div>
                   </div>
                 </CardContent>

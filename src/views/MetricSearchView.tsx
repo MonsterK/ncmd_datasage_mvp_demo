@@ -292,12 +292,6 @@ export function MetricSearchView({
                         <User className="h-3.5 w-3.5 text-slate-400" />
                         <span className="truncate">{metric.owners.techOwner}</span>
                       </div>
-                      <div className="text-[11px] text-slate-500">
-                        Deploy:{" "}
-                        {metric.deployHistory && metric.deployHistory.length > 0
-                          ? `${metric.deployHistory[metric.deployHistory.length - 1].targetType} · ${metric.deployHistory[metric.deployHistory.length - 1].status}`
-                          : "-"}
-                      </div>
                     </div>
                   </CardContent>
 
