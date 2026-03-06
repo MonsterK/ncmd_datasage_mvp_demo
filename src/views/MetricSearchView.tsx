@@ -182,6 +182,18 @@ export function MetricSearchView({
               </SelectContent>
             </Select>
 
+            <Select value={techOwnerFilter} onValueChange={setTechOwnerFilter}>
+              <SelectTrigger className="h-9 text-xs w-[150px] bg-slate-50 border-slate-200 rounded-lg">
+                <SelectValue placeholder="All tech owners" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tech Owners</SelectItem>
+                {techOwnerOptions.map((owner) => (
+                  <SelectItem key={owner} value={owner}>{owner}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={sortField} onValueChange={(value: MetricSortField) => setSortField(value)}>
               <SelectTrigger className="h-9 text-xs w-[130px] bg-slate-50 border-slate-200 rounded-lg">
                 <SelectValue placeholder="Sort by" />

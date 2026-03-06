@@ -56,6 +56,39 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
   const [sortField, setSortField] = useState<DimensionSortField>("updatedAt")
   const [typeFilter, setTypeFilter] = useState<string>("all")
 
+  const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [businessOwnerFilter, setBusinessOwnerFilter] = useState<string>("all")
+  const [techOwnerFilter, setTechOwnerFilter] = useState<string>("all")
+
+  const categoryOptions = useMemo(() => {
+    const set = new Set<string>()
+    dimensions.forEach((d) => {
+      const pathStr = d.categoryPath?.join(" › ") ?? d.category
+      if (pathStr) set.add(pathStr)
+    })
+    return Array.from(set).sort()
+  }, [dimensions])
+
+  const businessOwnerOptions = useMemo(() => {
+    const set = new Set<string>()
+    dimensions.forEach((d) => {
+      if (d.owners?.businessOwner) {
+        set.add(d.owners.businessOwner)
+      }
+    })
+    return Array.from(set).sort()
+  }, [dimensions])
+
+  const techOwnerOptions = useMemo(() => {
+    const set = new Set<string>()
+    dimensions.forEach((d) => {
+      if (d.owners?.techOwner) {
+        set.add(d.owners.techOwner)
+      }
+    })
+    return Array.from(set).sort()
+  }, [dimensions])
+
   const filteredDimensions = useMemo(() => {
     let result = dimensions
     
@@ -72,6 +105,18 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       result = result.filter(d => d.type === typeFilter)
     }
 
+    if (categoryFilter !== "all") {
+      result = result.filter(d => (d.categoryPath?.join(" › ") ?? d.category) === categoryFilter)
+    }
+
+    if (businessOwnerFilter !== "all") {
+      result = result.filter(d => d.owners?.businessOwner === businessOwnerFilter)
+    }
+
+    if (techOwnerFilter !== "all") {
+      result = result.filter(d => d.owners?.techOwner === techOwnerFilter)
+    }
+
     return result.sort((a, b) => {
       if (sortField === "name") {
         return a.name.localeCompare(b.name)
@@ -84,7 +129,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       const tB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
       return tB - tA
     })
-  }, [dimensions, search, typeFilter, sortField])
+  }, [dimensions, search, typeFilter, categoryFilter, businessOwnerFilter, techOwnerFilter, sortField])
 
   const typeOptions = useMemo(() => {
     const types = new Set(dimensions.map(d => d.type))
@@ -112,14 +157,42 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              className="h-9 w-9 rounded-full bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
-              aria-label="New"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="h-9 text-xs w-[160px] bg-slate-50 border-slate-200 rounded-lg">
+                <SelectValue placeholder="All categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categoryOptions.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
+              <SelectTrigger className="h-9 text-xs w-[150px] bg-slate-50 border-slate-200 rounded-lg">
+                <SelectValue placeholder="All business owners" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Business Owners</SelectItem>
+                {businessOwnerOptions.map((owner) => (
+                  <SelectItem key={owner} value={owner}>{owner}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={techOwnerFilter} onValueChange={setTechOwnerFilter}>
+              <SelectTrigger className="h-9 text-xs w-[150px] bg-slate-50 border-slate-200 rounded-lg">
+                <SelectValue placeholder="All tech owners" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tech Owners</SelectItem>
+                {techOwnerOptions.map((owner) => (
+                  <SelectItem key={owner} value={owner}>{owner}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="h-9 text-xs w-[140px] bg-slate-50 border-slate-200 rounded-lg">
                 <SelectValue placeholder="All types" />

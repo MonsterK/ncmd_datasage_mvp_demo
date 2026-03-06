@@ -37,7 +37,7 @@ import {
 } from "@/types"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
 
-export type ManagementSection = "metric" | "dimension" | "category"
+export type ManagementSection = "metric" | "dimension" | "category" | "workspace"
 
 export interface ManagementWorkspaceViewProps {
   activeSection: ManagementSection
@@ -306,6 +306,12 @@ export function ManagementWorkspaceView({
           </div>
         )
 
+      case "workspace":
+        return (
+          <div className="space-y-4">
+             <p>Workspace content here</p>
+          </div>
+        )
       case "category":
         return (
           <div className="space-y-4">
