@@ -67,7 +67,7 @@ function App() {
     error,
   } = useDataSage()
 
-  const [activeTopNav, setActiveTopNav] = useState<AppTopNav>("home")
+  const [activeTopNav, setActiveTopNav] = useState<AppTopNav>("metrics")
   const [activeManagementSection, setActiveManagementSection] = useState<ManagementSection>("metric")
   const [selectedMetricFieldName, setSelectedMetricFieldName] = useState<string | null>(null)
   const [isMetricProfileOpen, setIsMetricProfileOpen] = useState(false)
@@ -697,11 +697,6 @@ function App() {
 
             <nav className="flex items-center bg-slate-100/70 p-1.5 rounded-full border border-slate-200/60">
               <TopNavButton
-                label="Home"
-                active={activeTopNav === "home"}
-                onClick={() => handleChangeTopNav("home")}
-              />
-              <TopNavButton
                 label="Metrics & Dimensions"
                 active={activeTopNav === "metrics" || activeTopNav === "dimensions"}
                 onClick={() => handleChangeTopNav("metrics")}
@@ -725,7 +720,7 @@ function App() {
           <WorkspaceChatView
             metrics={data.metrics}
             categories={data.categories}
-            onBack={() => setActiveTopNav("home")}
+            onBack={() => setActiveTopNav("metrics")}
             fullScreen
           />
         </div>
@@ -752,17 +747,6 @@ function App() {
 
         {!loading && !error && (
           <div className="space-y-8">
-            {activeTopNav === "home" && (
-              <HomeView
-                metrics={data.metrics}
-                dimensions={data.dimensions}
-                metricSets={metricSetsState}
-                recentMetrics={recentMetrics}
-                onNavigateTopNav={setActiveTopNav}
-                onOpenMetric={handleOpenMetricProfile}
-              />
-            )}
-
             {activeTopNav === "metrics" && (
               <MetricsWorkspaceView
                 metrics={data.metrics}
