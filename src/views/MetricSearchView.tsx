@@ -51,8 +51,7 @@ export function MetricSearchView({
   const [search, setSearch] = useState("")
   const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "card")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
-  const [businessOwnerFilter, setBusinessOwnerFilter] = useState<string>("all")
-  const [techOwnerFilter, setTechOwnerFilter] = useState<string>("all")
+  const [ownerFilter, setOwnerFilter] = useState<string>("all")
   const [hasQueryFilter, setHasQueryFilter] = useState<HasQueryFilter>("all")
   const [sortField, setSortField] = useState<MetricSortField>("updatedAt")
   const [sortDirection, setSortDirection] = useState<MetricSortDirection>("desc")
@@ -66,21 +65,11 @@ export function MetricSearchView({
     return Array.from(set).sort()
   }, [metrics])
 
-  const businessOwnerOptions = useMemo(() => {
+  const ownerOptions = useMemo(() => {
     const set = new Set<string>()
     metrics.forEach((m) => {
-      if (m.owners?.businessOwner) {
-        set.add(m.owners.businessOwner)
-      }
-    })
-    return Array.from(set).sort()
-  }, [metrics])
-
-  const techOwnerOptions = useMemo(() => {
-    const set = new Set<string>()
-    metrics.forEach((m) => {
-      if (m.owners?.techOwner) {
-        set.add(m.owners.techOwner)
+      if (m.owner) {
+        set.add(m.owner)
       }
     })
     return Array.from(set).sort()
@@ -105,12 +94,8 @@ export function MetricSearchView({
       result = result.filter((m) => m.categoryPath.join(" › ") === categoryFilter)
     }
 
-    if (businessOwnerFilter !== "all") {
-      result = result.filter((m) => m.owners.businessOwner === businessOwnerFilter)
-    }
-
-    if (techOwnerFilter !== "all") {
-      result = result.filter((m) => m.owners.techOwner === techOwnerFilter)
+    if (ownerFilter !== "all") {
+      result = result.filter((m) => m.owner === ownerFilter)
     }
 
     if (hasQueryFilter !== "all") {
@@ -131,8 +116,7 @@ export function MetricSearchView({
     metrics,
     search,
     categoryFilter,
-    businessOwnerFilter,
-    techOwnerFilter,
+    ownerFilter,
     hasQueryFilter,
     sortField,
     sortDirection,
@@ -166,25 +150,13 @@ export function MetricSearchView({
               </SelectContent>
             </Select>
 
-            <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
+            <Select value={ownerFilter} onValueChange={setOwnerFilter}>
               <SelectTrigger className="h-9 text-xs w-[150px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="All business owners" />
+                <SelectValue placeholder="All owners" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Business Owners</SelectItem>
-                {businessOwnerOptions.map((owner) => (
-                  <SelectItem key={owner} value={owner}>{owner}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={techOwnerFilter} onValueChange={setTechOwnerFilter}>
-              <SelectTrigger className="h-9 text-xs w-[150px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="All tech owners" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Tech Owners</SelectItem>
-                {techOwnerOptions.map((owner) => (
+                <SelectItem value="all">All Owners</SelectItem>
+                {ownerOptions.map((owner) => (
                   <SelectItem key={owner} value={owner}>{owner}</SelectItem>
                 ))}
               </SelectContent>
@@ -229,8 +201,7 @@ export function MetricSearchView({
                 className="mt-4"
                 onClick={() => {
                   setCategoryFilter("all")
-                  setBusinessOwnerFilter("all")
-                  setTechOwnerFilter("all")
+                  setOwnerFilter("all")
                   setHasQueryFilter("all")
                   setSearch("")
                 }}
@@ -276,11 +247,7 @@ export function MetricSearchView({
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 text-xs text-slate-600">
                         <User className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="truncate">{metric.owners.businessOwner}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-600">
-                        <User className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="truncate">{metric.owners.techOwner}</span>
+                        <span className="truncate">{metric.owner}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -302,8 +269,7 @@ export function MetricSearchView({
                     <TableHead>Metric Name</TableHead>
                     <TableHead>Field Name</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Business Owner</TableHead>
-                    <TableHead>Tech Owner</TableHead>
+                    <TableHead>Owner</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Deploy</TableHead>
                     <TableHead className="text-right">Updated</TableHead>
@@ -321,8 +287,7 @@ export function MetricSearchView({
                       <TableCell className="text-xs text-slate-600 max-w-[200px] truncate" title={m.categoryPath.join(" > ")}>
                         {m.categoryPath.join(" › ")}
                       </TableCell>
-                      <TableCell className="text-xs text-slate-600">{m.owners.businessOwner}</TableCell>
-                      <TableCell className="text-xs text-slate-600">{m.owners.techOwner}</TableCell>
+                      <TableCell className="text-xs text-slate-600">{m.owner}</TableCell>
                       <TableCell>
                         <div onClick={(e) => e.stopPropagation()}>
                           <Badge
