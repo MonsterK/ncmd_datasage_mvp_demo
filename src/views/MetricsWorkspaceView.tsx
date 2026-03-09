@@ -53,8 +53,7 @@ export interface MetricsWorkspaceViewProps {
   onCreateDimension: (payload: {
     fieldName: string
     businessName: string
-    businessOwner: string
-    techOwner: string
+    owner: string
     technicalDefinition: string
     description: string
     category: string
@@ -144,8 +143,7 @@ export function MetricsWorkspaceView({
 
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
-  const [businessOwnerFilter, setBusinessOwnerFilter] = useState<string>("all")
-  const [techOwnerFilter, setTechOwnerFilter] = useState<string>("all")
+  const [ownerFilter, setOwnerFilter] = useState<string>("all")
   const [hasQueryFilter, setHasQueryFilter] = useState<HasQueryFilter>("all")
   const [sortField, setSortField] = useState<MetricSortField>("updatedAt")
   const [sortDirection, setSortDirection] = useState<MetricSortDirection>("desc")
@@ -159,21 +157,11 @@ export function MetricsWorkspaceView({
     return Array.from(set).sort()
   }, [metricsForSelectedSet])
 
-  const metricBusinessOwnerOptions = useMemo(() => {
+  const metricOwnerOptions = useMemo(() => {
     const set = new Set<string>()
     metricsForSelectedSet.forEach((m) => {
-      if (m.owners?.businessOwner) {
-        set.add(m.owners.businessOwner)
-      }
-    })
-    return Array.from(set).sort()
-  }, [metricsForSelectedSet])
-
-  const metricTechOwnerOptions = useMemo(() => {
-    const set = new Set<string>()
-    metricsForSelectedSet.forEach((m) => {
-      if (m.owners?.techOwner) {
-        set.add(m.owners.techOwner)
+      if (m.owner) {
+        set.add(m.owner)
       }
     })
     return Array.from(set).sort()
@@ -197,12 +185,8 @@ export function MetricsWorkspaceView({
       result = result.filter((m) => m.categoryPath.join(" › ") === categoryFilter)
     }
 
-    if (businessOwnerFilter !== "all") {
-      result = result.filter((m) => m.owners.businessOwner === businessOwnerFilter)
-    }
-
-    if (techOwnerFilter !== "all") {
-      result = result.filter((m) => m.owners.techOwner === techOwnerFilter)
+    if (ownerFilter !== "all") {
+      result = result.filter((m) => m.owner === ownerFilter)
     }
 
     if (hasQueryFilter !== "all") {
@@ -223,8 +207,7 @@ export function MetricsWorkspaceView({
     metricsForSelectedSet,
     search,
     categoryFilter,
-    businessOwnerFilter,
-    techOwnerFilter,
+    ownerFilter,
     hasQueryFilter,
     sortField,
     sortDirection,
@@ -501,7 +484,7 @@ export function MetricsWorkspaceView({
                     <CardContent className="pb-4 flex-1">
                       <div className="space-y-4">
                         <div className="flex items-center gap-2 text-xs text-slate-600">
-                          <span className="truncate">{m.owners?.businessOwner ?? "Unknown owner"}</span>
+                          <span className="truncate">{m.owner ?? "Unknown owner"}</span>
                         </div>
 
                         <div className="flex items-end justify-between gap-2 pt-2">

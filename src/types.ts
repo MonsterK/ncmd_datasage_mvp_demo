@@ -31,10 +31,7 @@ export interface Metric {
   businessDefinition: string
   technicalDefinition: string
   status: MetricStatus
-  owners: {
-    businessOwner: string
-    techOwner: string
-  }
+  owner: string
   queryDefinitions: MetricQueryDefinition[]
   trend30d: TrendPoint[]
   topDimensions: TopDimensionPoint[]
@@ -74,10 +71,7 @@ export interface Dimension {
   type: string
   values: DimensionValue[]
   boundMetricFieldNames: string[]
-  owners?: {
-    businessOwner: string
-    techOwner: string
-  }
+  owner?: string
   category?: string
   categoryPath?: string[]
   sourceLink?: string
@@ -144,8 +138,7 @@ export interface NewMetricPayload {
   businessDefinition: string
   fieldName: string
   technicalDefinition: string
-  businessOwner?: string
-  techOwner?: string
+  owner?: string
   categoryPath: string[]
   larkSheetLink?: string
   query: {

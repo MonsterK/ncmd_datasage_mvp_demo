@@ -145,10 +145,7 @@ function App() {
       status: "Draft",
       dataType: payload.query.dataType,
       unit: payload.query.unit,
-      owners: {
-        businessOwner: payload.businessOwner?.trim() || "TBD",
-        techOwner: payload.techOwner?.trim() || "TBD",
-      },
+      owner: payload.owner?.trim() || "TBD",
       larkSheetLink: payload.larkSheetLink?.trim() || undefined,
       queryDefinitions: [
         {
@@ -263,7 +260,7 @@ function App() {
         businessDefinition,
         technicalDefinition,
         status: "Draft",
-        owners: base.owners,
+        owner: base.owner,
         queryDefinitions: [newQuery],
         trend30d: createFlatTrend(),
         topDimensions: base.topDimensions,
@@ -327,7 +324,7 @@ function App() {
         businessDefinition,
         technicalDefinition,
         status: "Draft",
-        owners: base.owners,
+        owner: base.owner,
         queryDefinitions: [query],
         trend30d: createFlatTrend(),
         topDimensions: base.topDimensions,
@@ -454,8 +451,7 @@ function App() {
   const handleCreateDimension = (payload: {
     fieldName: string
     businessName: string
-    businessOwner: string
-    techOwner: string
+    owner: string
     technicalDefinition: string
     description: string
     category: string
@@ -478,10 +474,7 @@ function App() {
       type: "enum",
       values: payload.values ?? [],
       boundMetricFieldNames: [],
-      owners: {
-        businessOwner: payload.businessOwner || "TBD",
-        techOwner: payload.techOwner || "TBD",
-      },
+      owner: payload.owner || "TBD",
       technicalDefinition: payload.technicalDefinition,
       category: payload.category,
       categoryPath: payload.categoryPath,
@@ -524,10 +517,7 @@ function App() {
           categoryPath: payload.categoryPath.length ? payload.categoryPath : ["performance"],
           businessDefinition: payload.businessDefinition,
           technicalDefinition: payload.technicalDefinition,
-          owners: {
-            businessOwner: payload.businessOwner?.trim() || m.owners.businessOwner,
-            techOwner: payload.techOwner?.trim() || m.owners.techOwner,
-          },
+          owner: payload.owner?.trim() || m.owner,
           larkSheetLink: payload.larkSheetLink?.trim() || undefined,
           dataType: payload.query.dataType,
           unit: payload.query.unit,
@@ -599,8 +589,7 @@ function App() {
   const handleUpdateDimension = (payload: {
     id: string
     businessName: string
-    businessOwner: string
-    techOwner: string
+    owner: string
     technicalDefinition: string
     description: string
     category: string
@@ -626,10 +615,7 @@ function App() {
               sourceLink: payload.sourceLink,
               sourceDimensionField: payload.sourceDimensionField,
               values: payload.values ?? d.values,
-              owners: {
-                businessOwner: payload.businessOwner || d.owners?.businessOwner || "TBD",
-                techOwner: payload.techOwner || d.owners?.techOwner || "TBD",
-              },
+              owner: payload.owner || d.owner || "TBD",
               updatedAt: nowIso,
               history: [
                 ...(d.history ?? []),

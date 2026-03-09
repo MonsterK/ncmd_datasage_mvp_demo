@@ -75,12 +75,11 @@ export function MetricRegistrationView({
 
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
-  const [businessOwner, setBusinessOwner] = useState(initialMetric?.owners?.businessOwner ?? (Math.random() > 0.5 ? "PM" : "DS"))
+  const [owner, setOwner] = useState(initialMetric?.owner ?? (Math.random() > 0.5 ? "PM" : "DS"))
   const [fieldName, setFieldName] = useState(initialMetric?.fieldName ?? "")
   const [dataType, setDataType] = useState(initialMetric?.dataType ?? "decimal")
   const [unit, setUnit] = useState(initialMetric?.unit ?? "")
   const [technicalDefinition, setTechnicalDefinition] = useState(initialMetric?.technicalDefinition ?? "")
-  const [techOwner, setTechOwner] = useState(initialMetric?.owners?.techOwner ?? "DE")
   const [larkSheetLink, setLarkSheetLink] = useState(initialMetric?.larkSheetLink ?? "")
   const [importMessage, setImportMessage] = useState<string | null>(null)
 
@@ -210,8 +209,7 @@ export function MetricRegistrationView({
     const trimmedBusinessName = businessName.trim()
     const trimmedDefinition = businessDefinition.trim()
     const trimmedExpression = expression.trim()
-    const trimmedBusinessOwner = businessOwner.trim()
-    const trimmedTechOwner = techOwner.trim()
+    const trimmedOwner = owner.trim()
     const isDuplicate =
       Boolean(trimmedFieldName) &&
       metrics.some((m) => m.fieldName === trimmedFieldName && m.fieldName !== initialMetric?.fieldName)
@@ -219,10 +217,9 @@ export function MetricRegistrationView({
     if (!selectedCategoryPath.length) errors.push("Category is required.")
     if (!trimmedBusinessName) errors.push("Business name is required.")
     if (!trimmedDefinition) errors.push("Business definition is required.")
-    if (!trimmedBusinessOwner) errors.push("Business owner is required.")
+    if (!trimmedOwner) errors.push("Owner is required.")
     if (!trimmedFieldName) errors.push("Field name is required.")
     if (!trimmedExpression) errors.push("Expression is required.")
-    if (!trimmedTechOwner) errors.push("Tech owner is required.")
     if (isDuplicate) errors.push(`Field name "${trimmedFieldName}" already exists.`)
 
     setDefinitionErrors(errors)
@@ -337,8 +334,7 @@ export function MetricRegistrationView({
             businessDefinition: businessDefinition.trim(),
             fieldName: fieldName.trim(),
             technicalDefinition: technicalDefinition.trim(),
-            businessOwner: businessOwner.trim(),
-            techOwner: techOwner.trim(),
+            owner: owner.trim(),
             categoryPath: selectedCategoryPath,
             larkSheetLink: larkSheetLink.trim() || undefined,
             deploySummary: summary,
@@ -390,8 +386,7 @@ export function MetricRegistrationView({
       businessDefinition,
       fieldName,
       technicalDefinition,
-      businessOwner,
-      techOwner,
+      owner,
       categoryPath: selectedCategoryPath,
       larkSheetLink: larkSheetLink.trim() || undefined,
       query: {
@@ -617,11 +612,11 @@ export function MetricRegistrationView({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Business owner</label>
+                    <label className="text-xs font-semibold text-slate-700">Owner</label>
                     <Input
                       placeholder="Owner name"
-                      value={businessOwner}
-                      onChange={(e) => setBusinessOwner(e.target.value)}
+                      value={owner}
+                      onChange={(e) => setOwner(e.target.value)}
                       className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
                     />
                   </div>
@@ -652,15 +647,6 @@ export function MetricRegistrationView({
                       onChange={(e) => setFieldName(e.target.value)}
                       disabled={Boolean(disableFieldNameEditing)}
                       className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100 font-mono"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Tech owner</label>
-                    <Input
-                      placeholder="Owner name"
-                      value={techOwner}
-                      onChange={(e) => setTechOwner(e.target.value)}
-                      className="h-9 text-xs bg-white border-slate-200 focus:border-blue-300 focus:ring-blue-100"
                     />
                   </div>
                 </div>

@@ -56,8 +56,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
   const [sortField, setSortField] = useState<DimensionSortField>("updatedAt")
 
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
-  const [businessOwnerFilter, setBusinessOwnerFilter] = useState<string>("all")
-  const [techOwnerFilter, setTechOwnerFilter] = useState<string>("all")
+  const [ownerFilter, setOwnerFilter] = useState<string>("all")
 
   const categoryOptions = useMemo(() => {
     const set = new Set<string>()
@@ -68,21 +67,11 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
     return Array.from(set).sort()
   }, [dimensions])
 
-  const businessOwnerOptions = useMemo(() => {
+  const ownerOptions = useMemo(() => {
     const set = new Set<string>()
     dimensions.forEach((d) => {
-      if (d.owners?.businessOwner) {
-        set.add(d.owners.businessOwner)
-      }
-    })
-    return Array.from(set).sort()
-  }, [dimensions])
-
-  const techOwnerOptions = useMemo(() => {
-    const set = new Set<string>()
-    dimensions.forEach((d) => {
-      if (d.owners?.techOwner) {
-        set.add(d.owners.techOwner)
+      if (d.owner) {
+        set.add(d.owner)
       }
     })
     return Array.from(set).sort()
@@ -104,12 +93,8 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       result = result.filter(d => (d.categoryPath?.join(" › ") ?? d.category) === categoryFilter)
     }
 
-    if (businessOwnerFilter !== "all") {
-      result = result.filter(d => d.owners?.businessOwner === businessOwnerFilter)
-    }
-
-    if (techOwnerFilter !== "all") {
-      result = result.filter(d => d.owners?.techOwner === techOwnerFilter)
+    if (ownerFilter !== "all") {
+      result = result.filter(d => d.owner === ownerFilter)
     }
 
     return result.sort((a, b) => {
@@ -124,7 +109,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       const tB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
       return tB - tA
     })
-  }, [dimensions, search, categoryFilter, businessOwnerFilter, techOwnerFilter, sortField])
+  }, [dimensions, search, categoryFilter, ownerFilter, sortField])
 
   const handleDimensionClick = (dim: Dimension) => {
     setSelectedDimension(dim)
@@ -159,25 +144,13 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
               </SelectContent>
             </Select>
 
-            <Select value={businessOwnerFilter} onValueChange={setBusinessOwnerFilter}>
+            <Select value={ownerFilter} onValueChange={setOwnerFilter}>
               <SelectTrigger className="h-9 text-xs w-[150px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="All business owners" />
+                <SelectValue placeholder="All owners" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Business Owners</SelectItem>
-                {businessOwnerOptions.map((owner) => (
-                  <SelectItem key={owner} value={owner}>{owner}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={techOwnerFilter} onValueChange={setTechOwnerFilter}>
-              <SelectTrigger className="h-9 text-xs w-[150px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="All tech owners" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Tech Owners</SelectItem>
-                {techOwnerOptions.map((owner) => (
+                <SelectItem value="all">All Owners</SelectItem>
+                {ownerOptions.map((owner) => (
                   <SelectItem key={owner} value={owner}>{owner}</SelectItem>
                 ))}
               </SelectContent>
@@ -262,11 +235,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 text-xs text-slate-600">
                       <User className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="truncate">{dim.owners?.businessOwner || "PM"}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
-                      <User className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="truncate">{dim.owners?.techOwner || "DE"}</span>
+                      <span className="truncate">{dim.owner || "PM"}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -288,7 +257,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                   <TableHead>Dimension Name</TableHead>
                   <TableHead>Field Name</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Tech Owner</TableHead>
+                  <TableHead>Owner</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Usage</TableHead>
                   <TableHead className="text-right">Updated</TableHead>
@@ -306,7 +275,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
                     <TableCell className="text-xs text-slate-600">
                       {d.categoryPath?.join(" › ") ?? d.category ?? "-"}
                     </TableCell>
-                    <TableCell className="text-xs text-slate-600">{d.owners?.techOwner || "DE"}</TableCell>
+                    <TableCell className="text-xs text-slate-600">{d.owner || "PM"}</TableCell>
                     <TableCell>
                       <Badge 
                         variant={d.status === "Active" ? "default" : "secondary"}
@@ -390,8 +359,8 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <span className="text-slate-500">Business owner</span>
-                    <p className="font-medium text-slate-900">{dimension.owners?.businessOwner || "PM"}</p>
+                    <span className="text-slate-500">Owner</span>
+                    <p className="font-medium text-slate-900">{dimension.owner || "PM"}</p>
                   </div>
                 </div>
               </CardContent>
@@ -409,12 +378,50 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5 p-5 text-xs">
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-1">
-                    <span className="text-slate-500">Tech owner</span>
-                    <p className="font-medium text-slate-900">{dimension.owners?.techOwner || "DE"}</p>
-                  </div>
+              <div className="space-y-1">
+                 <span className="text-slate-500">Technical Definition (SQL)</span>
+                 <div className="font-mono text-slate-900 bg-slate-50 p-2 rounded border border-slate-200 overflow-x-auto">
+                   {dimension.technicalDefinition || "No definition provided."}
+                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
+              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Tag className="h-4 w-4 text-orange-500" />
+                Enum Values
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500">
+                Enumerated values and their meanings.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader className="bg-slate-50">
+                  <TableRow>
+                    <TableHead className="text-xs h-9">Code</TableHead>
+                    <TableHead className="text-xs h-9">Label</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dimension.values && dimension.values.length > 0 ? (
+                    dimension.values.map((val, idx) => (
+                      <TableRow key={idx} className="hover:bg-slate-50/50">
+                        <TableCell className="text-xs font-mono py-2">{val.code}</TableCell>
+                        <TableCell className="text-xs py-2">{val.label}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-xs text-slate-400 text-center py-4 italic">
+                        No enum values defined.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
 

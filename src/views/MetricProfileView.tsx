@@ -39,7 +39,7 @@ export function MetricProfileView({
   const [deployHistory, setDeployHistory] = useState<DeployHistory[]>([])
   const [isAddingBinding, setIsAddingBinding] = useState(false)
   const [newBindingTarget, setNewBindingTarget] = useState("")
-  const [newBindingOwner, setNewBindingOwner] = useState(metric.owners.techOwner)
+  const [newBindingOwner, setNewBindingOwner] = useState(metric.owner)
 
   useEffect(() => {
     if (metric.deployHistory) {
@@ -52,7 +52,7 @@ export function MetricProfileView({
   const handleAddBinding = () => {
     setIsAddingBinding(true)
     setNewBindingTarget("")
-    setNewBindingOwner(metric.owners.techOwner)
+    setNewBindingOwner(metric.owner)
   }
 
   const handleSaveBinding = () => {
@@ -104,14 +104,11 @@ export function MetricProfileView({
         <div className="flex items-center gap-6 mb-4 border-b border-slate-50 pb-4">
           <div className="flex items-center gap-2">
             <div className="flex -space-x-1.5">
-               <div className="h-6 w-6 rounded-full bg-indigo-100 border border-white flex items-center justify-center text-[9px] font-bold text-indigo-600 shadow-sm" title={metric.owners.businessOwner}>
-                  {metric.owners.businessOwner.charAt(0).toUpperCase()}
-               </div>
-               <div className="h-6 w-6 rounded-full bg-blue-100 border border-white flex items-center justify-center text-[9px] font-bold text-blue-600 shadow-sm" title={metric.owners.techOwner}>
-                  {metric.owners.techOwner.charAt(0).toUpperCase()}
+               <div className="h-6 w-6 rounded-full bg-indigo-100 border border-white flex items-center justify-center text-[9px] font-bold text-indigo-600 shadow-sm" title={metric.owner}>
+                  {metric.owner.charAt(0).toUpperCase()}
                </div>
             </div>
-            <div className="text-[11px] text-slate-400">Owners</div>
+            <div className="text-[11px] text-slate-400">Owner</div>
           </div>
         </div>
 
@@ -139,8 +136,8 @@ export function MetricProfileView({
           <CardContent className="space-y-5 p-5 text-xs">
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-1">
-                  <span className="text-slate-500">Tech owner</span>
-                  <p className="font-medium text-slate-900">{metric.owners.techOwner}</p>
+                  <span className="text-slate-500">Owner</span>
+                  <p className="font-medium text-slate-900">{metric.owner}</p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-slate-500">Field Name</span>
@@ -246,7 +243,7 @@ export function MetricProfileView({
                            {item.type || "deployment"}
                         </Badge>
                       </div>
-                      <div className="text-slate-600 truncate">{metric.owners.techOwner}</div>
+                      <div className="text-slate-600 truncate">{metric.owner}</div>
                       <div>
                         <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
                           item.status === 'success' 

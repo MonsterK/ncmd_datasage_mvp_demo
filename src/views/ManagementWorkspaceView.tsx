@@ -59,8 +59,7 @@ export interface ManagementWorkspaceViewProps {
   onCreateDimension: (payload: {
     fieldName: string
     businessName: string
-    businessOwner: string
-    techOwner: string
+    owner: string
     technicalDefinition: string
     description: string
     category: string
@@ -72,8 +71,7 @@ export interface ManagementWorkspaceViewProps {
   onUpdateDimension: (payload: {
     id: string
     businessName: string
-    businessOwner: string
-    techOwner: string
+    owner: string
     technicalDefinition: string
     description: string
     category: string
@@ -170,10 +168,7 @@ export function ManagementWorkspaceView({
                         </Select>
                       </TableCell>
                       <TableCell className="text-xs">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-slate-900">{m.owners.businessOwner}</span>
-                          <span className="text-[11px] text-slate-500">{m.owners.techOwner}</span>
-                        </div>
+                        <span className="text-slate-900">{m.owner}</span>
                       </TableCell>
                       <TableCell className="text-[11px] text-slate-500">{formatDate(m.updatedAt)}</TableCell>
                       <TableCell className="text-xs pr-4">
@@ -256,11 +251,8 @@ export function ManagementWorkspaceView({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs">
-                        {d.owners ? (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-slate-900">{d.owners.businessOwner}</span>
-                            <span className="text-[11px] text-slate-500">{d.owners.techOwner}</span>
-                          </div>
+                        {d.owner ? (
+                          <span className="text-slate-900">{d.owner}</span>
                         ) : (
                           <span className="text-slate-400">-</span>
                         )}
@@ -1084,8 +1076,7 @@ interface NewDimensionSheetProps {
   onCreateDimension: (payload: {
     fieldName: string
     businessName: string
-    businessOwner: string
-    techOwner: string
+    owner: string
     technicalDefinition: string
     category: string
     categoryPath: string[]
@@ -1100,8 +1091,7 @@ interface NewDimensionSheetProps {
   onUpdateDimension?: (payload: {
     id: string
     businessName: string
-    businessOwner: string
-    techOwner: string
+    owner: string
     technicalDefinition: string
     category: string
     categoryPath: string[]
@@ -1123,8 +1113,7 @@ export function NewDimensionSheet({
 }: NewDimensionSheetProps) {
   const [fieldName, setFieldName] = useState("")
   const [businessName, setBusinessName] = useState("")
-  const [businessOwner, setBusinessOwner] = useState("")
-  const [techOwner, setTechOwner] = useState("")
+  const [owner, setOwner] = useState("")
   const [technicalDefinition, setTechnicalDefinition] = useState("")
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([])
   const [description, setDescription] = useState("")
@@ -1141,8 +1130,7 @@ export function NewDimensionSheet({
     if (isEditMode && initialDimension) {
       setFieldName(initialDimension.fieldName)
       setBusinessName(initialDimension.name)
-      setBusinessOwner(initialDimension.owners?.businessOwner ?? "")
-      setTechOwner(initialDimension.owners?.techOwner ?? "")
+      setOwner(initialDimension.owner ?? "")
       setTechnicalDefinition(initialDimension.technicalDefinition ?? "")
       setSelectedCategoryPath(
         initialDimension.categoryPath ??
@@ -1155,8 +1143,7 @@ export function NewDimensionSheet({
     } else {
       setFieldName("")
       setBusinessName("")
-      setBusinessOwner("")
-      setTechOwner("")
+      setOwner("")
       setTechnicalDefinition("")
       setSelectedCategoryPath([])
       setDescription("")
@@ -1190,10 +1177,9 @@ export function NewDimensionSheet({
       (!isEditMode && !trimmedFieldName) ||
       trimmedCategoryPath.length === 0 ||
       !trimmedTechnicalDefinition ||
-      !businessOwner.trim() ||
-      !techOwner.trim()
+      !owner.trim()
     ) {
-      setMessage("Business name, definition, owners, field name, expression, and category are required.")
+      setMessage("Business name, definition, owner, field name, expression, and category are required.")
       return
     }
 
@@ -1201,8 +1187,7 @@ export function NewDimensionSheet({
       onUpdateDimension({
         id: initialDimension.id,
         businessName: trimmedBusinessName,
-        businessOwner: businessOwner.trim(),
-        techOwner: techOwner.trim(),
+        owner: owner.trim(),
         technicalDefinition: trimmedTechnicalDefinition,
         category: trimmedCategoryPath.join(" / "),
         categoryPath: trimmedCategoryPath,
@@ -1215,8 +1200,7 @@ export function NewDimensionSheet({
       onCreateDimension({
         fieldName: trimmedFieldName,
         businessName: trimmedBusinessName,
-        businessOwner: businessOwner.trim(),
-        techOwner: techOwner.trim(),
+        owner: owner.trim(),
         technicalDefinition: trimmedTechnicalDefinition,
         category: trimmedCategoryPath.join(" / "),
         categoryPath: trimmedCategoryPath,
@@ -1263,6 +1247,33 @@ export function NewDimensionSheet({
                 </div>
               </div>
 
+            <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Physical Info</p>
+                <p className="text-xs text-slate-500 mt-1">Map to physical Hive table and field (Optional).</p>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700">Hive Table</label>
+                  <Input
+                    className="h-9 text-xs font-mono"
+                    value={sourceLink}
+                    onChange={(e) => setSourceLink(e.target.value)}
+                    placeholder="db.table_name"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700">Hive Field</label>
+                  <Input
+                    className="h-9 text-xs font-mono"
+                    value={sourceDimensionField}
+                    onChange={(e) => setSourceDimensionField(e.target.value)}
+                    placeholder="field_name"
+                  />
+                </div>
+              </div>
+            </div>
+
               <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Business definition</p>
@@ -1291,20 +1302,11 @@ export function NewDimensionSheet({
                 </div>
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Business owner</label>
+                    <label className="text-xs font-semibold text-slate-700">Owner</label>
                     <Input
                       className="h-9 text-xs"
-                      value={businessOwner}
-                      onChange={(e) => setBusinessOwner(e.target.value)}
-                      placeholder="Owner name"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-700">Tech owner</label>
-                    <Input
-                      className="h-9 text-xs"
-                      value={techOwner}
-                      onChange={(e) => setTechOwner(e.target.value)}
+                      value={owner}
+                      onChange={(e) => setOwner(e.target.value)}
                       placeholder="Owner name"
                     />
                   </div>
@@ -1343,50 +1345,75 @@ export function NewDimensionSheet({
                   <p className="text-sm font-semibold text-slate-900">Enum definition</p>
                   <p className="text-xs text-slate-500 mt-1">Manage enumerated values for this dimension.</p>
                 </div>
-                <div className="space-y-3">
-                  {enumValues.map((value, index) => (
-                    <div key={`${value.code}-${index}`} className="grid gap-3 md:grid-cols-[1fr_1fr_auto] items-center">
-                      <Input
-                        className="h-9 text-xs font-mono"
-                        placeholder="Code"
-                        value={value.code}
-                        onChange={(e) => {
-                          const next = [...enumValues]
-                          next[index] = { ...next[index], code: e.target.value }
-                          setEnumValues(next)
-                        }}
-                      />
-                      <Input
-                        className="h-9 text-xs"
-                        placeholder="Label"
-                        value={value.label}
-                        onChange={(e) => {
-                          const next = [...enumValues]
-                          next[index] = { ...next[index], label: e.target.value }
-                          setEnumValues(next)
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-9 text-xs border-slate-200"
-                        onClick={() => setEnumValues(enumValues.filter((_, i) => i !== index))}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-9 text-xs border-slate-200"
-                    onClick={() => setEnumValues([...enumValues, { code: "", label: "" }])}
-                  >
-                    Add enum value
-                  </Button>
+                <div className="rounded-lg border border-slate-200 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-50 hover:bg-slate-50 border-slate-200">
+                        <TableHead className="h-8 text-[10px] font-semibold text-slate-500 w-[120px]">Value Code</TableHead>
+                        <TableHead className="h-8 text-[10px] font-semibold text-slate-500">Value Label</TableHead>
+                        <TableHead className="h-8 text-[10px] font-semibold text-slate-500 w-[60px] text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {enumValues.map((value, index) => (
+                        <TableRow key={index} className="hover:bg-slate-50/50 border-slate-100">
+                          <TableCell className="p-2">
+                            <Input
+                              className="h-7 text-xs font-mono border-slate-200 focus:border-blue-300"
+                              placeholder="Code"
+                              value={value.code}
+                              onChange={(e) => {
+                                const next = [...enumValues]
+                                next[index] = { ...next[index], code: e.target.value }
+                                setEnumValues(next)
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell className="p-2">
+                            <Input
+                              className="h-7 text-xs border-slate-200 focus:border-blue-300"
+                              placeholder="Label"
+                              value={value.label}
+                              onChange={(e) => {
+                                const next = [...enumValues]
+                                next[index] = { ...next[index], label: e.target.value }
+                                setEnumValues(next)
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell className="p-2 text-right">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                              onClick={() => setEnumValues(enumValues.filter((_, i) => i !== index))}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {enumValues.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={3} className="py-4 text-center text-[10px] text-slate-400 italic">
+                            No enum values defined.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full h-8 text-xs border-dashed text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50"
+                  onClick={() => setEnumValues([...enumValues, { code: "", label: "" }])}
+                >
+                  <PlusCircle className="mr-2 h-3.5 w-3.5" />
+                  Add Value
+                </Button>
               </div>
 
             </form>
