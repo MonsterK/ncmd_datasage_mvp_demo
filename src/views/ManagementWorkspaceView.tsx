@@ -1113,7 +1113,7 @@ export function NewDimensionSheet({
 }: NewDimensionSheetProps) {
   const [fieldName, setFieldName] = useState("")
   const [businessName, setBusinessName] = useState("")
-  const [owner, setOwner] = useState("")
+  const [owner, setOwner] = useState("admin")
   const [technicalDefinition, setTechnicalDefinition] = useState("")
   const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([])
   const [description, setDescription] = useState("")
@@ -1143,7 +1143,7 @@ export function NewDimensionSheet({
     } else {
       setFieldName("")
       setBusinessName("")
-      setOwner("")
+      setOwner("admin")
       setTechnicalDefinition("")
       setSelectedCategoryPath([])
       setDescription("")

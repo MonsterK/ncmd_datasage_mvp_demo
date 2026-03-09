@@ -75,7 +75,7 @@ export function MetricRegistrationView({
 
   const [businessName, setBusinessName] = useState(initialMetric?.businessName ?? "")
   const [businessDefinition, setBusinessDefinition] = useState(initialMetric?.businessDefinition ?? "")
-  const [owner, setOwner] = useState(initialMetric?.owner ?? (Math.random() > 0.5 ? "PM" : "DS"))
+  const [owner, setOwner] = useState(initialMetric?.owner ?? "admin")
   const [fieldName, setFieldName] = useState(initialMetric?.fieldName ?? "")
   const [dataType, setDataType] = useState(initialMetric?.dataType ?? "decimal")
   const [unit, setUnit] = useState(initialMetric?.unit ?? "")
