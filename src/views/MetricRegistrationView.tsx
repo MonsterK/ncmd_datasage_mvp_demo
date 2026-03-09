@@ -80,6 +80,8 @@ export function MetricRegistrationView({
   const [dataType, setDataType] = useState(initialMetric?.dataType ?? "decimal")
   const [unit, setUnit] = useState(initialMetric?.unit ?? "")
   const [technicalDefinition, setTechnicalDefinition] = useState(initialMetric?.technicalDefinition ?? "")
+  const [sourceHiveTable, setSourceHiveTable] = useState(initialMetric?.sourceHiveTable ?? "")
+  const [sourceHiveField, setSourceHiveField] = useState(initialMetric?.sourceHiveField ?? "")
   const [larkSheetLink, setLarkSheetLink] = useState(initialMetric?.larkSheetLink ?? "")
   const [importMessage, setImportMessage] = useState<string | null>(null)
 
@@ -335,6 +337,8 @@ export function MetricRegistrationView({
             fieldName: fieldName.trim(),
             technicalDefinition: technicalDefinition.trim(),
             owner: owner.trim(),
+            sourceHiveTable: sourceHiveTable.trim(),
+            sourceHiveField: sourceHiveField.trim(),
             categoryPath: selectedCategoryPath,
             larkSheetLink: larkSheetLink.trim() || undefined,
             deploySummary: summary,
@@ -387,6 +391,8 @@ export function MetricRegistrationView({
       fieldName,
       technicalDefinition,
       owner,
+      sourceHiveTable,
+      sourceHiveField,
       categoryPath: selectedCategoryPath,
       larkSheetLink: larkSheetLink.trim() || undefined,
       query: {
@@ -695,6 +701,32 @@ export function MetricRegistrationView({
                       {cdmLoading ? "Analyzing..." : "Refresh Source Info"}
                     </Button>
                   </div>
+                  
+                  {/* Physical Info Section */}
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 mb-4">
+                    <p className="text-xs font-semibold text-slate-900 mb-3">Physical Info (Optional)</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-700">Hive Table</label>
+                        <Input
+                          placeholder="db.table_name"
+                          value={sourceHiveTable}
+                          onChange={(e) => setSourceHiveTable(e.target.value)}
+                          className="h-9 text-xs bg-white border-slate-200 font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-700">Hive Field</label>
+                        <Input
+                          placeholder="field_name"
+                          value={sourceHiveField}
+                          onChange={(e) => setSourceHiveField(e.target.value)}
+                          className="h-9 text-xs bg-white border-slate-200 font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   {cdmError && (
                     <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
                       {cdmError}

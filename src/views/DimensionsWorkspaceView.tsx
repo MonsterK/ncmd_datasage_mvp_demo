@@ -437,9 +437,10 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             </CardHeader>
             <CardContent className="p-5 text-xs">
               <div className="space-y-4">
+                <p className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3">Physical Info</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <span className="text-slate-500">Source Table</span>
+                    <span className="text-slate-500">Hive Table</span>
                     <div className="flex items-center gap-2">
                       <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200 truncate">
                         {dimension.sourceLink || "Not configured"}
@@ -447,7 +448,7 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <span className="text-slate-500">Source Field</span>
+                    <span className="text-slate-500">Hive Field</span>
                     <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200">
                       {dimension.sourceDimensionField || "Not configured"}
                     </p>

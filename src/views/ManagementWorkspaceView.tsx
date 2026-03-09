@@ -395,9 +395,13 @@ export function ManagementWorkspaceView({
 
   const handleAddClick = () => {
     if (activeSection === "metric") {
-      onNavigateWorkspace()
+      setMetricSheetMode("create")
+      setMetricToEdit(null)
+      setIsNewMetricSheetOpen(true)
     } else if (activeSection === "dimension") {
-      onNavigateWorkspace()
+      setDimensionSheetMode("create")
+      setDimensionToEdit(null)
+      setIsNewDimensionSheetOpen(true)
     } else if (activeSection === "category") {
       setCategorySheetMode("create")
       setCategoryToEdit(null)

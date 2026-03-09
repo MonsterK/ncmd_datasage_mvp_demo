@@ -134,16 +134,6 @@ export function MetricProfileView({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 p-5 text-xs">
-            <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-1">
-                  <span className="text-slate-500">Owner</span>
-                  <p className="font-medium text-slate-900">{metric.owner}</p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-slate-500">Field Name</span>
-                  <p className="font-mono text-slate-900">{metric.fieldName}</p>
-                </div>
-            </div>
             <div className="space-y-1.5">
               <p className="font-semibold text-slate-800">Tech definition (SQL)</p>
               <pre className="overflow-x-auto rounded-xl bg-slate-900 p-4 text-[11px] leading-relaxed text-slate-50 font-mono shadow-inner">
@@ -164,7 +154,28 @@ export function MetricProfileView({
               Map fields to source CDM tables.
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-5 text-xs">
+            <div className="space-y-4 mb-6">
+              <p className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3">Physical Info</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <span className="text-slate-500">Hive Table</span>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200 truncate">
+                      {metric.sourceHiveTable || "Not configured"}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-slate-500">Hive Field</span>
+                  <p className="font-mono text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                    {metric.sourceHiveField || "Not configured"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3">Lineage Info</p>
             <div className="divide-y divide-slate-50">
               {metric.queryDefinitions.map((q) => (
                  <div key={q.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 hover:bg-slate-50/30 transition-colors">
@@ -188,6 +199,11 @@ export function MetricProfileView({
                     </div>
                  </div>
               ))}
+            </div>
+
+            <div className="mt-6">
+              <p className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3">Dependency Graph</p>
+              <MetricLineageDag metric={metric} />
             </div>
           </CardContent>
         </Card>

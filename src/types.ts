@@ -45,6 +45,8 @@ export interface Metric {
   unit?: string
   deployHistory?: DeployHistory[]
   lastDeployAt?: string
+  sourceHiveTable?: string
+  sourceHiveField?: string
 }
 
 export interface ChangeLog {
@@ -153,6 +155,8 @@ export interface NewMetricPayload {
     relatedDatasets?: string[]
   }
   deploySummary?: DeployHistory
+  sourceHiveTable?: string
+  sourceHiveField?: string
 }
 
 export type DeployTargetType = "Aeolus Dataset" | "Hive Table"
