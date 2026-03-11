@@ -54,18 +54,33 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
   const [selectedDimension, setSelectedDimension] = useState<Dimension | null>(null)
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false)
   const [sortField, setSortField] = useState<DimensionSortField>("updatedAt")
-
+  const [businessModuleFilter, setBusinessModuleFilter] = useState<string>("all")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [ownerFilter, setOwnerFilter] = useState<string>("all")
+
+  const businessModuleOptions = useMemo(() => {
+    const set = new Set<string>()
+    dimensions.forEach((d) => {
+      if (d.categoryPath && d.categoryPath.length > 0) {
+        set.add(d.categoryPath[0])
+      }
+    })
+    return Array.from(set).sort()
+  }, [dimensions])
 
   const categoryOptions = useMemo(() => {
     const set = new Set<string>()
     dimensions.forEach((d) => {
+      // If business module is selected, only show categories under it
+      if (businessModuleFilter !== "all" && d.categoryPath?.[0] !== businessModuleFilter) {
+        return
+      }
+      
       const pathStr = d.categoryPath?.join(" › ") ?? d.category
       if (pathStr) set.add(pathStr)
     })
     return Array.from(set).sort()
-  }, [dimensions])
+  }, [dimensions, businessModuleFilter])
 
   const ownerOptions = useMemo(() => {
     const set = new Set<string>()
@@ -89,6 +104,10 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       )
     }
 
+    if (businessModuleFilter !== "all") {
+      result = result.filter(d => d.categoryPath?.[0] === businessModuleFilter)
+    }
+
     if (categoryFilter !== "all") {
       result = result.filter(d => (d.categoryPath?.join(" › ") ?? d.category) === categoryFilter)
     }
@@ -109,7 +128,7 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
       const tB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
       return tB - tA
     })
-  }, [dimensions, search, categoryFilter, ownerFilter, sortField])
+  }, [dimensions, search, categoryFilter, businessModuleFilter, ownerFilter, sortField])
 
   const handleDimensionClick = (dim: Dimension) => {
     setSelectedDimension(dim)
@@ -132,9 +151,24 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Select value={businessModuleFilter} onValueChange={(val) => {
+              setBusinessModuleFilter(val)
+              setCategoryFilter("all")
+            }}>
+              <SelectTrigger className="h-9 text-xs w-[160px] bg-slate-50 border-slate-200 rounded-lg">
+                <SelectValue placeholder="All Modules" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Modules</SelectItem>
+                {businessModuleOptions.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="h-9 text-xs w-[160px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="All categories" />
+                <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
@@ -194,6 +228,9 @@ export function DimensionsWorkspaceView({ dimensionTree, dimensions }: Dimension
               onClick={() => {
                 setSearch("")
                 setSortField("updatedAt")
+                setBusinessModuleFilter("all")
+                setCategoryFilter("all")
+                setOwnerFilter("all")
               }}
             >
               Clear filters

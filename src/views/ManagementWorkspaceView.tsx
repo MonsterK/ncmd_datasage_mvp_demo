@@ -147,7 +147,7 @@ export function ManagementWorkspaceView({
                 </TableHeader>
                 <TableBody>
                   {metrics.map((m) => (
-                    <TableRow key={m.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
+                    <TableRow key={m.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors group">
                       <TableCell className="text-sm font-medium text-slate-900 pl-4">{m.businessName}</TableCell>
                       <TableCell className="font-mono text-[11px] text-slate-500">{m.fieldName}</TableCell>
                       <TableCell className="text-xs text-slate-700">
@@ -172,37 +172,37 @@ export function ManagementWorkspaceView({
                       </TableCell>
                       <TableCell className="text-[11px] text-slate-500">{formatDate(m.updatedAt)}</TableCell>
                       <TableCell className="text-xs pr-4">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
+                            className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+                            onClick={() => onOpenMetricProfile(m.fieldName)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
                             onClick={() => {
                               setMetricSheetMode("edit")
                               setMetricToEdit(m)
                               setIsNewMetricSheetOpen(true)
                             }}
                           >
-                            Edit
+                            <Type className="h-4 w-4" />
                           </Button>
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
+                            className="h-7 w-7 p-0 text-slate-500 hover:text-red-600 hover:bg-red-50"
                             onClick={() => onDeleteMetric(m.fieldName)}
                           >
-                            Delete
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
-                            onClick={() => onOpenMetricProfile(m.fieldName)}
-                          >
-                            View
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -239,7 +239,7 @@ export function ManagementWorkspaceView({
                 </TableHeader>
                 <TableBody>
                   {dimensions.map((d) => (
-                    <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors">
+                    <TableRow key={d.id} className="hover:bg-slate-50/50 border-slate-100 transition-colors group">
                       <TableCell className="text-sm font-medium text-slate-900 pl-4">{d.name}</TableCell>
                       <TableCell className="font-mono text-[11px] text-slate-500">{d.fieldName}</TableCell>
                       <TableCell className="text-xs text-slate-700">
@@ -259,28 +259,28 @@ export function ManagementWorkspaceView({
                       </TableCell>
                       <TableCell className="text-[11px] text-slate-500">{formatDate(d.updatedAt)}</TableCell>
                       <TableCell className="text-xs pr-4">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600"
+                            className="h-7 w-7 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
                             onClick={() => {
                               setDimensionSheetMode("edit")
                               setDimensionToEdit(d)
                               setIsNewDimensionSheetOpen(true)
                             }}
                           >
-                            Edit
+                            <Type className="h-4 w-4" />
                           </Button>
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="h-7 px-3 text-[11px] rounded-full border-slate-200 text-red-600 shadow-sm hover:bg-red-50 hover:shadow-md hover:border-red-200"
+                            className="h-7 w-7 p-0 text-slate-500 hover:text-red-600 hover:bg-red-50"
                             onClick={() => onDeleteDimension(d.id)}
                           >
-                            Delete
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>

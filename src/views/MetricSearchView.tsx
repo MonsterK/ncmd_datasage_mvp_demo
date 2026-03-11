@@ -50,20 +50,45 @@ export function MetricSearchView({
 }: MetricSearchViewProps) {
   const [search, setSearch] = useState("")
   const [viewMode, setViewMode] = useState<MetricViewMode>(initialViewMode ?? "card")
+  const [businessModuleFilter, setBusinessModuleFilter] = useState<string>("all")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [ownerFilter, setOwnerFilter] = useState<string>("all")
   const [hasQueryFilter, setHasQueryFilter] = useState<HasQueryFilter>("all")
   const [sortField, setSortField] = useState<MetricSortField>("updatedAt")
   const [sortDirection, setSortDirection] = useState<MetricSortDirection>("desc")
 
+  const businessModuleOptions = useMemo(() => {
+    const set = new Set<string>()
+    metrics.forEach((m) => {
+      if (m.categoryPath && m.categoryPath.length > 0) {
+        set.add(m.categoryPath[0])
+      }
+    })
+    return Array.from(set).sort()
+  }, [metrics])
+
   const categoryOptions = useMemo(() => {
     const set = new Set<string>()
     metrics.forEach((m) => {
+      // If business module is selected, only show categories under it
+      if (businessModuleFilter !== "all" && m.categoryPath[0] !== businessModuleFilter) {
+        return
+      }
+
+      // Show Level 2 and Level 3 combined or just the full path excluding Level 1?
+      // User said "categories (retain original level 2 and 3)".
+      // The original filter used the full path. 
+      // Let's assume we filter by the specific sub-category path part or just keep using the full path but filtered by module?
+      // If I select "Business Module A", the category dropdown should probably show "Level 2 > Level 3" or just "Level 2".
+      // Let's stick to showing the full path for clarity, but filtered by the selected module.
+      // Or better: The user wants to filter by "Business Module" AND "Category". 
+      // Usually this means "Category" dropdown shows available categories.
+      
       const pathStr = m.categoryPath.join(" › ")
       if (pathStr) set.add(pathStr)
     })
     return Array.from(set).sort()
-  }, [metrics])
+  }, [metrics, businessModuleFilter])
 
   const ownerOptions = useMemo(() => {
     const set = new Set<string>()
@@ -88,6 +113,10 @@ export function MetricSearchView({
           m.businessDefinition.toLowerCase().includes(q)
         )
       })
+    }
+
+    if (businessModuleFilter !== "all") {
+      result = result.filter((m) => m.categoryPath[0] === businessModuleFilter)
     }
 
     if (categoryFilter !== "all") {
@@ -116,6 +145,7 @@ export function MetricSearchView({
     metrics,
     search,
     categoryFilter,
+    businessModuleFilter,
     ownerFilter,
     hasQueryFilter,
     sortField,
@@ -138,9 +168,24 @@ export function MetricSearchView({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <Select value={businessModuleFilter} onValueChange={(val) => {
+              setBusinessModuleFilter(val)
+              setCategoryFilter("all") // Reset category when module changes
+            }}>
+              <SelectTrigger className="h-9 text-xs w-[160px] bg-slate-50 border-slate-200 rounded-lg">
+                <SelectValue placeholder="All Modules" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Modules</SelectItem>
+                {businessModuleOptions.map((opt) => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="h-9 text-xs w-[160px] bg-slate-50 border-slate-200 rounded-lg">
-                <SelectValue placeholder="All categories" />
+                <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
@@ -200,6 +245,7 @@ export function MetricSearchView({
                 variant="outline"
                 className="mt-4"
                 onClick={() => {
+                  setBusinessModuleFilter("all")
                   setCategoryFilter("all")
                   setOwnerFilter("all")
                   setHasQueryFilter("all")
