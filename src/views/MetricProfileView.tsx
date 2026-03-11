@@ -201,10 +201,7 @@ export function MetricProfileView({
               ))}
             </div>
 
-            <div className="mt-6">
-              <p className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3">Dependency Graph</p>
-              <MetricLineageDag metric={metric} />
-            </div>
+            {/* Dependency Graph removed as per request */}
           </CardContent>
         </Card>
 

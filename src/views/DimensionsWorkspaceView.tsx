@@ -36,7 +36,8 @@ import {
   ArrowRight,
   User,
   Info,
-  Truck
+  Truck,
+  Link
 } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
@@ -495,6 +496,36 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             </CardContent>
           </Card>
 
+          <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/30">
+              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <List className="h-4 w-4 text-blue-500" />
+                Enum Values
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500">Allowed values for this dimension.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+               <div className="w-full">
+                 <div className="grid grid-cols-[1fr_2fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                   <div>Value</div>
+                   <div>Description</div>
+                 </div>
+                 {/* Mock Enum Data */}
+                 {[
+                   { value: "ios", description: "Apple iOS devices" },
+                   { value: "android", description: "Google Android devices" },
+                   { value: "web", description: "Web browsers (Desktop/Mobile)" },
+                   { value: "other", description: "Unknown or other platforms" }
+                 ].map((item, index) => (
+                    <div key={index} className="grid grid-cols-[1fr_2fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
+                      <div className="font-mono font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded w-fit">{item.value}</div>
+                      <div className="text-slate-600">{item.description}</div>
+                    </div>
+                 ))}
+               </div>
+            </CardContent>
+          </Card>
+          
           {/* Deploy Scenario */}
           <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/40">
@@ -508,38 +539,64 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                     Deployment status and history.
                   </CardDescription>
                  </div>
-                 <button 
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm"
-                 >
-                   Deploy
-                 </button>
+                 <div className="flex items-center gap-2">
+                    <button 
+                      className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm flex items-center gap-1.5"
+                      // onClick={handleAddBinding} // TODO: Implement binding for dimensions if needed
+                    >
+                      <Link className="h-3 w-3" />
+                      Binding
+                    </button>
+                    <button 
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm"
+                    >
+                      Deploy
+                    </button>
+                 </div>
                </div>
             </CardHeader>
-            <CardContent className="p-5 text-xs">
-               <div className="space-y-1.5">
-                  <p className="font-semibold text-slate-800">Deploy status</p>
-                  {latestDeploy ? (
-                    <div className="text-xs text-slate-600 space-y-2">
-                      <div>
-                        {latestDeploy.targetType} · {latestDeploy.target}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        {latestDeploy.status} · {new Date(latestDeploy.deployedAt).toLocaleString()}
-                      </div>
-                      {dimension.deployHistory && dimension.deployHistory.length > 1 && (
-                        <div className="space-y-1 text-[11px] text-slate-500">
-                          {dimension.deployHistory.slice(-3).reverse().map((item, index) => (
-                            <div key={`${item.target}-${item.deployedAt}-${index}`}>
-                              {item.targetType} · {item.target} · {item.status}
-                            </div>
-                          ))}
+            <CardContent className="p-0">
+               {dimension.deployHistory && dimension.deployHistory.length > 0 ? (
+                 <div className="w-full">
+                   <div className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                     <div>Target</div>
+                     <div>Type</div>
+                     <div>Owner</div>
+                     <div>Status</div>
+                     <div className="text-right">Last Deployed</div>
+                   </div>
+                   {dimension.deployHistory.map((item, index) => (
+                      <div key={index} className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0">
+                        <div className="font-medium text-slate-900 flex items-center gap-1.5 min-w-0">
+                          <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${item.type === 'binding' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
+                          <span className="truncate" title={item.target}>{item.target}</span>
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-500">No deploy history yet.</p>
-                  )}
-                </div>
+                        <div className="text-slate-600">
+                          <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-slate-200 bg-slate-50 text-slate-600">
+                             {item.type || "deployment"}
+                          </Badge>
+                        </div>
+                        <div className="text-slate-600 truncate">{dimension.owner}</div>
+                        <div>
+                          <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
+                            item.status === 'success' 
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                              : 'bg-red-50 text-red-700 border-red-200'
+                          }`}>
+                            {item.status}
+                          </Badge>
+                        </div>
+                        <div className="text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                          {new Date(item.deployedAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                   ))}
+                 </div>
+               ) : (
+                 <div className="p-8 text-center text-xs text-slate-400 italic">
+                   No deployment history available.
+                 </div>
+               )}
             </CardContent>
           </Card>
 
@@ -552,23 +609,27 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
               <CardDescription className="text-xs text-slate-500">Change logs for this dimension.</CardDescription>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {dimension.history?.map((log, i) => (
                   <div key={i} className="flex gap-3 text-xs">
-                    <div className="min-w-[30px] pt-1 flex flex-col items-center">
-                      <div className="h-1.5 w-1.5 rounded-full bg-purple-500 ring-2 ring-purple-50"></div>
-                      {i !== (dimension.history?.length ?? 0) - 1 && <div className="w-px h-full bg-slate-100 my-1"></div>}
+                    <div className="min-w-[40px] pt-0.5 flex flex-col items-center">
+                      <div className="h-2 w-2 rounded-full bg-blue-500 ring-4 ring-blue-50"></div>
+                      {i !== (dimension.history?.length ?? 0) - 1 && <div className="w-px h-full bg-slate-200 my-1"></div>}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex-1 pb-4">
+                      <div className="flex items-center gap-2 mb-1">
                         <span className="font-bold text-slate-900">{log.version}</span>
-                        <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleDateString()}</span>
+                        <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleString()}</span>
                       </div>
-                      <div className="text-slate-600">
-                        <span className="font-medium text-slate-800 mr-1">{log.editor}</span>
-                        <span>{log.action}d this dimension.</span>
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="text-[9px] bg-white px-1.5 py-0 h-4">
+                            {log.action}
+                          </Badge>
+                          <span className="font-medium text-slate-700">{log.editor}</span>
+                        </div>
+                        {log.comment && <p className="text-slate-600 italic">"{log.comment}"</p>}
                       </div>
-                      {log.comment && <p className="text-slate-500 italic mt-0.5">"{log.comment}"</p>}
                     </div>
                   </div>
                 )) ?? <p className="text-slate-400 italic">No history available.</p>}
