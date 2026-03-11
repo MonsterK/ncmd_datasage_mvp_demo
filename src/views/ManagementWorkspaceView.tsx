@@ -37,7 +37,7 @@ import {
 } from "@/types"
 import { MetricRegistrationView } from "@/views/MetricRegistrationView"
 
-export type ManagementSection = "metric" | "dimension" | "category" | "workspace"
+export type ManagementSection = "metric" | "dimension" | "business_module" | "category" | "workspace"
 
 export interface ManagementWorkspaceViewProps {
   activeSection: ManagementSection
@@ -305,7 +305,7 @@ export function ManagementWorkspaceView({
              <p>Workspace content here</p>
           </div>
         )
-      case "category":
+      case "business_module":
         return (
           <div className="space-y-4">
             <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
@@ -315,25 +315,18 @@ export function ManagementWorkspaceView({
                     <TableHead className="w-[40%] pl-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
                     <TableHead className="w-[30%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
                     <TableHead className="w-[20%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Semantic View</TableHead>
-                    <TableHead className="w-[10%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Subcategories</TableHead>
                     <TableHead className="w-[10%] pr-6 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {categories.map((category) => (
-                    <CategoryRow
+                    <BusinessModuleRow
                       key={category.id}
                       category={category}
-                      level={0}
-                      onEdit={(cat, isSub) => {
+                      onEdit={(cat) => {
                         setCategorySheetMode("edit")
                         setCategoryToEdit(cat)
-                        setIsEditingSubCategory(isSub)
-                        setIsCategorySheetOpen(true)
-                      }}
-                      onCreateSub={(parent) => {
-                        setCategorySheetMode("create")
-                        setParentCategoryForCreate(parent)
+                        setIsEditingSubCategory(false)
                         setIsCategorySheetOpen(true)
                       }}
                       onDelete={(id) => onDeleteCategory?.(id)}
@@ -350,7 +343,58 @@ export function ManagementWorkspaceView({
                   {categories.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={4} className="h-32 text-center text-xs text-slate-400 italic">
-                        No categories found. Create one to get started.
+                        No business modules found. Create one to get started.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )
+      case "category":
+        // Flatten Level 2 categories
+        const subCategories = categories.flatMap(c => c.children?.map(child => ({...child, parentName: c.name, parentId: c.id})) || [])
+        
+        return (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-slate-50 border-slate-100 bg-slate-50/50">
+                    <TableHead className="w-[30%] pl-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
+                    <TableHead className="w-[20%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Business Module</TableHead>
+                    <TableHead className="w-[30%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
+                    <TableHead className="w-[10%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Subcategories</TableHead>
+                    <TableHead className="w-[10%] pr-6 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {subCategories.map((category) => (
+                    <CategoryRow
+                      key={category.id}
+                      category={category}
+                      level={0}
+                      parentName={(category as any).parentName}
+                      onEdit={(cat, isSub) => {
+                        setCategorySheetMode("edit")
+                        setCategoryToEdit(cat)
+                        setIsEditingSubCategory(true) // Level 2/3 are considered subcategories in the sheet logic
+                        setIsCategorySheetOpen(true)
+                      }}
+                      onCreateSub={(parent) => {
+                        setCategorySheetMode("create")
+                        setParentCategoryForCreate(parent)
+                        setIsCategorySheetOpen(true)
+                      }}
+                      onDelete={(id) => onDeleteCategory?.(id)}
+                      onViewSemanticView={() => {}}
+                    />
+                  ))}
+                  {subCategories.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-32 text-center text-xs text-slate-400 italic">
+                        No categories found.
                       </TableCell>
                     </TableRow>
                   )}
@@ -378,6 +422,12 @@ export function ManagementWorkspaceView({
           description: "Manage dimension terms, values dictionary and bindings.",
           addLabel: "New dimension",
         }
+      case "business_module":
+        return {
+          title: "Business Modules",
+          description: "Manage top-level business domains and their semantic views.",
+          addLabel: "New Module",
+        }
       case "category":
         return {
           title: "Category Management",
@@ -402,6 +452,11 @@ export function ManagementWorkspaceView({
       setDimensionSheetMode("create")
       setDimensionToEdit(null)
       setIsNewDimensionSheetOpen(true)
+    } else if (activeSection === "business_module") {
+      setCategorySheetMode("create")
+      setCategoryToEdit(null)
+      setParentCategoryForCreate(null)
+      setIsCategorySheetOpen(true)
     } else if (activeSection === "category") {
       setCategorySheetMode("create")
       setCategoryToEdit(null)
@@ -431,6 +486,12 @@ export function ManagementWorkspaceView({
             />
             <SidebarItem
               icon={FolderKanban}
+              label="Business Modules"
+              active={activeSection === "business_module"}
+              onClick={() => onChangeSection("business_module")}
+            />
+            <SidebarItem
+              icon={Layers}
               label="Categories"
               active={activeSection === "category"}
               onClick={() => onChangeSection("category")}
@@ -638,10 +699,14 @@ export function ManagementWorkspaceView({
         mode={categorySheetMode}
         initialCategory={categoryToEdit}
         parentCategory={parentCategoryForCreate}
-        isSubCategory={isEditingSubCategory}
+        isSubCategory={isEditingSubCategory || activeSection === "category"}
+        businessModules={categories} // Pass all Level 1 as options
         onCreateCategory={(payload) => {
           if (parentCategoryForCreate) {
             onCreateCategory({ ...payload, parentId: parentCategoryForCreate.id })
+          } else if (payload.parentId) {
+             // Handle selection from dropdown
+             onCreateCategory({ ...payload })
           } else {
             onCreateCategory(payload)
           }
@@ -663,7 +728,8 @@ interface NewCategorySheetProps {
   initialCategory?: CategoryNode | null
   parentCategory?: CategoryNode | null
   isSubCategory?: boolean
-  onCreateCategory: (payload: { id: string; name: string; description: string; semanticView?: { name: string; hiveTables: string[] } }) => void
+  businessModules?: CategoryNode[]
+  onCreateCategory: (payload: { id: string; name: string; description: string; semanticView?: { name: string; hiveTables: string[] }; parentId?: string }) => void
   onUpdateCategory: (payload: { id: string; name: string; description: string; semanticView?: { name: string; hiveTables: string[] } }) => void
 }
 
@@ -674,6 +740,7 @@ function NewCategorySheet({
   initialCategory,
   parentCategory,
   isSubCategory = false,
+  businessModules,
   onCreateCategory,
   onUpdateCategory,
 }: NewCategorySheetProps) {
@@ -681,10 +748,13 @@ function NewCategorySheet({
   const [description, setDescription] = useState("")
   const [semanticViewName, setSemanticViewName] = useState("")
   const [semanticViewTables, setSemanticViewTables] = useState<string[]>([])
+  const [selectedBusinessModule, setSelectedBusinessModule] = useState<string>("")
 
   // Only top-level categories can have semantic view configuration
   // If we are creating a sub-category (parentCategory exists) or editing a sub-category (isSubCategory is true), hide it.
-  const showSemanticViewConfig = !parentCategory && !isSubCategory
+  // Also hide if we are creating a "Category" (Level 2) which requires a parent module.
+  const showSemanticViewConfig = !parentCategory && !isSubCategory && !businessModules
+  const showParentSelector = !parentCategory && mode === "create" && !!businessModules
 
   useEffect(() => {
     if (open) {
@@ -693,11 +763,13 @@ function NewCategorySheet({
         setDescription(initialCategory.description || "")
         setSemanticViewName(initialCategory.semanticView?.name || "")
         setSemanticViewTables(initialCategory.semanticView?.hiveTables || [])
+        // If editing, we don't change parent
       } else {
         setName("")
         setDescription("")
         setSemanticViewName("")
         setSemanticViewTables([])
+        setSelectedBusinessModule("")
       }
     }
   }, [open, mode, initialCategory])
@@ -705,6 +777,11 @@ function NewCategorySheet({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return
+
+    if (showParentSelector && !selectedBusinessModule) {
+      // Should show validation error, but for now just return
+      return
+    }
 
     let semanticView = undefined
     if (showSemanticViewConfig) {
@@ -727,6 +804,7 @@ function NewCategorySheet({
         name: name.trim(),
         description: description.trim(),
         semanticView,
+        parentId: selectedBusinessModule || undefined,
       })
     }
     onOpenChange(false)
@@ -744,6 +822,22 @@ function NewCategorySheet({
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
             <form id="category-form" onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
+                {showParentSelector && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-700">Business Module</label>
+                    <Select value={selectedBusinessModule} onValueChange={setSelectedBusinessModule} required>
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue placeholder="Select Business Module" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {businessModules?.map((bm) => (
+                          <SelectItem key={bm.id} value={bm.id}>{bm.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-slate-700">Name</label>
                   <Input
@@ -851,16 +945,64 @@ interface SidebarItemProps {
   onClick?: () => void
 }
 
+interface BusinessModuleRowProps {
+  category: CategoryNode
+  onEdit: (cat: CategoryNode) => void
+  onDelete: (id: string) => void
+  onViewSemanticView: (cat: CategoryNode) => void
+}
+
+function BusinessModuleRow({ category, onEdit, onDelete, onViewSemanticView }: BusinessModuleRowProps) {
+  return (
+    <TableRow className="hover:bg-slate-50/50 border-slate-100 transition-colors group">
+      <TableCell className="py-3 pl-6">
+        <div className="flex items-center gap-2">
+          <FolderKanban className="h-4 w-4 text-blue-600" />
+          <span className="text-sm font-medium text-slate-900">{category.name}</span>
+        </div>
+      </TableCell>
+      <TableCell className="text-xs text-slate-500 max-w-[200px] truncate">
+        {category.description || "-"}
+      </TableCell>
+      <TableCell className="text-xs">
+        {category.semanticView ? (
+           <div className="flex items-center gap-1.5">
+             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+             <span className="text-slate-700 font-medium">{category.semanticView.name}</span>
+             <span className="text-slate-400">({category.semanticView.hiveTables.length} tables)</span>
+           </div>
+        ) : (
+           <span className="text-slate-400 italic">-</span>
+        )}
+      </TableCell>
+      <TableCell className="pr-6 text-right">
+        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onViewSemanticView(category)}>
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onEdit(category)}>
+            <Type className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-600 hover:bg-red-50" onClick={() => onDelete(category.id)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  )
+}
+
 interface CategoryRowProps {
   category: CategoryNode
   level: number
+  parentName?: string
   onEdit: (cat: CategoryNode, isSub: boolean) => void
   onCreateSub: (parent: CategoryNode) => void
   onDelete: (id: string) => void
   onViewSemanticView: (cat: CategoryNode) => void
 }
 
-function CategoryRow({ category, level, onEdit, onCreateSub, onDelete, onViewSemanticView }: CategoryRowProps) {
+function CategoryRow({ category, level, parentName, onEdit, onCreateSub, onDelete, onViewSemanticView }: CategoryRowProps) {
   const [expanded, setExpanded] = useState(false)
   const hasChildren = category.children && category.children.length > 0
 
@@ -886,6 +1028,14 @@ function CategoryRow({ category, level, onEdit, onCreateSub, onDelete, onViewSem
             </div>
           </div>
         </TableCell>
+        {parentName && (
+          <TableCell className="text-xs text-slate-600 font-medium">
+            <div className="flex items-center gap-1.5">
+              <FolderKanban className="h-3.5 w-3.5 text-slate-400" />
+              {parentName}
+            </div>
+          </TableCell>
+        )}
         <TableCell className="text-xs text-slate-500 max-w-[200px] truncate" title={category.description}>
           {category.description || "-"}
         </TableCell>
