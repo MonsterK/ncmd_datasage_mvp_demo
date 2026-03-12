@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
 import { Home, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Type, Calendar, Braces, Trash2, Eye } from "lucide-react"
@@ -346,6 +346,12 @@ export function ManagementWorkspaceView({
                         })
                         setIsSemanticViewPreviewOpen(true)
                       }}
+                      onEditSemanticView={(cat) => {
+                        setSemanticViewCategory(cat)
+                        setSemanticViewName(cat.semanticView?.name ?? "")
+                        setSemanticViewTables(cat.semanticView?.hiveTables ?? [])
+                        setIsSemanticViewDialogOpen(true)
+                      }}
                     />
                   ))}
                   {categories.length === 0 && (
@@ -579,91 +585,92 @@ export function ManagementWorkspaceView({
       </Dialog>
 
       <Dialog open={isSemanticViewDialogOpen} onOpenChange={setIsSemanticViewDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-sm font-semibold">
-              {semanticViewCategory ? `${semanticViewCategory.name} Semantic View` : "Semantic View"}
+            <DialogTitle className="text-sm font-semibold text-slate-900">
+              Configure Semantic View
             </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Define the physical tables for this business module.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700">Semantic View Name</label>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-slate-700">View Name</label>
               <Input
-                className="h-8 text-xs"
+                placeholder="e.g. dm_delivery_view"
                 value={semanticViewName}
                 onChange={(e) => setSemanticViewName(e.target.value)}
+                className="h-8 text-xs font-mono"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700">Hive CDM Tables</label>
-              <div className="space-y-2">
-                {semanticViewTables.map((table, index) => (
-                  <div key={`${table}-${index}`} className="flex items-center gap-2">
-                    <Input
-                      className="h-8 text-xs"
-                      value={table}
-                      onChange={(e) => {
-                        const next = [...semanticViewTables]
-                        next[index] = e.target.value
-                        setSemanticViewTables(next)
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-2 text-xs text-red-600 hover:bg-red-50"
-                      onClick={() => {
-                        const next = semanticViewTables.filter((_, i) => i !== index)
-                        setSemanticViewTables(next)
-                      }}
+              <label className="text-xs font-medium text-slate-700">Hive Tables</label>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  placeholder="Add table (e.g. db.table_name)"
+                  className="h-8 text-xs font-mono flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const val = (e.target as HTMLInputElement).value.trim()
+                      if (val && !semanticViewTables.includes(val)) {
+                        setSemanticViewTables([...semanticViewTables, val]);
+                        (e.target as HTMLInputElement).value = ""
+                      }
+                    }
+                  }}
+                />
+              </div>
+              <div className="min-h-[100px] max-h-[200px] overflow-y-auto rounded-md border border-slate-200 bg-slate-50 p-2 space-y-1">
+                {semanticViewTables.map((table) => (
+                  <div key={table} className="flex items-center justify-between bg-white px-2 py-1.5 rounded border border-slate-100 text-xs">
+                    <span className="font-mono text-slate-600">{table}</span>
+                    <button
+                      onClick={() => setSemanticViewTables(semanticViewTables.filter(t => t !== table))}
+                      className="text-slate-400 hover:text-red-500"
                     >
-                      Remove
-                    </Button>
+                      <X className="h-3 w-3" />
+                    </button>
                   </div>
                 ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => setSemanticViewTables([...semanticViewTables, "dwd_"])}
-                >
-                  + Add table
-                </Button>
+                {semanticViewTables.length === 0 && (
+                  <div className="text-center py-8 text-xs text-slate-400 italic">
+                    No tables added yet. Type and press Enter to add.
+                  </div>
+                )}
               </div>
             </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => setIsSemanticViewDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => {
-                  if (!semanticViewCategory) return
-                  const cleaned = semanticViewTables.map((t) => t.trim()).filter(Boolean)
-                  onUpdateCategory({
-                    id: semanticViewCategory.id,
-                    semanticView: {
-                      name: semanticViewName.trim() || `${semanticViewCategory.name}_semantic_view`,
-                      hiveTables: cleaned,
-                    },
-                  })
-                  setIsSemanticViewDialogOpen(false)
-                }}
-              >
-                Save
-              </Button>
-            </div>
           </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSemanticViewDialogOpen(false)}
+              className="h-8 text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                if (semanticViewCategory) {
+                   onUpdateCategory({
+                     id: semanticViewCategory.id,
+                     name: semanticViewCategory.name,
+                     description: semanticViewCategory.description ?? "",
+                     semanticView: {
+                       name: semanticViewName || `${semanticViewCategory.name}_view`,
+                       hiveTables: semanticViewTables
+                     }
+                   })
+                   setIsSemanticViewDialogOpen(false)
+                }
+              }}
+              className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save Configuration
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -958,9 +965,10 @@ interface BusinessModuleRowProps {
   onEdit: (cat: CategoryNode) => void
   onDelete: (id: string) => void
   onViewSemanticView: (cat: CategoryNode) => void
+  onEditSemanticView: (cat: CategoryNode) => void
 }
 
-function BusinessModuleRow({ category, onEdit, onDelete, onViewSemanticView }: BusinessModuleRowProps) {
+function BusinessModuleRow({ category, onEdit, onDelete, onViewSemanticView, onEditSemanticView }: BusinessModuleRowProps) {
   return (
     <TableRow className="hover:bg-slate-50/50 border-slate-100 transition-colors group">
       <TableCell className="py-3 pl-6">
@@ -974,13 +982,21 @@ function BusinessModuleRow({ category, onEdit, onDelete, onViewSemanticView }: B
       </TableCell>
       <TableCell className="text-xs">
         {category.semanticView ? (
-           <div className="flex items-center gap-1.5">
+           <div className="flex items-center gap-1.5 group/sem cursor-pointer" onClick={() => onEditSemanticView(category)}>
              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
-             <span className="text-slate-700 font-medium">{category.semanticView.name}</span>
+             <span className="text-slate-700 font-medium group-hover/sem:text-blue-600 transition-colors">{category.semanticView.name}</span>
              <span className="text-slate-400">({category.semanticView.hiveTables.length} tables)</span>
+             <Type className="h-3 w-3 text-slate-400 opacity-0 group-hover/sem:opacity-100 transition-opacity" />
            </div>
         ) : (
-           <span className="text-slate-400 italic">-</span>
+           <Button 
+             variant="ghost" 
+             size="sm" 
+             className="h-6 text-[10px] text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2"
+             onClick={() => onEditSemanticView(category)}
+           >
+             + Add View
+           </Button>
         )}
       </TableCell>
       <TableCell className="pr-6 text-right">
