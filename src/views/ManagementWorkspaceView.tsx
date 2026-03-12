@@ -768,8 +768,10 @@ function NewCategorySheet({
   // Only top-level categories can have semantic view configuration
   // If we are creating a sub-category (parentCategory exists) or editing a sub-category (isSubCategory is true), hide it.
   // Also hide if we are creating a "Category" (Level 2) which requires a parent module.
-  const showSemanticViewConfig = !parentCategory && !isSubCategory && !businessModules
-  const showParentSelector = !parentCategory && mode === "create" && !!businessModules
+  const isBusinessModule = !isSubCategory && !parentCategory
+  
+  const showSemanticViewConfig = isBusinessModule
+  const showParentSelector = isSubCategory && !parentCategory && mode === "create" && !!businessModules
 
   useEffect(() => {
     if (open) {
