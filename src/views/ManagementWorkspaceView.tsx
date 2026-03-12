@@ -138,6 +138,7 @@ export function ManagementWorkspaceView({
                   <TableRow className="hover:bg-slate-50 border-slate-100 bg-slate-50/50">
                     <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider pl-4">Name</TableHead>
                     <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Name</TableHead>
+                    <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Business Module</TableHead>
                     <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</TableHead>
                     <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</TableHead>
                     <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Owners</TableHead>
@@ -243,7 +244,10 @@ export function ManagementWorkspaceView({
                       <TableCell className="text-sm font-medium text-slate-900 pl-4">{d.name}</TableCell>
                       <TableCell className="font-mono text-[11px] text-slate-500">{d.fieldName}</TableCell>
                       <TableCell className="text-xs text-slate-700">
-                        {d.categoryPath?.length ? d.categoryPath.join(" › ") : d.category ?? "Uncategorized"}
+                        {d.categoryPath?.[0] ?? "-"}
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-700">
+                        {d.categoryPath?.length && d.categoryPath.length > 1 ? d.categoryPath.slice(1).join(" › ") : "-"}
                       </TableCell>
                       <TableCell className="text-xs">
                         <Badge variant="outline" className="text-[10px] bg-slate-50 border-slate-200 text-slate-600">
