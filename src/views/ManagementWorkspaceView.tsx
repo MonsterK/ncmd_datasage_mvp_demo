@@ -25,7 +25,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CategoryTreeSelect } from "@/components/CategoryTreeSelect"
-import { Home, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Type, Calendar, Braces, Trash2, Eye } from "lucide-react"
+import { Home, Layers, FolderKanban, LineChart as LineChartIcon, PlusCircle, Hash, Type, Calendar, Braces, Trash2, Eye, X } from "lucide-react"
 
 import {
   Metric,
