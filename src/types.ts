@@ -78,6 +78,7 @@ export interface Dimension {
   categoryPath?: string[]
   sourceLink?: string
   sourceDimensionField?: string
+  queryDefinitions?: MetricQueryDefinition[]
   status?: MetricStatus
   technicalDefinition?: string
   createdAt?: string

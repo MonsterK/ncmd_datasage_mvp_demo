@@ -475,6 +475,38 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
             </CardHeader>
             <CardContent className="p-5 text-xs">
               <div className="space-y-4">
+                <p className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3">Lineage Info</p>
+                <div className="divide-y divide-slate-50 mb-6">
+                  {dimension.queryDefinitions && dimension.queryDefinitions.length > 0 ? (
+                    dimension.queryDefinitions.map((q) => (
+                      <div key={q.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 hover:bg-slate-50/30 transition-colors">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Source Table</span>
+                          <div className="flex items-center gap-2">
+                            <a 
+                              href="#" 
+                              className="font-mono text-xs text-blue-600 hover:underline hover:text-blue-700 truncate"
+                              onClick={(e) => e.preventDefault()}
+                            >
+                              {q.source}
+                            </a>
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Source Field</span>
+                          <p className="font-mono text-xs text-slate-700 break-all">
+                            {q.fields && q.fields.length > 0 ? q.fields.join(", ") : (q.expression || "Not configured")}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                     <div className="p-5 text-center text-xs text-slate-400 italic">
+                       No lineage info available.
+                     </div>
+                  )}
+                </div>
+
                 <p className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2 mb-3">Physical Info</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
