@@ -376,10 +376,9 @@ export function ManagementWorkspaceView({
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-slate-50 border-slate-100 bg-slate-50/50">
-                    <TableHead className="w-[30%] pl-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
+                    <TableHead className="w-[35%] pl-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
                     <TableHead className="w-[20%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Business Module</TableHead>
-                    <TableHead className="w-[30%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
-                    <TableHead className="w-[10%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Subcategories</TableHead>
+                    <TableHead className="w-[35%] text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</TableHead>
                     <TableHead className="w-[10%] pr-6 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -407,7 +406,7 @@ export function ManagementWorkspaceView({
                   ))}
                   {subCategories.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-32 text-center text-xs text-slate-400 italic">
+                      <TableCell colSpan={4} className="h-32 text-center text-xs text-slate-400 italic">
                         No categories found.
                       </TableCell>
                     </TableRow>
@@ -1065,26 +1064,8 @@ function CategoryRow({ category, level, parentName, onEdit, onCreateSub, onDelet
         <TableCell className="text-xs text-slate-500 max-w-[200px] truncate" title={category.description}>
           {category.description || "-"}
         </TableCell>
-        <TableCell className="text-xs">
-          {category.semanticView ? (
-             <div className="flex items-center gap-1.5">
-               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
-               <span className="text-slate-700 font-medium">{category.semanticView.name}</span>
-               <span className="text-slate-400">({category.semanticView.hiveTables.length} tables)</span>
-             </div>
-          ) : (
-             <span className="text-slate-400 italic">-</span>
-          )}
-        </TableCell>
-        <TableCell className="text-xs text-slate-500">
-          {hasChildren ? (
-            <Badge variant="secondary" className="text-[10px] font-normal bg-slate-100 text-slate-600 hover:bg-slate-200">
-              {category.children!.length} subcategories
-            </Badge>
-          ) : (
-            <span className="text-slate-400">-</span>
-          )}
-        </TableCell>
+
+
         <TableCell>
           <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {level === 0 && (
@@ -1137,6 +1118,7 @@ function CategoryRow({ category, level, parentName, onEdit, onCreateSub, onDelet
           key={child.id}
           category={child}
           level={level + 1}
+          parentName={parentName}
           onEdit={onEdit}
           onCreateSub={onCreateSub}
           onDelete={onDelete}
