@@ -244,17 +244,16 @@ export function MetricProfileView({
           <div className="p-0">
              {deployHistory.length > 0 || isAddingBinding ? (
                <div className="w-full">
-                 <div className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                 <div className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
                    <div>Target Type</div>
                    <div>Target Asset</div>
                    <div>Target Field</div>
                    <div>Type</div>
                    <div>Owner</div>
-                   <div>Status</div>
                    <div className="text-right">Last Deployed</div>
                  </div>
                  {deployHistory.map((item, index) => (
-                    <div key={index} className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0">
+                    <div key={index} className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0">
                       <div className="text-slate-600 truncate">{item.targetType || "Hive Table"}</div>
                       <div className="font-medium text-slate-900 flex items-center gap-1.5 min-w-0">
                         <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${item.type === 'binding' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
@@ -267,15 +266,6 @@ export function MetricProfileView({
                         </Badge>
                       </div>
                       <div className="text-slate-600 truncate">{metric.owner}</div>
-                      <div>
-                        <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 border-slate-200 ${
-                          item.status === 'success' 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                            : 'bg-red-50 text-red-700 border-red-200'
-                        }`}>
-                          {item.status}
-                        </Badge>
-                      </div>
                       <div className="text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
                         {new Date(item.deployedAt).toLocaleDateString()}
                       </div>
@@ -283,7 +273,7 @@ export function MetricProfileView({
                  ))}
                  
                  {isAddingBinding && (
-                   <div className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-3 text-xs items-center bg-blue-50/30">
+                   <div className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-3 text-xs items-center bg-blue-50/30">
                      <div>
                        <Select value={newBindingTargetType} onValueChange={(v: any) => setNewBindingTargetType(v)}>
                          <SelectTrigger className="h-7 text-[11px] bg-white">
@@ -318,9 +308,6 @@ export function MetricProfileView({
                        </Badge>
                      </div>
                      <div className="text-slate-600 truncate">{newBindingOwner}</div>
-                     <div>
-                       <span className="text-[10px] text-slate-400 italic">Pending...</span>
-                     </div>
                      <div className="flex justify-end gap-2">
                        <button 
                          onClick={handleSaveBinding}
