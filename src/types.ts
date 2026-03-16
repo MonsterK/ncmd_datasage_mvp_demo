@@ -165,6 +165,7 @@ export type DeployTargetType = "Aeolus Dataset" | "Hive Table"
 export interface DeployHistory {
   targetType: DeployTargetType
   target: string
+  targetField?: string
   status: "success" | "failed"
   deployedAt: string
   fieldCount: number

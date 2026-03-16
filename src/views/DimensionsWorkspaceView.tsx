@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { DimensionTreeNode, Dimension } from "@/types"
+import { DimensionTreeNode, Dimension, DeployHistory } from "@/types"
 import { 
   Folder, 
   Tag, 
@@ -37,7 +37,9 @@ import {
   User,
   Info,
   Truck,
-  Link
+  Link,
+  Check,
+  X
 } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
@@ -348,10 +350,51 @@ interface DimensionDetailSheetProps {
 }
 
 function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetailSheetProps) {
-  const latestDeploy = useMemo(() => {
-    if (!dimension?.deployHistory || dimension.deployHistory.length === 0) return null
-    return dimension.deployHistory[dimension.deployHistory.length - 1]
+  const [deployHistory, setDeployHistory] = useState<DeployHistory[]>([])
+  const [isAddingBinding, setIsAddingBinding] = useState(false)
+  const [newBindingTargetType, setNewBindingTargetType] = useState<"Aeolus Dataset" | "Hive Table">("Hive Table")
+  const [newBindingTarget, setNewBindingTarget] = useState("")
+  const [newBindingTargetField, setNewBindingTargetField] = useState("")
+  const [newBindingOwner, setNewBindingOwner] = useState("")
+
+  useEffect(() => {
+    if (dimension?.deployHistory) {
+      setDeployHistory(dimension.deployHistory)
+    } else {
+      setDeployHistory([])
+    }
   }, [dimension])
+
+  const handleAddBinding = () => {
+    setIsAddingBinding(true)
+    setNewBindingTargetType("Hive Table")
+    setNewBindingTarget("")
+    setNewBindingTargetField("")
+    setNewBindingOwner(dimension?.owner || "PM")
+  }
+
+  const handleSaveBinding = () => {
+    if (!newBindingTarget.trim()) return
+
+    const newEntry: DeployHistory = {
+      targetType: newBindingTargetType,
+      target: newBindingTarget,
+      targetField: newBindingTargetField,
+      status: "success",
+      deployedAt: new Date().toISOString(),
+      fieldCount: 1,
+      type: "binding"
+    }
+
+    setDeployHistory([...deployHistory, newEntry])
+    setIsAddingBinding(false)
+  }
+
+  const handleCancelBinding = () => {
+    setIsAddingBinding(false)
+    setNewBindingTarget("")
+    setNewBindingTargetField("")
+  }
 
   if (!dimension) return null
 
@@ -574,7 +617,7 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                  <div className="flex items-center gap-2">
                     <button 
                       className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-[10px] font-semibold px-3 py-1.5 rounded-full transition-colors shadow-sm flex items-center gap-1.5"
-                      // onClick={handleAddBinding} // TODO: Implement binding for dimensions if needed
+                      onClick={handleAddBinding}
                     >
                       <Link className="h-3 w-3" />
                       Binding
@@ -588,21 +631,25 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                </div>
             </CardHeader>
             <CardContent className="p-0">
-               {dimension.deployHistory && dimension.deployHistory.length > 0 ? (
+               {deployHistory.length > 0 || isAddingBinding ? (
                  <div className="w-full">
-                   <div className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
-                     <div>Target</div>
+                   <div className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                     <div>Target Type</div>
+                     <div>Target Asset</div>
+                     <div>Target Field</div>
                      <div>Type</div>
                      <div>Owner</div>
                      <div>Status</div>
                      <div className="text-right">Last Deployed</div>
                    </div>
-                   {dimension.deployHistory.map((item, index) => (
-                      <div key={index} className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0">
+                   {deployHistory.map((item, index) => (
+                      <div key={index} className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0">
+                        <div className="text-slate-600 truncate">{item.targetType || "Hive Table"}</div>
                         <div className="font-medium text-slate-900 flex items-center gap-1.5 min-w-0">
                           <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${item.type === 'binding' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
                           <span className="truncate" title={item.target}>{item.target}</span>
                         </div>
+                        <div className="text-slate-600 font-mono text-[11px] truncate" title={item.targetField}>{item.targetField || "-"}</div>
                         <div className="text-slate-600">
                           <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-slate-200 bg-slate-50 text-slate-600">
                              {item.type || "deployment"}
@@ -623,6 +670,64 @@ function DimensionDetailSheet({ open, onOpenChange, dimension }: DimensionDetail
                         </div>
                       </div>
                    ))}
+
+                   {isAddingBinding && (
+                     <div className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-3 text-xs items-center bg-blue-50/30">
+                       <div>
+                         <Select value={newBindingTargetType} onValueChange={(v: any) => setNewBindingTargetType(v)}>
+                           <SelectTrigger className="h-7 text-[11px] bg-white">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="Hive Table">Hive Table</SelectItem>
+                             <SelectItem value="Aeolus Dataset">Aeolus</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       </div>
+                       <div>
+                         <Input 
+                           value={newBindingTarget}
+                           onChange={(e) => setNewBindingTarget(e.target.value)}
+                           placeholder="e.g. db.table"
+                           className="h-7 text-xs bg-white"
+                           autoFocus
+                         />
+                       </div>
+                       <div>
+                         <Input 
+                           value={newBindingTargetField}
+                           onChange={(e) => setNewBindingTargetField(e.target.value)}
+                           placeholder="Field or Expr"
+                           className="h-7 text-xs bg-white font-mono"
+                         />
+                       </div>
+                       <div>
+                         <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-purple-200 bg-purple-50 text-purple-700">
+                           binding
+                         </Badge>
+                       </div>
+                       <div className="text-slate-600 truncate">{newBindingOwner}</div>
+                       <div>
+                         <span className="text-[10px] text-slate-400 italic">Pending...</span>
+                       </div>
+                       <div className="flex justify-end gap-2">
+                         <button 
+                           onClick={handleSaveBinding}
+                           className="h-6 w-6 flex items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700"
+                           title="Save binding"
+                         >
+                           <Check className="h-3 w-3" />
+                         </button>
+                         <button 
+                           onClick={handleCancelBinding}
+                           className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300"
+                           title="Cancel"
+                         >
+                           <X className="h-3 w-3" />
+                         </button>
+                       </div>
+                     </div>
+                   )}
                  </div>
                ) : (
                  <div className="p-8 text-center text-xs text-slate-400 italic">

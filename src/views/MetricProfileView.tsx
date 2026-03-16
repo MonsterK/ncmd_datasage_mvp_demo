@@ -38,7 +38,9 @@ export function MetricProfileView({
   // Local state for deploy history to support adding bindings
   const [deployHistory, setDeployHistory] = useState<DeployHistory[]>([])
   const [isAddingBinding, setIsAddingBinding] = useState(false)
+  const [newBindingTargetType, setNewBindingTargetType] = useState<"Aeolus Dataset" | "Hive Table">("Hive Table")
   const [newBindingTarget, setNewBindingTarget] = useState("")
+  const [newBindingTargetField, setNewBindingTargetField] = useState("")
   const [newBindingOwner, setNewBindingOwner] = useState(metric.owner)
 
   useEffect(() => {
@@ -51,7 +53,9 @@ export function MetricProfileView({
 
   const handleAddBinding = () => {
     setIsAddingBinding(true)
+    setNewBindingTargetType("Hive Table")
     setNewBindingTarget("")
+    setNewBindingTargetField("")
     setNewBindingOwner(metric.owner)
   }
 
@@ -59,8 +63,9 @@ export function MetricProfileView({
     if (!newBindingTarget.trim()) return
 
     const newEntry: DeployHistory = {
-      targetType: "Hive Table", // Default or could be a selection
+      targetType: newBindingTargetType,
       target: newBindingTarget,
+      targetField: newBindingTargetField,
       status: "success",
       deployedAt: new Date().toISOString(),
       fieldCount: 1,
@@ -74,6 +79,7 @@ export function MetricProfileView({
   const handleCancelBinding = () => {
     setIsAddingBinding(false)
     setNewBindingTarget("")
+    setNewBindingTargetField("")
   }
 
   return (
@@ -238,19 +244,23 @@ export function MetricProfileView({
           <div className="p-0">
              {deployHistory.length > 0 || isAddingBinding ? (
                <div className="w-full">
-                 <div className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
-                   <div>Target</div>
+                 <div className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-2 bg-slate-50/50 border-b border-slate-100 text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                   <div>Target Type</div>
+                   <div>Target Asset</div>
+                   <div>Target Field</div>
                    <div>Type</div>
                    <div>Owner</div>
                    <div>Status</div>
                    <div className="text-right">Last Deployed</div>
                  </div>
                  {deployHistory.map((item, index) => (
-                    <div key={index} className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0">
+                    <div key={index} className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-3 text-xs items-center border-b border-slate-50 last:border-0">
+                      <div className="text-slate-600 truncate">{item.targetType || "Hive Table"}</div>
                       <div className="font-medium text-slate-900 flex items-center gap-1.5 min-w-0">
                         <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${item.type === 'binding' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
                         <span className="truncate" title={item.target}>{item.target}</span>
                       </div>
+                      <div className="text-slate-600 font-mono text-[11px] truncate" title={item.targetField}>{item.targetField || "-"}</div>
                       <div className="text-slate-600">
                         <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-slate-200 bg-slate-50 text-slate-600">
                            {item.type || "deployment"}
@@ -273,14 +283,33 @@ export function MetricProfileView({
                  ))}
                  
                  {isAddingBinding && (
-                   <div className="grid grid-cols-[1.5fr_0.8fr_0.8fr_0.8fr_1fr] gap-4 px-5 py-3 text-xs items-center bg-blue-50/30">
+                   <div className="grid grid-cols-[0.8fr_1fr_1fr_0.6fr_0.6fr_0.6fr_0.8fr] gap-4 px-5 py-3 text-xs items-center bg-blue-50/30">
+                     <div>
+                       <Select value={newBindingTargetType} onValueChange={(v: any) => setNewBindingTargetType(v)}>
+                         <SelectTrigger className="h-7 text-[11px] bg-white">
+                           <SelectValue />
+                         </SelectTrigger>
+                         <SelectContent>
+                           <SelectItem value="Hive Table">Hive Table</SelectItem>
+                           <SelectItem value="Aeolus Dataset">Aeolus</SelectItem>
+                         </SelectContent>
+                       </Select>
+                     </div>
                      <div>
                        <Input 
                          value={newBindingTarget}
                          onChange={(e) => setNewBindingTarget(e.target.value)}
-                         placeholder="Enter target..."
+                         placeholder="e.g. db.table"
                          className="h-7 text-xs bg-white"
                          autoFocus
+                       />
+                     </div>
+                     <div>
+                       <Input 
+                         value={newBindingTargetField}
+                         onChange={(e) => setNewBindingTargetField(e.target.value)}
+                         placeholder="Field or Expr"
+                         className="h-7 text-xs bg-white font-mono"
                        />
                      </div>
                      <div>
